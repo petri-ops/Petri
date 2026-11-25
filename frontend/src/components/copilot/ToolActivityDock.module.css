@@ -4,7 +4,7 @@
   position: fixed;
   right: 16px;
   bottom: 60px;
-  z-index: 90;
+  z-index: var(--petri-z-sticky);
   display: flex;
   flex-direction: column;
   width: min(520px, calc(100vw - 32px));

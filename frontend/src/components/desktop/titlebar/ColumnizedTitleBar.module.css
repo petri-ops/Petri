@@ -21,11 +21,9 @@
   --win-btn-fg-close-hover: #ffffff;
 
   position: relative;
-  /* 与 fixed 条同层级：列内 header 及其菜单须压在 settingsOverlay(998) 之上
-     （今天顶栏在模态之上可见的行为不变）；backdrop-filter 已为本元素建堆叠上下文，
-     菜单 z-index 只在其内竞争。aside overflow:hidden 仅在栏水平边缘裁切，菜单向下
-     开在栏体（aside 全高）内不被裁。 */
-  z-index: 9999;
+  /* chrome 档：压过普通遮罩、低于 toast；backdrop-filter 已建堆叠上下文，
+     菜单只在栏内竞争，aside overflow 仅裁水平边缘。 */
+  z-index: var(--petri-z-chrome);
   flex-shrink: 0;
   height: var(--titlebar-height);
   box-sizing: border-box;

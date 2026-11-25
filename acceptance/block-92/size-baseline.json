@@ -79,7 +79,7 @@
       "module": "W-01",
       "lines": 535,
       "bytes": 28186,
-      "sha256": "ca7f2984e5f152a4ecbcd4504472aec0c62b39dc3406c58de1c14c0e23e80308"
+      "sha256": "6476be8472b20b0ca3265846ade99e3994026bf04ccbc1968763bfc04e57096a"
     },
     {
       "path": "frontend/src/pages/home.tsx",
@@ -197,33 +197,33 @@
       "path": "frontend/src/pages/project-workspace.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 7735,
-      "bytes": 176970,
-      "sha256": "35164d2968566b9d137290a8584dc34fc68287bf0310af4a3613366b03c0576a"
+      "lines": 7732,
+      "bytes": 177062,
+      "sha256": "31e135f9c525874770a8905ec9158cebbab16cefd9f4b521f541f0fc2518e441"
     },
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 5494,
-      "bytes": 133453,
-      "sha256": "d9980492c2c90f7a6e0bf05af17f868edfca9098c846c65ab64c5659525b912c"
+      "bytes": 133771,
+      "sha256": "d7e8f21ff42f6837edd0ed173c73190871f8ff166268e1b9ba1cebbf5364ab8e"
     },
     {
       "path": "frontend/src/components/desktop/desktop.css",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 2207,
-      "bytes": 53894,
-      "sha256": "cfdcea41f6432d78e63f90bf678db29913fc12daaea3debef5002cf34ccbf7e1"
+      "bytes": 53942,
+      "sha256": "579c61d0a5b59d022f05ed9e958a43d5b43a5f61a99687392cacdcf0cd36ddd7"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1974,
-      "bytes": 39502,
-      "sha256": "684a4d1071eaca3f21245fa20826f680542c4f141252929426860b9f49f8e979"
+      "bytes": 39792,
+      "sha256": "5f70c4960b49cc849be6d3e03f942a0df52a046818554bb2ebd5c1e333803d21"
     },
     {
       "path": "core/petri-server/loop-orchestrator.js",
@@ -245,9 +245,9 @@
       "path": "frontend/src/styles/custom.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1483,
-      "bytes": 49461,
-      "sha256": "5c6549594776bcdb098992db73e4ca187174a0825d2104557fe69edcbb0bc419"
+      "lines": 1485,
+      "bytes": 49581,
+      "sha256": "7227c3947a7844d1bd08652513e0074e43dd60b89698cfdf22d7d6e9ff7232fe"
     },
     {
       "path": "core/shared-backend/skill-schema.js",
@@ -262,8 +262,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1295,
-      "bytes": 30462,
-      "sha256": "28379dc8fd5d8a0e5420f0d4fbf7bec6bf68fb9ce8bfc947804b9b5c001a59fb"
+      "bytes": 30561,
+      "sha256": "db2d6fa54b0366e2cf8f4a9ae1ab3c8980d078376895ef8006e47c5b07203da6"
     },
     {
       "path": "core/petri-server/agent-task-store.js",
@@ -382,8 +382,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 994,
-      "bytes": 22667,
-      "sha256": "0c48dd057447a519d40dd3de4d65f278925a22a84246be575820fccc7484af12"
+      "bytes": 22721,
+      "sha256": "a26ce0c08b135e4497dc31586c7ce442bdacb25f360d290afcb94b74b4cc0a48"
     },
     {
       "path": "core/shared-backend/loop-repair-strategy.js",
@@ -716,6 +716,97 @@
       "to": {
         "lines": 742,
         "bytes": 34462
+      }
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.module.css",
+      "reason": "B1 队列3：26 处裸 z-index 语义 token 化，var(--petri-z-*) 长于裸值；已同步精简陈旧数值注释",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 7735,
+        "bytes": 176970
+      },
+      "to": {
+        "lines": 7732,
+        "bytes": 177062
+      }
+    },
+    {
+      "path": "frontend/src/components/copilot/simple-chat.css",
+      "reason": "B1 队列3：17 处裸 z-index 语义 token 化",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 5494,
+        "bytes": 133453
+      },
+      "to": {
+        "lines": 5494,
+        "bytes": 133771
+      }
+    },
+    {
+      "path": "frontend/src/components/desktop/desktop.css",
+      "reason": "B1 队列3：3 处裸 z-index 语义 token 化",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 2207,
+        "bytes": 53894
+      },
+      "to": {
+        "lines": 2207,
+        "bytes": 53942
+      }
+    },
+    {
+      "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
+      "reason": "B1 队列3：16 处裸 z-index 语义 token 化（含原 Z_TIER_FROZEN 冻结 2 处，本次由 owner 发令全量迁移）",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 1974,
+        "bytes": 39502
+      },
+      "to": {
+        "lines": 1974,
+        "bytes": 39792
+      }
+    },
+    {
+      "path": "frontend/src/styles/custom.css",
+      "reason": "B1 队列3：新增 --petri-z-chrome 档（标题栏专用，介于 modal/lightbox 之间）",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 1483,
+        "bytes": 49461
+      },
+      "to": {
+        "lines": 1485,
+        "bytes": 49581
+      }
+    },
+    {
+      "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css",
+      "reason": "B1 队列3：5 处裸 z-index 语义 token 化",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 1295,
+        "bytes": 30462
+      },
+      "to": {
+        "lines": 1295,
+        "bytes": 30561
+      }
+    },
+    {
+      "path": "frontend/src/components/desktop/TitleBar.module.css",
+      "reason": "B1 队列3：3 处裸 z-index 语义 token 化（含原 Z_TIER_FROZEN 冻结 1 处）",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 994,
+        "bytes": 22667
+      },
+      "to": {
+        "lines": 994,
+        "bytes": 22721
       }
     }
   ]

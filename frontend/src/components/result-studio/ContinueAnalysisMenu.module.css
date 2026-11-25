@@ -32,7 +32,7 @@
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  z-index: 20;
+  z-index: var(--petri-z-dropdown);
   width: min(280px, calc(100vw - 32px));
   padding: var(--petri-space-3);
   border: 1px solid var(--petri-border-card);

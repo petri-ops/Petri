@@ -47,7 +47,7 @@
   bottom: 0;
   right: calc(100% - 4px);
   width: 380px;
-  z-index: 30;
+  z-index: var(--petri-z-raised);
   display: flex;
   flex-direction: column;
   border: 1px solid var(--petri-border-card);
@@ -73,7 +73,7 @@
   position: absolute;
   top: 6px;
   right: 8px;
-  z-index: 2;
+  z-index: var(--petri-z-base);
   display: inline-flex;
   align-items: center;
   justify-content: center;

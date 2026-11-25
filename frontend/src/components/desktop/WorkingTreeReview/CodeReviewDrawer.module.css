@@ -9,7 +9,7 @@
 .drawerBackdrop {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: var(--petri-z-overlay);
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: stretch;

@@ -161,7 +161,7 @@ export function InstallDeepLinkDialog(): React.ReactElement | null {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 90,
+        zIndex: var(--petri-z-overlay),
         display: 'grid',
         placeItems: 'center',
         background: 'var(--petri-overlay, rgba(4, 9, 20, 0.55))',

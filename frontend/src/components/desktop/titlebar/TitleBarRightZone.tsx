@@ -227,7 +227,7 @@ export function TitleBarRightZone(): React.ReactElement {
             className={styles.toolMenu}
             role="menu"
             data-testid="work-surface-tab-menu"
-            style={{ position: 'fixed', left: tabMenu.x, top: tabMenu.y, zIndex: 60 }}
+            style={{ position: 'fixed', left: tabMenu.x, top: tabMenu.y, zIndex: var(--petri-z-dropdown) }}
           >
             <button
               type="button"

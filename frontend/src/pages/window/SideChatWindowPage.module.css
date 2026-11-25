@@ -29,7 +29,7 @@
   position: absolute;
   top: 1px;
   right: 2px;
-  z-index: 12;
+  z-index: var(--petri-z-base);
   display: inline-flex;
   align-items: center;
   justify-content: center;

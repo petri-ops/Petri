@@ -4,6 +4,13 @@
 
 > **BLOCK-519 阶段二同批登记（2026-11-25 · owner 发令「按已批计划继续推进」）**：composer 输入栏新增麦克风入口（`ComposerMicButton` + `useComposerMic`）——点击录音→停止→转写文本**追加**进输入框（不自动发送，动作语义「加入上下文 ≠ 立即执行」）；不支持/禁用/失败可见态；后端 `POST /api/speech/transcribe` 复用现有 ASR provider 链（默认关不发请求、云回退如实报来源）。零新增 UI-###、不翻任何条目状态词、观感 `pending_human_eye` 零代签；判据=HK-01 红 4/4→绿 4/4 + 阶段一语音回归 18/18 + ChannelPreference 6/6 + types/lint 0 + Vite HMR 新源核对（owner 3000/3001/9222 PID 未变）。whisper 并列依赖形态待 owner 裁决（V 材料 CLI 假设与真值不符，四问建议 npm binding，见 `acceptance/voice-local-stage2/STAGE2-DEPENDENCY-FOUR-Q.md`）。证据=`acceptance/voice-local-stage2/EVIDENCE.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-728: z-index 六档语义 token 替换（2026-11-25 **in_progress**；harness 隐形体验优化队列 3 B1；视觉层级，观感零代签）
+
+- **变化面**：`frontend/src` 全源 104 处裸 `z-index:N`（CSS 94 + TS/TSX 内联 10）迁移到既有 `--petri-z-*` 语义档位；新增 `--petri-z-chrome: 7000`（标题栏/列头专用，介于 modal 6000 与 lightbox 8000 之间），保留「顶栏压过普通弹窗」的既有行为，同时让 Toast(10000) 成为最高档。顶层通知（CrashNoticeBanner / ThemeProvider 同步失败条 / workspaceNotice）走 toast，登录与确认弹层走 modal，普通遮罩走 overlay。
+- **为什么这样设计**：2026-10-10 UX 审计抓真 Toast(9999) 被标题栏(10001) 与登录弹窗(10000) 压住；不另立并行 token 家族，复用主题系统既有档位（任务要求六档为子集，raised/chrome/lightbox 为按需扩展档），零新依赖，双主题无关，reduced-motion 兜底不改。
+- **验证（代码）**：HK-01 `test/harness-b1-zindex-contract.test.mjs` 红 6 测试中 4 失败 → 绿 6/6；`gate:ui-visual` 绿；theme-token-contract 裸 z 棘轮归零（本机缺 `frontend/node_modules`，vitest 未能执行，静态层级契约由 Node 侧 B1 与 BLOCK-413 复核）。
+- **状态边界**：in_progress（静态契约绿，dev Electron 实机未跑）；视觉层级观感项 `pending_human_eye` 一律不代签、不翻 verified，待主人过目；不碰 owner dev 实例、主线 WIP 零触碰、G0 开发期常态。证据=`acceptance/harness-invisible-issues/A3-B1-EVIDENCE.md`。
+
 ## UI-725: 背景水印可替换设置（2026-11-25 **in_progress**；独立 worktree `petri-ops/watermark-swap`）
 
 - **变化面**：设置页「外观」新增「背景水印」项（三态 无/内置水墨/自定义图片 + 本地图片导入/路径 + 浅底转透明 + 透明度 0–30%）；`GlobalWatermarkAI` 改为读偏好动态注入背景图，暗色反相沿用既有 CSS 规则。

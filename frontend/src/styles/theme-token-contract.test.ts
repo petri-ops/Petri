@@ -126,7 +126,8 @@ describe('theme token contract', () => {
       '--petri-radius-sm', '--petri-radius-md', '--petri-radius-lg', '--petri-radius-pill',
       '--petri-radius-seal', '--petri-radius-icon', '--petri-radius-card',
       '--petri-z-base', '--petri-z-raised', '--petri-z-sticky', '--petri-z-dropdown',
-      '--petri-z-overlay', '--petri-z-modal', '--petri-z-lightbox', '--petri-z-toast',
+      '--petri-z-overlay', '--petri-z-modal', '--petri-z-chrome', '--petri-z-lightbox',
+      '--petri-z-toast',
     ]) {
       expect(text).toMatch(new RegExp(`${token.replace(/-/g, '\\-')}\\s*:`));
     }
@@ -137,8 +138,11 @@ describe('theme token contract', () => {
     };
     const toast = zValue('--petri-z-toast');
     expect(toast).toBeGreaterThan(zValue('--petri-z-lightbox'));
+    expect(toast).toBeGreaterThan(zValue('--petri-z-chrome'));
     expect(toast).toBeGreaterThan(zValue('--petri-z-modal'));
     expect(toast).toBeGreaterThan(zValue('--petri-z-overlay'));
+    // 标题栏必须压过普通弹窗（保持顶栏常驻可见），但不得高于 Toast。
+    expect(zValue('--petri-z-chrome')).toBeGreaterThan(zValue('--petri-z-modal'));
   });
 
   it('holds no duplicate token definitions in the same :root/dark block (重复定义禁)', () => {
@@ -169,8 +173,9 @@ describe('theme token contract', () => {
       '--petri-titlebar-height', '--petri-radius-sm', '--petri-radius-md', '--petri-radius-lg',
       '--petri-radius-pill', '--petri-radius-seal', '--petri-radius-icon', '--petri-radius-card',
       '--petri-z-base', '--petri-z-raised', '--petri-z-sticky',
-      '--petri-z-dropdown', '--petri-z-overlay', '--petri-z-modal', '--petri-z-lightbox',
-      '--petri-z-toast', '--petri-font-sans', '--petri-font-mono', '--petri-mono',
+      '--petri-z-dropdown', '--petri-z-overlay', '--petri-z-modal', '--petri-z-chrome',
+      '--petri-z-lightbox', '--petri-z-toast',
+      '--petri-font-sans', '--petri-font-mono', '--petri-mono',
       '--petri-shadow-sm',
       // BLOCK-178 — 功能性尺寸 token（焦点环宽度，非颜色；主题无关）
       '--petri-ring-width',
@@ -614,50 +619,11 @@ describe('theme token contract', () => {
       const count = (text.match(/z-?[Ii]ndex\s*:\s*(?!["'`]?\s*var\()\d/g) || []).length;
       if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);
     }
-    const RATCHET: Record<string, number> = {
-      // BLOCK-413 冻结 38 文件 / 111 处。
-      // UI-D3 / BLOCK-418 — 7 处精确等价裸值（100/1000/10000）迁移到
-      // var(--petri-z-*)，按当次现值下调为 34 文件 / 104 处（只减不放宽）：
-      // 归零 4 键删除（更严），3 个文件数值下调；不等价档位（9998/10001/100000 等）
-      // 不硬映射、保留现值。WIP 文件 26 处零触碰、保持现值。
-      // 注：SvgEditorViewer ×2 与 TitleBar ×1 的 10/10000 因 code-size 入册文件
-      // 字节棘轮「只减不增」不能替换为更长字符串，保留裸值并登记在
-      // gate:ui-visual 的 Z_TIER_FROZEN 冻结清单（新增即红、只减不增）。
-      'App.tsx': 2,
-      'components/annotations/AnnotationBar.module.css': 1,
-      'components/annotations/AnnotationOverlay.module.css': 2,
-      'components/copilot/ChatArtifactCard.tsx': 1,
-      'components/copilot/ChatScrollbar.module.css': 1,
-      'components/copilot/ContextBudgetBar.tsx': 1,
-      'components/copilot/MessageRail.module.css': 2,
-      'components/copilot/SimpleChat/PromptEnhanceDialog.module.css': 1,
-      'components/copilot/SimpleChat/ScheduleDialog.module.css': 1,
-      'components/copilot/ToolActivityDock.module.css': 1,
-      'components/copilot/simple-chat.css': 17,
-      'components/desktop/CrashNoticeBanner.tsx': 1,
-      'components/desktop/InstallDeepLinkDialog.tsx': 1,
-      'components/desktop/PluginStorePanel.tsx': 1,
-      'components/desktop/TitleBar.module.css': 3,
-      'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 1,
-      'components/desktop/WorkingTreeReview/ReviewMode.css': 5,
-      'components/desktop/desktop.css': 3,
-      'components/desktop/theme-control.css': 1,
-      'components/desktop/titlebar/ColumnizedTitleBar.module.css': 1,
-      'components/desktop/titlebar/TitleBarRightZone.tsx': 1,
-      'components/knowledge/KnowledgeConsoleDock.module.css': 2,
-      'components/result-studio/CompactResultNavigator.module.css': 2,
-      'components/result-studio/ContinueAnalysisMenu.module.css': 1,
-      'components/result-studio/RevisionCodeView.module.css': 1,
-      'components/shell/QuitSummaryDialog.module.css': 1,
-      'components/svg-editor/SvgEditorViewer.module.css': 16,
-      'components/ui/Lightbox.css': 1,
-      'components/workspace-panels/FloatCardResizer.module.css': 1,
-      'pages/project-workspace.module.css': 26,
-      'pages/welcome.module.css': 2,
-      'pages/window/CommandCenterJobsWall.tsx': 1,
-      'pages/window/SideChatWindowPage.module.css': 1,
-      'themes/ThemeProvider.tsx': 1,
-    }
+    // B1（队列 3，2026-11-25）— 存量 104 处（CSS 94 + TS/TSX 内联 10）已全量
+    // 迁移到 --petri-z-* 语义档位，棘轮归零：任何裸数值（含 code-size 入册文件
+    // 曾经的 SvgEditorViewer ×2 / TitleBar ×1 冻结例外）新增即红。
+    // 迁移判据与逐处语义见 acceptance/harness-invisible-issues/A3-B1-EVIDENCE.md。
+    const RATCHET: Record<string, number> = {}
     const actual: Record<string, number> = {};
     for (const entry of offenders) {
       const [rel, count] = entry.split(':');

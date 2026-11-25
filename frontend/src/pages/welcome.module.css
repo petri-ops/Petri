@@ -174,7 +174,7 @@
   border: none;
   background: transparent;
   cursor: default;
-  z-index: 30;
+  z-index: var(--petri-z-dropdown);
 }
 
 .projectPanel {
@@ -187,7 +187,7 @@
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border-card);
   box-shadow: var(--petri-shadow-float);
-  z-index: 31;
+  z-index: var(--petri-z-dropdown);
   overflow: hidden;
 }
 

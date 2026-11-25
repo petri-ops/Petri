@@ -224,11 +224,11 @@
   color: var(--petri-text);
 }
 
-/* UI-618 — 列表弹层 portal 到 body + fixed 定位（左/上由 JS 视口钳制）：
-   脱离面板 overflow 裁切；右栏工具条时向左展开；z 高于标题栏（10001）。 */
+/* UI-618 — 列表弹层 portal 到 body + fixed 定位（左/上由 JS 钳制）：
+   脱离面板 overflow 裁切；左展避让；z 走 lightbox 档压过标题栏 chrome。 */
 .items {
   position: fixed;
-  z-index: 10002;
+  z-index: var(--petri-z-lightbox);
   display: grid;
   gap: 2px;
   max-height: min(320px, 60vh);
