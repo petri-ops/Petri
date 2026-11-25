@@ -10032,7 +10032,9 @@
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/WatermarkControl.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/watermarkImage.ts",
         "core/packages/shared-config/config-schema.js",
-        "acceptance/visual-refresh-2026-11-25/**"
+        "acceptance/visual-refresh-2026-11-25/**",
+        "acceptance/watermark-swap-configurable/**",
+        "acceptance/watermark-multi-candidate/**"
       ],
       "tests": [
         "frontend/src/components/common/GlobalWatermarkAI.test.ts",
