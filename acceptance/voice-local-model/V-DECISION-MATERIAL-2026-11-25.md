@@ -1,7 +1,8 @@
-# V 类裁决材料 · 语音本地模型（2026-11-25 · pending_user_ruling，不开工）
+# V 类裁决材料 · 语音本地模型（2026-11-25 · 阶段一已批并开工；阶段二未做）
 
 > 拍板背景：主人实机试用反馈「语音这块你打算怎么做，harness 能否增加语音输入呢。现在支持配置本地模型吧」+ WorkBuddy 语音设置截图（本地/云端切换、Whisper 系/SenseVoice/Nemotron/Parakeet 列表、下载/使用中/语言自动检测）。
-> 性质：正式裁决材料（吸收 item 17 早前选型稿 `voice-local-runtime/U-DECISION-MATERIAL.md`——其「C 系统输入法外接」最小形态保留为备选，其余被本材料细化替代）。**只出材料：不实际投放、不引入本地推理运行时、不动主人 dev 实例**。批量清除包与架构简化梳理（msg_5ee5ec0a8cbe）不受影响。
+> 执行授权：owner 经 兴奋 转达主人 2026-11-25「按你的推荐来，冲吧」——执行本材料单一推荐 SenseVoice-small 阶段一（BLOCK-519）；whisper.cpp 并列下载项、composer 麦克风实时输入、G1+/打包/签名/对外投放均不在本令。
+> 性质：正式裁决材料（吸收 item 17 早前选型稿 `voice-local-runtime/U-DECISION-MATERIAL.md`——其「C 系统输入法外接」最小形态保留为备选，其余被本材料细化替代）。**阶段一只落「设置面+文件转写本地化」；不实际投放、不动主人 dev 实例**。批量清除包与架构简化梳理（msg_5ee5ec0a8cbe）不受影响。
 
 ## 一、现状核码（三点真值）
 
@@ -56,3 +57,33 @@
 - 「C 系统输入法先行」= 最小形态（S 文档文案）。
 
 红线重申：裁决前不动 speech-config、不引入本地推理运行时、本地模型未到位不冒充可用（一切「使用中/已下载」状态以真实落盘为准）。
+
+## 七、BLOCK-519 阶段一实施计划（2026-11-25 · owner 已批）
+
+### 7.1 开工前核码（C-32/C-43 教训：先核码再信台账）
+- `git diff --name-only 503cf0460..HEAD | grep -iE 'voice|speech|asr|tts|transcribe'` → **zero-touch**：前一包 BLOCK-518 三提交不碰语音面。
+- `speech-config.js` = DEFAULTS(enabled=false/provider=none) + 共享 schema `speech` 家族（commitGuard 白名单：enabled/provider/ttsVoice/ttsFormat/timeoutMs）；`asr-provider.js` 唯一 provider=deepseek 云；`speech-tools.js:tool_transcribe_audio` 只是把 config 透传 asrFn——**无本地 runtime、无回退链、无模型管理面**，与 §一/§四一致。
+- `capability-provisioning.js` 已导出 `defaultDownload` / `streamingSha256`（函数级复用），`_provisionOnce` 的 SHA 校验+原子移动是私有实现，不导出 → 模型管理器重写原子移动一小段，不挂 ledger。
+- 依赖核真：材料写的 `@k2-fs/sherpa-onnx-node` 在 npm **404**；实际官方包=`sherpa-onnx-node@2.0.3`（Apache-2.0，2026-11-22 更新；macOS arm64/x64、Linux、Windows 预编译，无需本地编译器）。
+
+### 7.2 依赖四问（立项检查单）
+1. 替代方案：npm binding（预编译、无编译器、Node≥16）vs 独立 CLI（需手工下载二进制、进程管理更重）→ 选 npm binding，模型目录独立下载。
+2. 许可证/维护度：Apache-2.0（sherpa-onnx）+ 模型 FunASR MIT，许可干净；2.0.3 于 2026-11-22 更新，官方多语言示例在维护。
+3. 影响面：native addon 受 Node ABI 约束（本机 Node 24 实测为准）；macOS 需 `DYLD_LIBRARY_PATH` 指向包内 lib → **子进程 worker 隔离**（spawn 时设 env，不污染 owner dev 进程）；模型 ~230–500MB 放用户数据目录，不进仓库/打包产物；G0 开发期只验证 dev 边界。
+4. 退出成本：单一 wrapper `local-asr.js` 懒加载 + worker，业务面只认 wrapper 契约；移除依赖只需删 wrapper 与 manifest 项。
+- 用户裁决留痕：本令「引入 sherpa-onnx 是主人已裁决的产品级依赖例外，照立项检查单走」+ 2026-11-25 阶段一开工令；版本钉扎精确 `2.0.3`（不用 ^），登记根 `package.json`。收口如实写「1 新依赖」。
+
+### 7.3 阶段一范围/验收
+- 模型管理：`core/petri-server/helpers/local-asr-model.js`（catalog=SenseVoice-small int8 2024-07-17；download 用 `defaultDownload`+`streamingSha256`+原子移动+tar 解包；list/delete/current 以真实落盘为准；sha 官方未公布→落盘后记录实测 sha 供审计，不伪造校验值）。
+- ASR 透明包装：`core/petri-server/helpers/local-asr.js` + worker（spawn 设 DYLD_LIBRARY_PATH；SenseVoice 原生多语，`language:auto` 作配置字段透传并诚实标注）。
+- provider 链：`speech-config` additive `provider_chain`/`local_model`；`asr-provider` 按链尝试 local→deepseek，成功回执带 provider 来源与回退轨迹；`transcribe_audio` 自动获得本地 provider（config 透传，不改工具契约）。
+- 设置面：`ChannelPreferencePanel` 语音段按截图形态加 本地/云端/本地优先切换、模型列表（下载/使用中/删除）、语言自动检测；未下载模型不得显示「使用中」。
+- 不做：whisper.cpp 并列项、composer 麦克风实时输入、G1+/打包/签名/对外投放；embedding/tools 不涉及。
+- 门禁：HK-01 红绿先行；定向 Node/前端测试；`npm run closeout`（存量红如实归属）；隔离栈 9223 验收、owner 3000/3001 不碰、前端靠 vite HMR；证据落 `acceptance/voice-local-stage1/`；提交本地、push 待放行。
+
+### 7.4 实施结果（2026-11-25）
+- 新增 `local-asr-model.js`（catalog + 下载/校验/原子移动/删除，落盘真值）、`local-asr.js` + `local-asr-worker.js`（native 单边界、DYLD 子进程隔离）；`asr-provider.js` provider 链（local→deepseek，来源/回退轨迹）、`speech-config.js` + shared-config additive；`speech-tools.js` 注入口让 `transcribe_audio` 自动获得本地 provider；`runtime-config.js` 增模型管理 REST 三口；`ChannelPreferencePanel.tsx` 按截图形态落本地/云端/链切换、语言、模型列表。
+- GitHub release 资源 302 → 先 HEAD 解析最终 URL，再复用 capability-provisioning 的 `defaultDownload` 与原 `streamingSha256`；SHA 官方未公布，落盘后记录实测值。
+- 依赖：`package.json` 精确钉扎 `sherpa-onnx-node@2.0.3`（**1 新依赖**），平台包 `sherpa-onnx-darwin-arm64` 随 optional deps 安装；native addon 在 dyld env 下实测可加载。
+- 真实 arm64 实测：模型下载 50s（实测 sha `7d1efa…d347e`），官方 `test_wavs/zh.wav` 本地转写文本「开饭时间早上9点至下午5点。」、598ms、0 云请求（证据=`acceptance/voice-local-stage1/EVIDENCE.md`）。
+- 定向验证：HK-01 后端 7/7 + 前端 6/6 + 既有 P6 语音 10/10 全绿，types 0；阶段二（whisper 并列下载/composer 麦克风）未做。

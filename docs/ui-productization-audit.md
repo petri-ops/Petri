@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **BLOCK-519 同批登记（2026-11-25 · owner 批准 SenseVoice 阶段一）**：`ChannelPreferencePanel` 语音段按 WorkBuddy 截图形态增补——本地/云端/本地优先三态切换、ASR 语言自动检测选择、本地模型列表（未下载=下载钮；真实落盘=使用中/删除钮，未落盘绝不标使用中）。零新增 UI-###、不翻任何条目状态词、观感 `pending_human_eye` 零代签；判据=HK-01 红→绿 + 前端 6/6 + 真机 arm64 转写实证。证据=`acceptance/voice-local-stage1/EVIDENCE.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 > **BLOCK-518 同批登记（2026-11-25 · owner 批准能力渠道简化阶段一+二）**：本包改呈现面但不新增 UI-###、不翻任何条目状态——①UI-614 图片入口门（composer 贴图/拖图始终放行，原 visionConfigured+chatVisionCapable 双位门退役）；②UI-476 识图模型选择器（撤 vision 能力过滤，槽位保留列全部模型）；③UI-706 渠道行详情（隐藏视觉/思考列，保留向量列与思考探测钮，探测只展示证据）。行为判据=HK-01 11 红→绿 + 前端定向 31/31 + 后端契约 52/52 + types 0；HMR 只读核对 Vite 新源 + owner 窗口无旧 UI 标记。观感项维持 `in_progress`/`pending_human_eye` 零代签，不重打 debt 棘轮。证据=`acceptance/model-capability-simplification/SIMPLIFICATION-PLAN-2026-11-25.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-724: 唤醒预授权 UI 勾选面（BLOCK-516；2026-11-24 **verified（dev Electron 边界内；ui724-wakeup-ui-live 9/9 allPass + 组件测试 9/9；观感待主人过目不代签）**）
