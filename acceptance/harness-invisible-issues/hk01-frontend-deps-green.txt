@@ -1,0 +1,5 @@
+
+> petri-desktop@0.0.4 quality:frontend-deps
+> node scripts/quality-frontend-deps-gate.mjs
+
+[quality:frontend-deps] PASS frontend/node_modules 存在且含 typescript

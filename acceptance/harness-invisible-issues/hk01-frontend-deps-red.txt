@@ -1,0 +1,6 @@
+
+> petri-desktop@0.0.4 quality:frontend-deps
+> node scripts/quality-frontend-deps-gate.mjs
+
+[quality:frontend-deps] FAIL 缺 frontend/node_modules：type-aware lint 会静默跳过 TSX 解析（假绿根因）。
+[quality:frontend-deps] 修复：npm --prefix frontend ci

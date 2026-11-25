@@ -54,6 +54,35 @@ function syntaxErrors(source, fileName) {
     .map((d) => `TS${d.code} @${d.start}: ${ts.flattenDiagnosticMessageText(d.messageText, ' ')}`);
 }
 
+// S3（item 43）：全前端树 parse-only 语法门。不依赖 frontend/node_modules 的
+// 类型解析——createSourceFile 只做语法解析，.d.ts 也能过；裸 var(--...) 等
+// TSX 语法错误必然落进 parseDiagnostics（S2 自证）。typescript 是仓库已声明
+// 依赖（root devDependencies + frontend devDependencies），零新依赖。
+function discoverFrontendSources(dir = path.join(ROOT, 'frontend', 'src')) {
+  const out = [];
+  const walk = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const abs = path.join(d, e.name);
+      if (e.isDirectory()) {
+        if (e.name === 'node_modules' || e.name === 'dist') continue;
+        walk(abs);
+      } else if (/\.(ts|tsx)$/.test(e.name)) {
+        out.push(abs);
+      }
+    }
+  };
+  walk(dir);
+  return out.sort();
+}
+
+function parseErrors(source, fileName) {
+  const kind = fileName.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const sf = ts.createSourceFile(fileName, source, ts.ScriptTarget.ES2020, true, kind);
+  return (sf.parseDiagnostics ?? [])
+    .filter((d) => d.category === ts.DiagnosticCategory.Error)
+    .map((d) => `TS${d.code}: ${ts.flattenDiagnosticMessageText(d.messageText, ' ')}`);
+}
+
 // 9 个文件、10 处改动（App.tsx 两处）：item 41 全量改动面。
 const FILES = [
   'frontend/src/App.tsx',
@@ -81,6 +110,28 @@ test('S2 合成红自证：裸 var() 必被报语法错、加引号后归零', (
   assert.ok(bare.length >= 1, '裸 var(--...) 必须被 transpileModule 报语法错');
   assert.deepEqual(
     syntaxErrors("const s = { zIndex: 'var(--petri-z-toast)' };", 'synthetic.tsx'),
+    [],
+    '加引号后语法错误必须归零',
+  );
+});
+
+test('S3 全前端树 parse-only 语法门（缺 frontend/node_modules 时仍生效）', () => {
+  const files = discoverFrontendSources();
+  assert.ok(files.length > 500, `前端源规模异常（${files.length}），拒绝空扫描假绿`);
+  const bad = [];
+  for (const abs of files) {
+    const rel = path.relative(ROOT, abs);
+    const found = parseErrors(fs.readFileSync(abs, 'utf8'), rel);
+    if (found.length) bad.push(`${rel}: ${found.join('; ')}`);
+  }
+  assert.deepEqual(bad, [], `前端树语法错误：\n${bad.join('\n')}`);
+});
+
+test('S4 合成红自证：parse-only 门必抓裸 var()，合法字符串不误伤', () => {
+  const bare = parseErrors('const s = { zIndex: var(--petri-z-toast) };', 'synthetic.tsx');
+  assert.ok(bare.some((m) => m.startsWith('TS1109')), '裸 var(--...) 必须报 TS1109 Expression expected');
+  assert.deepEqual(
+    parseErrors("const s = { zIndex: 'var(--petri-z-toast)' };", 'synthetic.tsx'),
     [],
     '加引号后语法错误必须归零',
   );

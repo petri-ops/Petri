@@ -1,0 +1,44 @@
+
+> petri-desktop@0.0.4 quality:ts-syntax
+> node --test test/b1-inline-var-syntax.test.mjs
+
+✔ S1 9 个改动文件 transpileModule 语法错误为 0 (123.455958ms)
+✔ S2 合成红自证：裸 var() 必被报语法错、加引号后归零 (2.268917ms)
+✖ S3 全前端树 parse-only 语法门（缺 frontend/node_modules 时仍生效） (415.402708ms)
+✔ S4 合成红自证：parse-only 门必抓裸 var()，合法字符串不误伤 (0.165875ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 751.937166
+
+✖ failing tests:
+
+test at test/b1-inline-var-syntax.test.mjs:118:1
+✖ S3 全前端树 parse-only 语法门（缺 frontend/node_modules 时仍生效） (415.402708ms)
+  AssertionError [ERR_ASSERTION]: 前端树语法错误：
+  frontend/src/__item43_syntax_probe.tsx: TS1109: Expression expected.; TS1138: Parameter declaration expected.; TS1005: ',' expected.; TS1005: ',' expected.; TS1005: ';' expected.; TS1128: Declaration or statement expected.
+  + actual - expected
+  
+  + [
+  +   "frontend/src/__item43_syntax_probe.tsx: TS1109: Expression expected.; TS1138: Parameter declaration expected.; TS1005: ',' expected.; TS1005: ',' expected.; TS1005: ';' expected.; TS1128: Declaration or statement expected."
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/ropefish/test/b1-inline-var-syntax.test.mjs:127:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ "frontend/src/__item43_syntax_probe.tsx: TS1109: Expression expected.; TS1138: Parameter declaration expected.; TS1005: ',' expected.; TS1005: ',' expected.; TS1005: ';' expected.; TS1128: Declaration or statement expected." ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

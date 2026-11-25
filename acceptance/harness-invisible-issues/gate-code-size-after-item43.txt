@@ -1,0 +1,3 @@
+[code-size-ledger] FAIL 门禁违规：
+  - frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx: 731 > 基线 727（棘轮只减不增）
+  - frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx: 内容指纹漂移（sha256 变更未随提交重打基线）——node scripts/code-size-ledger.mjs --write

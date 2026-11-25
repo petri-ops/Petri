@@ -78,8 +78,8 @@
       "wave": "B",
       "module": "W-01",
       "lines": 535,
-      "bytes": 28186,
-      "sha256": "6476be8472b20b0ca3265846ade99e3994026bf04ccbc1968763bfc04e57096a"
+      "bytes": 28208,
+      "sha256": "7225193fa1eea666f21e4c0eb311f63ce1e27f721b2443988bb023ea4a798caf"
     },
     {
       "path": "frontend/src/pages/home.tsx",
@@ -125,9 +125,9 @@
       "path": "core/petri-server/helpers/tools-executor.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 2081,
-      "bytes": 87779,
-      "sha256": "76e1215b91b531bd937731e33be139b1c49f3ca5b4f7854ba618013c687f8070"
+      "lines": 2106,
+      "bytes": 90569,
+      "sha256": "9d6178735f189f2630cf28452e57c46d7b734d6a1b2c2fe241d41101a1ea73cc"
     },
     {
       "path": "core/petri-server/db.js",
@@ -157,9 +157,9 @@
       "path": "core/petri-server/mcp/registry.js",
       "wave": "C",
       "module": "P-02",
-      "lines": 983,
-      "bytes": 37523,
-      "sha256": "41799cd9134683f3f44d7782f539c2851a5f455b4682b03cdb7fda58343ae0b5"
+      "lines": 984,
+      "bytes": 37748,
+      "sha256": "486b77f8716ff03f415883365a32cd731bcf54704f482e0fc4ae8d01bdad9132"
     },
     {
       "path": "core/shared-backend/result-studio-lifecycle.js",
@@ -245,9 +245,9 @@
       "path": "frontend/src/styles/custom.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1485,
-      "bytes": 49581,
-      "sha256": "7227c3947a7844d1bd08652513e0074e43dd60b89698cfdf22d7d6e9ff7232fe"
+      "lines": 1401,
+      "bytes": 47143,
+      "sha256": "f78486306cbe3b441703ab11aa3239f5c00fcabeb01c530e0543e274f7e69fdd"
     },
     {
       "path": "core/shared-backend/skill-schema.js",
@@ -301,17 +301,17 @@
       "path": "core/petri-server/agent-runner.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1153,
-      "bytes": 60296,
-      "sha256": "638b7a3046a0943ef902e729f6b90260e2355cee53e87acb0de6f0950fc1a613"
+      "lines": 1038,
+      "bytes": 58012,
+      "sha256": "83f672c450c7fa30813e4f2a112dd947358221aa634e85da474dd364fefcfac9"
     },
     {
       "path": "core/shared-backend/skill-runtime.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1136,
-      "bytes": 32067,
-      "sha256": "ab8dafe1cdfa0a55130dd4da86abf5b551ab4dd133059e6ff11c7523db0f74c2"
+      "lines": 1139,
+      "bytes": 32229,
+      "sha256": "404654f62b00c2e52706f3f9caa234637a4464a710490b10cf405f463e5fb58a"
     },
     {
       "path": "core/shared-backend/result-changeset-service/baseline-cohort.js",
@@ -445,9 +445,9 @@
       "path": "core/petri-server/mcp/registry/run-plugin-script.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 911,
-      "bytes": 41525,
-      "sha256": "c7c053d789ff29e8dbe8ea0749eb09680c324da79067c70ef132df29aa743c1e"
+      "lines": 912,
+      "bytes": 41570,
+      "sha256": "35a5406bc490ee90d23952b76b49dc186548450bffc11111dc42e22966907702"
     },
     {
       "path": "core/petri-server/plugin-loader.js",
