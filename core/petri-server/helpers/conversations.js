@@ -14,6 +14,7 @@
 const dbMod = require('../db');
 const sqlite = dbMod.getDatabase();
 const {v4: uuidv4} = require('uuid');
+const logger = require('../../shared-backend/logger');
 
 // One-time table create + migrations (idempotent)
 sqlite.exec(`
@@ -212,9 +213,9 @@ async function _maybeAutoTitleConversation(conversationId, userId) {
       || conv2.title.length > 24;
     if (!stillDefault) return;
     sqlite.prepare('UPDATE copilot_conversations SET title=?, updated_at=? WHERE id=?').run(title, new Date().toISOString(), conversationId);
-    console.log('[auto-title] conv=' + conversationId + ' → ' + title);
+    logger.info('[auto-title] conv=' + conversationId + ' → ' + title);
   } catch (e) {
-    console.warn('[auto-title] failed:', e && e.message || e);
+    logger.warn('[auto-title] failed:', e && e.message || e);
   }
 }
 
@@ -271,7 +272,7 @@ async function _maybeDetectTopicShift(conversationId, userId) {
               const reason = `Jev 判定话题切换（noul=${noul.toFixed(2)}）`.slice(0, 60);
               sqlite.prepare('UPDATE copilot_conversations SET last_topic_shift_at=?, last_topic_shift_reason=? WHERE id=?')
                 .run(new Date().toISOString(), reason, conversationId);
-              console.log('[topic-shift][jev] conv=' + conversationId + ' → ' + reason);
+              logger.info('[topic-shift][jev] conv=' + conversationId + ' → ' + reason);
               return { shifted: true, reason };
             }
             if (typeof noul === 'number' && noul <= jevGates.no) {
@@ -282,7 +283,7 @@ async function _maybeDetectTopicShift(conversationId, userId) {
           // Jev 降级（!ok）：落入下方大模型路径
         }
       } catch (e) {
-        console.warn('[topic-shift][jev] failed → 大模型路径:', e && e.message || e);
+        logger.warn('[topic-shift][jev] failed → 大模型路径:', e && e.message || e);
       }
     }
 
@@ -310,10 +311,10 @@ async function _maybeDetectTopicShift(conversationId, userId) {
     const reason = String(parsed.reason || '话题已切换').slice(0, 60);
     sqlite.prepare('UPDATE copilot_conversations SET last_topic_shift_at=?, last_topic_shift_reason=? WHERE id=?')
       .run(new Date().toISOString(), reason, conversationId);
-    console.log('[topic-shift] conv=' + conversationId + ' → ' + reason);
+    logger.info('[topic-shift] conv=' + conversationId + ' → ' + reason);
     return {shifted: true, reason};
   } catch (e) {
-    console.warn('[topic-shift] failed:', e && e.message || e);
+    logger.warn('[topic-shift] failed:', e && e.message || e);
     return null;
   }
 }

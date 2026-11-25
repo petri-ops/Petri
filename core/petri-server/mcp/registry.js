@@ -13,6 +13,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
+const logger = require('../../shared-backend/logger');
 // BLOCK-109-CORE-ARCH P2-4 — MCP 工具同轨执行元数据投影（消除第二套执行语义）
 const { getToolMetadata } = require('../agent-tools/tool-metadata');
 // BLOCK-57 — 会话执行目标 → 插件远程直跑（设计评审 D1-D9；同步预算 ≤300s 与本地插件语义一致）
@@ -203,7 +204,7 @@ async function _skillDiscover(args = {}) {
       isError: false,
     };
   } catch (e) {
-    console.error('[mcp-registry] skill_discover error:', e);
+    logger.error('[mcp-registry] skill_discover error: ' + (e && (e.stack || e.message || e)));
     return {
       content: [{ type: 'text', text: JSON.stringify({ error: e.message }) }],
       isError: true,
@@ -238,7 +239,7 @@ async function _skillGet(args = {}) {
       isError: false,
     };
   } catch (e) {
-    console.error('[mcp-registry] skill_get error:', e);
+    logger.error('[mcp-registry] skill_get error: ' + (e && (e.stack || e.message || e)));
     return {
       content: [{ type: 'text', text: JSON.stringify({ error: e.message }) }],
       isError: true,
@@ -301,7 +302,7 @@ async function _skillExecute(args = {}) {
       isError: result.status === 'failed',
     };
   } catch (e) {
-    console.error('[mcp-registry] skill_execute error:', e);
+    logger.error('[mcp-registry] skill_execute error: ' + (e && (e.stack || e.message || e)));
     return {
       content: [{ type: 'text', text: JSON.stringify({ error: e.message }) }],
       isError: true,
@@ -500,7 +501,7 @@ function listIdeMcpResources() {
     const { listIdeResources } = require('./ide-tools');
     return listIdeResources();
   } catch (e) {
-    console.warn('[mcp-registry] IDE resources list failed:', e.message);
+    logger.warn('[mcp-registry] IDE resources list failed:', e.message);
     return [];
   }
 }
@@ -552,7 +553,7 @@ async function listTools() {
   } catch (e) {
     // BLOCK-377（S2 §8.10）——初始化失败汇入 degraded 账本（不得对外宣称完整可用）
     noteRegistryIssue('refresh_plugin_sources', `refresh plugins before listTools failed: ${e.message}`);
-    console.warn('[mcp-registry] refresh plugins before listTools failed:', e.message);
+    logger.warn('[mcp-registry] refresh plugins before listTools failed:', e.message);
   }
 
   // 合并插件工具、Skill 工具与 IDE MCP 工具
@@ -583,7 +584,7 @@ function getIdeToolDefinitionsSafe() {
     const { getIdeToolDefinitions } = require('./ide-tools');
     _ideTools = getIdeToolDefinitions();
   } catch (e) {
-    console.warn('[mcp-registry] IDE tools load failed:', e.message);
+    logger.warn('[mcp-registry] IDE tools load failed:', e.message);
     _ideTools = [];
   }
   return _ideTools;
@@ -713,7 +714,7 @@ async function runPluginToolSshDirect({ sshProjectRow, jobDir, plugin, language,
           }
         }
       } catch (e) {
-        console.warn('[mcp-registry] ssh-direct renv capture failed:', e.message);
+        logger.warn('[mcp-registry] ssh-direct renv capture failed:', e.message);
       }
     }
     const scriptErr = code !== 0
@@ -844,7 +845,7 @@ async function callTool(name, args, opts = {}) {
     clearRegistryIssue('refresh_plugin_sources');
   } catch (e) {
     noteRegistryIssue('refresh_plugin_sources', `refresh plugins before callTool failed: ${e.message}`);
-    console.warn('[mcp-registry] refresh plugins before callTool failed:', e.message);
+    logger.warn('[mcp-registry] refresh plugins before callTool failed:', e.message);
   }
   // opts.userId：归属用户（agent 在登录态下跑，写进 tool_jobs.user_id，
   // 这样用户能在 history 看到，客户端能按 jobId 加载结果）。
@@ -899,7 +900,7 @@ async function callTool(name, args, opts = {}) {
         };
       }
       // 校验器自身异常 → fail-closed：拒绝调用并记录
-      console.error('[mcp-registry] input validator crashed:', validatorError);
+      logger.error('[mcp-registry] input validator crashed: ' + (validatorError && (validatorError.stack || validatorError.message || validatorError)));
       return {
         content: [
           {
