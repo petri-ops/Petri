@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **BLOCK-518 同批登记（2026-11-25 · owner 批准能力渠道简化阶段一+二）**：本包改呈现面但不新增 UI-###、不翻任何条目状态——①UI-614 图片入口门（composer 贴图/拖图始终放行，原 visionConfigured+chatVisionCapable 双位门退役）；②UI-476 识图模型选择器（撤 vision 能力过滤，槽位保留列全部模型）；③UI-706 渠道行详情（隐藏视觉/思考列，保留向量列与思考探测钮，探测只展示证据）。行为判据=HK-01 11 红→绿 + 前端定向 31/31 + 后端契约 52/52 + types 0；HMR 只读核对 Vite 新源 + owner 窗口无旧 UI 标记。观感项维持 `in_progress`/`pending_human_eye` 零代签，不重打 debt 棘轮。证据=`acceptance/model-capability-simplification/SIMPLIFICATION-PLAN-2026-11-25.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-724: 唤醒预授权 UI 勾选面（BLOCK-516；2026-11-24 **verified（dev Electron 边界内；ui724-wakeup-ui-live 9/9 allPass + 组件测试 9/9；观感待主人过目不代签）**）
 
 - **变化面**：①ScheduleDialog（composer `/schedule` 确认框）新增「无人值守预授权（可选，默认关）」折起区——trusted 勾选 → ①预算 Goal 下拉（只列带预算 active goal，过滤无预算/暂停/预算用尽）②白名单勾选列表（数据源=新增 GET /api/schedules/auto-tool-names，registry 内置名单此前无 REST 面）；提交携 autoMode/autoToolAllowlist/goalId，服务端 BLOCK-515 fail-closed 校验错误原样透出。②ScheduledWorkspacePanel：trusted 行「唤醒 trusted · 白名单 N 项」徽章 + 「撤回预授权」按钮（setScheduleAuto guided 撤回即清白名单回 guided）。③routes additive：GET auto-tool-names + POST :id/auto + 创建透传。BLOCK-515 治理语义（最小只读起步/默认 guided/预算硬顶 goalGate/显式可审计可撤回）由此获得设置面。

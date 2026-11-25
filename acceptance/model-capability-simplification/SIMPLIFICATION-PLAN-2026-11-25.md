@@ -1,6 +1,7 @@
-# 能力渠道简化方案（2026-11-25 · 只出方案不改产品代码 · pending_owner_ruling）
+# 能力渠道简化方案（2026-11-25 · owner 已批阶段一+二并落地 · 阶段三未做）
 
 > 拍板：主人「现在的模型多模态了。我觉得没有必要保留，直接都支持即可。你梳理确定一下。继续」——架构级简化梳理令，先方案后动码。
+> 执行授权：owner「按你的推荐来，冲吧」（msg_884f86238075）→ 按 §五「全按序走」执行阶段一→二；阶段三（roles.vision 槽位退役）**不做**。
 > 方法：六能力×八角色逐项核码消费面（文件:行 在案），区分「多模态可直接全支持」与「砍了会静默坏」——**vision 与 embedding 不同质，不能混为一谈**。
 > 已知交互：本方案与已探索的「批量清除+预填开关」包（msg_e2bf920e780f 授权）存在替代关系——结论见 §五（建议叫停转型）。
 
@@ -62,3 +63,24 @@
 ## 六、拍板口令
 
 - 「阶段一做」= 前端呈现简化立项（含阶段二设计文档）；「全按序走」= 阶段一→二连批（阶段三另议）；「先等」= 维持现状。
+
+## 七、落地记录（2026-11-25 · BLOCK-518 转型包）
+
+**授权**：owner「按你的推荐来，冲吧」（msg_884f86238075）= 按 §五「全按序走」执行阶段一+二；阶段三不做。前任 claude chat 空转、HEAD 无实现提交，本批从零落地。
+
+**阶段一（纯前端）**：
+- `frontend/src/components/copilot/SimpleChat/attachments.ts` — `visionConfigured+chatVisionCapable` 双位门退役（含 imageInputAllowed/videoInputAllowed/VISION_NOT_CONFIGURED_NOTICE/hasImagePayload/hasVideoPayload），`onPaste`/`onDrop` 图片与视频始终放行；`useComposerDrop.ts` 与 `SimpleChat.tsx` 同步撤门参数、撤 `/ai/settings` vision_configured 取数 effect；`auto-model.ts` 的 UI-614 图片入口门（imageVisionCapable）一并退役。
+- `VisionRoleBinding.tsx` — 撤 vision 能力过滤，候选=全部 (渠道, 模型) 对；槽位保留（阶段三另议）。
+- `EndpointRowDetail.tsx` — 视觉/思考列隐藏，向量列 + 思考探测钮保留；探测结果只展示诚实证据，不再物化 reasoning 声明位；`ModelSelectorControls.tsx` 思考合并下拉随声明位撤除（选择器显示保留）。
+
+**阶段二（前后端）**：
+- `core/shared-backend/llm-providers/model-profile.js` — `MODEL_CAPABILITIES=['tools','embedding']`；`ROLE_CAPABILITY` 收敛（agent→tools、embedding→embedding 硬门；chat 族/vision→null 撤门）；归一收窄渠道数组与 modelCapabilities 覆写（旧数据 vision/reasoning 位丢弃、embedding/tools 必留）；BLOCK-518 批量清除转型销账=收窄后为空的物化覆写条目整条清除；默认档案 dashscope-vision 不再自动注入；inferCapabilities/inferModelCapabilities 同口径收窄。
+- 前端镜像 `model-capabilities.ts` 同步推断；`useEndpointProfilesEditor.ts` 的 chat_model_presets 撤 chat 位过滤；`providerDefaults` 改为 ['tools']。
+- `vision-inline.js` — chatVisionInlineCapable 撤 vision 声明判据，provider 协议形态单判（openai-family/anthropic 内联；dashscope 原生协议不内联）；`ai-settings.js` 退役 vision 能力补声明写面（改绑保留）。
+- **已知行为面**：reasoning 不再是声明位 → composer 思考档位控件与网关思考参数注入门按既有「未声明不发参」口径休眠；探测钮保留作证据展示。此为声明面收窄的明示后果，非缺陷。
+
+**HK-01 红绿先行**：新契约测试 `test/block518-capability-narrowing.test.mjs` 11 红 → 实现后全绿；前端 attachments/VisionRoleBinding/EndpointRowDetail 测试按新契约红→绿。
+
+**验证**：后端契约 52/52（block518+model-profile+block455+block224+ui638+block155）+ 相邻 39/39（thinking-level-injection/block454-p5/block456/block201）+ 前端定向 31/31（attachments/auto-model/model-capabilities/VisionRoleBinding/EndpointRowDetail）；`quality:types` 0；Jev test:suggest 追加 3 文件（conf 0.99）已跑；HMR 只读核对=Vite 服务新源 + owner 窗口 `/settings` 无旧 UI 标记，3000/3001/9222 三进程未触碰。
+
+**证据/台账**：AUDIT-LOG 2026-11-25 条；UI 台账同批注记（UI-614/706/476 呈现面变化、状态不翻）；证据明细=`acceptance/model-capability-simplification/EVIDENCE.md`。closeout 链 audit:compact/hygiene/docs:check/ui:audit:check 全 PASS，test:changed 1311/6（6 红=工具基线 118/120 族 4 + W5b 1 + P6 证据源绑定 1，均非本包实现缺陷、归属见 EVIDENCE.md）；code-size 指纹随包重打。G0 开发期常态 · 不外推 packaged/Provider/GA。

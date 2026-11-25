@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-24T05:14:30.622Z",
+  "generatedAt": "2026-11-25T01:50:07.997Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 516,
-  "uniqueIds": 507,
+  "sections": 517,
+  "uniqueIds": 508,
   "counts": {
-    "live-missing": 15,
-    "verified": 474,
+    "verified": 479,
+    "live-missing": 11,
     "closed": 13,
     "blocked": 14
   },
-  "debt": 29,
+  "debt": 25,
   "liveMissing": [
     {
       "id": "UI-723",
@@ -24,7 +24,7 @@
     {
       "id": "UI-702",
       "deps": [],
-      "title": "通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 **in_progress**）"
+      "title": "通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 in_progress → **2026-11-24 "
     },
     {
       "id": "UI-699",
@@ -47,21 +47,6 @@
       "title": "功能面接线批——设置面板五段 + 档位锁定提示 + 钉住多格式预览（BLOCK-346 T1/T3/T4；2026-11-04 **in_progress（代码+组件测试完成，待实"
     },
     {
-      "id": "UI-663",
-      "deps": [],
-      "title": "SVG 编辑器「未保存改动」逐元素取舍（BLOCK-342 W4 reopen 第一刀；2026-11-03 **in_progress（代码面全绿；实机链列清单返回空，未定位，不"
-    },
-    {
-      "id": "UI-595",
-      "deps": [],
-      "title": "批注画笔渲染平滑与触屏防误触 **in_progress（降档 b：组件级 62/62 已锚，待图像 artifact 在结果面打开的实机腿）**（2026-10-30 **RW-"
-    },
-    {
-      "id": "UI-475",
-      "deps": [],
-      "title": "识图未配置时图片输入前置阻断——贴图/拖图即提示配置去向（BLOCK-150 加映·主代理跨会话协作）(2026-10-09 in_progress，契约级全绿；**RW-02 d"
-    },
-    {
       "id": "UI-513",
       "deps": [],
       "title": "跨端偏好同步失败可见化（**RW-02 d 档改判 2026-10-30：UI 面尚未交付（设置面消费属下一批待办）——改判为待交付登记，非已交付未验证**（2026-10-17 "
@@ -70,11 +55,6 @@
       "id": "UI-521",
       "deps": [],
       "title": "外观偏好缓存单源（**RW-02 d 档改判 2026-10-30：非可见 UI 面（台账自认零交互变化）——drift 单测即证据，移出 UI 实机腿验收域**（2026-10-"
-    },
-    {
-      "id": "UI-522",
-      "deps": [],
-      "title": "模型渠道导出默认脱敏（**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻**（2026-10-18 in_progress，BLOC"
     },
     {
       "id": "UI-526",
