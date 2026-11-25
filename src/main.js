@@ -516,26 +516,44 @@ function setupSkillsIpc() {
 // 只读：让设置页"计算与数据"分类展示 Harness 自备了哪些运行时/包。
 // 写入动作（provision/remove）由 Harness 编排层内部完成，不通过前端 IPC
 // 直接触发，以保持 D8 透明进度和 C-03 安全确认边界。
-// BLOCK-100 P1 — 测试实例后端就绪轮询：每 1s 探测 /api/health，超时返回 false
-//（调用方 fail-fast 弹窗退出，不留「半死测试实例」假通过）。
+// BLOCK-100 P1 — 测试实例后端就绪探测：每 1s 轮询 /api/health 兜底（调用方
+// fail-fast 弹窗退出，不留「半死测试实例」假通过）。
+// BLOCK-520 P2（OB-009）— ready 显式事件快路径：命中即广播 signalReady(port)；
+// 并发等待者经 onReady 立即唤醒，不必各自轮询。轮询 fallback 保留（fail-open：
+// 事件漏发/模块缺席也不会让等待方悬挂）。
 async function waitForBackendHealthy(port, timeoutMs) {
+  const readySignal = require("../core/shared-backend/ready-signal");
+  const key = `backend:${port}`;
+  if (readySignal.isReady(key)) return true;
   const base = `http://127.0.0.1:${port}`;
   const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const ok = await fetch(`${base}/api/health`, { signal: AbortSignal.timeout(2000) })
-        .then((r) => r.ok)
-        .catch(() => false);
-      if (ok) {
-        console.log(`[desktop] test instance: backend healthy at :${port}`);
-        return true;
+  let wake = null; // ready 事件到达时立即打断睡眠（无需等满 1s 轮询间隔）
+  const off = readySignal.onReady(key, () => { if (wake) wake(); });
+  try {
+    while (Date.now() < deadline) {
+      if (readySignal.isReady(key)) return true;
+      try {
+        const ok = await fetch(`${base}/api/health`, { signal: AbortSignal.timeout(2000) })
+          .then((r) => r.ok)
+          .catch(() => false);
+        if (ok) {
+          readySignal.signalReady(key, { port, pid: process.pid });
+          console.log(`[desktop] test instance: backend healthy at :${port}`);
+          return true;
+        }
+      } catch {
+        // 探测失败继续轮询
       }
-    } catch {
-      // 探测失败继续轮询
+      await Promise.race([
+        new Promise((resolve) => setTimeout(resolve, 1000)),
+        new Promise((resolve) => { wake = resolve; }),
+      ]);
+      wake = null;
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return false;
+  } finally {
+    off();
   }
-  return false;
 }
 
 // ── 应用生命周期 ───────────────────────────────────────────────

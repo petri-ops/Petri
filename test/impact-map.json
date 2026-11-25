@@ -10091,10 +10091,27 @@
         "frontend/src/components/workspace-panels/CreateEntryRefactor.test.tsx",
         "frontend/src/pages/home.tsx",
         "frontend/src/styles/theme-token-contract.test.ts",
-        "acceptance/create-entry-refactor/**"
+        "acceptance/create-entry-refactor/**",
+        "acceptance/summary-card-reposition/**"
       ],
       "tests": [
         "frontend/src/components/workspace-panels/CreateEntryRefactor.test.tsx"
+      ]
+    },
+    {
+      "id": "block520-p2-control",
+      "note": "BLOCK-520 P2 控制闭环（2026-11-25）：OB-008 goal-verifier 接线进终止判定（可选注入、decisionVerifier null 不变）/OB-009 ready 显式事件替轮询。HK-01 红绿先行，证据=acceptance/harness-observability/P2-EVIDENCE.md。",
+      "patterns": [
+        "core/shared-backend/ready-signal.js",
+        "core/petri-server/agent-tools/goal-verifier.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "src/main.js",
+        "acceptance/harness-observability/**"
+      ],
+      "tests": [
+        "test/block520-p2-control.test.mjs"
       ]
     }
   ]

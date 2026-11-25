@@ -489,6 +489,11 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
       userId,
       // BLOCK-335 P1 — 验证器投票（spec.kind 未注册/缺失 = null = 零变化）
       decisionVerifier: verifySpec ? require('../helpers/verify-host').createDecisionVerifier(verifySpec, { userId }) : null,
+      // BLOCK-520 P2（OB-008）— 目标证据验证器：有 goals/todoRefs 时构造（观测终止判定，
+      // 不改写 decision、不改 decisionVerifier 默认 null；无目标则 null=零变化）
+      goalVerifier: goalList.length
+        ? require('./goal-verifier').createGoalVerifier({ goals: goalList, todos: refList })
+        : null,
       conversationId: _activeConv && _activeConv.id,
       _activeConv,
       apiKey: getChatModelCredential(preset),

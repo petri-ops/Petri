@@ -65,4 +65,32 @@ function verifyGoalCompletion({ goal, artifacts = [], todos = [], backgroundTask
   };
 }
 
-module.exports = { TERMINAL_TODO_STATUSES, verifyGoalCompletion };
+/**
+ * BLOCK-520 P2（OB-008）接线工厂：把静态 goals/todos 与 loop 运行期证据
+ * （context.artifacts / context.backgroundTasks）绑成可注入的 goalVerifier。
+ *
+ * 设计纪律（裁决2）：decisionVerifier 默认 null 不变；本工厂**只在调用方显式
+ * 构造时**产生验证器，loop 默认未传 = 零行为变化。验证器返回与 decisionVerifier
+ * 同构的 { verdict, detail }（'ready'/'deferred'），供终止判定点观测/聚合。
+ */
+function createGoalVerifier({ goals = [], todos = [] } = {}) {
+  const goal = Array.isArray(goals) && goals.length
+    ? { status: 'active', goals: goals.slice() }
+    : null;
+  return async function goalVerifier(context = {}) {
+    const verdict = verifyGoalCompletion({
+      goal: context.goal || goal,
+      artifacts: context.artifacts || [],
+      todos: context.todos || todos,
+      backgroundTasks: context.backgroundTasks || [],
+    });
+    return {
+      verdict: verdict.ok ? 'ready' : 'deferred',
+      detail: verdict.reasons.map((r) => r.code).join(',') || 'goal evidence verified',
+      reasonCodes: verdict.reasons.map((r) => r.code),
+      evidence: verdict.evidence,
+    };
+  };
+}
+
+module.exports = { TERMINAL_TODO_STATUSES, verifyGoalCompletion, createGoalVerifier };

@@ -183,6 +183,9 @@ async function runLoop({
     thinkingLevel,
     // BLOCK-335 P0 — 判据驱动驾驶员：验证器投票（async fn；未传=现状语义零变化）
     decisionVerifier,
+    // BLOCK-520 P2（OB-008）— 目标证据验证器（可选；未传=零行为变化）；
+    // 与 decisionVerifier 同构但不改其默认 null（裁决2）。观测结果进终止判定。
+    goalVerifier,
     // BLOCK-155 — 真·单通道 vision：chat.js 按所选渠道单源解析出（openai 系/
     // anthropic 且声明 vision 能力）；false/未传 = 恒等回旧 read_image 双通道
     visionInline,
@@ -1500,6 +1503,14 @@ async function runLoop({
         });
         if (outcome.verifyVoteConsumed && verifyVote && verifyVote.verdict !== 'ready') verifyRedStreak += 1;
         const decision = outcome.decision;
+
+        // BLOCK-520 P2 OB-008 — 目标证据验证器：未传=零变化，观测 verdict 不改写 decision（行为裁决待主人）
+        if (typeof goalVerifier === 'function' && (decision === 'complete' || decision === 'finalize')) {
+          try {
+            const gv = await goalVerifier({ taskId: toolCtx.taskId, projectId: toolCtx.projectId, loopRunId, iteration: loopSequence, context });
+            if (gv && gv.verdict) _emit({ event: 'goal_verdict', verdict: gv.verdict, reasonCodes: gv.reasonCodes || [] });
+          } catch { /* 验证器故障 = 无证据投票，不伪装成绿也不阻断终止 */ }
+        }
         const decisionReasonCode = outcome.decisionReasonCode;
         let publicConclusion = outcome.publicConclusion;
         if (publicConclusion === '') {

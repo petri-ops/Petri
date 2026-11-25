@@ -304,8 +304,8 @@ async function runAgentLoop({
   visionInline = false,
   // BLOCK-93 P1 — 子智能体角色软约束指令片段（spawn 链自注册表渲染；未传＝零注入）
   roleDirective = null,
-  // BLOCK-335 P0 — 判据驱动驾驶员：结构化验证投票（async fn；未传＝现状语义零变化）
-  decisionVerifier = null,
+  // BLOCK-335 P0 — 判据驱动驾驶员：结构化验证投票（未传＝零变化）；BLOCK-520 P2 OB-008 goalVerifier 同理可选
+  decisionVerifier = null, goalVerifier = null,
 }) {
   const turnStartedAt = Date.now();
   const isGuest = !userId;
@@ -824,8 +824,8 @@ async function runAgentLoop({
     disableProviderFallback,
     // BLOCK-81 P1 — 思考档位进 loop（网关侧按 profile 能力位门控后映射上游参数）
     thinkingLevel,
-    // BLOCK-335 P0 — 验证器投票随 loopConfig 进 orchestrator 决策瀑布
-    decisionVerifier,
+    // BLOCK-335/BLOCK-520 P2 — 验证器投票与目标证据验证器随 loopConfig 进 orchestrator
+    decisionVerifier, goalVerifier,
     // BLOCK-155 — 真·单通道 vision：loop 组 reqBody 时把最后一条 user 消息的
     // 图片附件行内联为 image_url 部件（loop-orchestrator 侧实现，messages 不突变）
     visionInline,

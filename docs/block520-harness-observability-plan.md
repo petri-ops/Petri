@@ -39,9 +39,9 @@ phase: G0
 - **OB-003** ✅ `core/shared-backend/metrics.js` + `/api/_internal/metrics`（零新依赖）：IPC 计数/SQLite 写延迟（DB 单点 run 计时）/后端重启次数/breaker 状态 add 接口。
 - **OB-005** ✅ `core/shared-backend/health.js` 四端点 additive 同 shape，区分 readiness/liveness（保留 attach 判据原字段）。
 
-### 波次 P2 — 控制闭环（需评估/可能裁决）
-- **OB-008** goal-verifier 接线进主循环终止判定（闭合「目标输入、证据交付」）；`decisionVerifier` 默认值明确化——默认改非 null 属行为裁决，单列与主人确认。
-- **OB-009** ready 显式事件 + 启动等待替 `isReady` 轮询。
+### 波次 P2 — 控制闭环（✅ 已落地 2026-11-25，待 wave 回执；证据 `acceptance/harness-observability/P2-EVIDENCE.md`）
+- **OB-008** ✅ goal-verifier 可选钩子接进主循环终止判定点（观测 verdict 事件，不改写 decision）；`decisionVerifier` 默认 null **不变**（裁决2；改默认属行为裁决待主人）。
+- **OB-009** ✅ ready-signal 显式事件 + `waitForBackendHealthy` 快路径唤醒，轮询 fallback 保留（fail-open）。
 - **第 9 项** 会话级外部监督器（心跳/超时重启/异常升级）：**单列 U 类材料 `acceptance/harness-observability/U-EXTERNAL-SUPERVISOR.md`，status=pending_user_ruling，不自行开工**。
 
 ## §3 纪律与验收口径
