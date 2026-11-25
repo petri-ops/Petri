@@ -14,8 +14,6 @@ export interface UseComposerDropOptions {
   setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>;
   setIsDraggingOver: (value: boolean) => void;
   existingCount: number;
-  visionEnabled?: boolean;
-  chatVisionCapable?: boolean;
   /** 复用既有可见提示条（当前会话自引用/读取失败/附件提示）。 */
   onNotice?: (message: string | null) => void;
 }
@@ -33,8 +31,6 @@ export function useComposerDrop(options: UseComposerDropOptions): ComposerDropHa
     setAttachments,
     setIsDraggingOver,
     existingCount,
-    visionEnabled,
-    chatVisionCapable,
     onNotice,
   } = options;
 
@@ -60,23 +56,16 @@ export function useComposerDrop(options: UseComposerDropOptions): ComposerDropHa
         .catch(() => onNotice?.('未能引用会话：可改用 @ 选择会话'));
       return;
     }
-    const notice = onDrop(
-      event,
-      setAttachments,
-      setIsDraggingOver,
-      { visionEnabled, chatVisionCapable },
-      existingCount,
-    );
+    // BLOCK-518 声明面退役 — 图片/视频门参数随 attachments.ts 双位门一并移除。
+    const notice = onDrop(event, setAttachments, setIsDraggingOver, existingCount);
     if (notice) onNotice?.(notice);
   }, [
     addItem,
-    chatVisionCapable,
     conversationId,
     existingCount,
     onNotice,
     setAttachments,
     setIsDraggingOver,
-    visionEnabled,
   ]);
 
   const handleDragOver = useCallback((event: React.DragEvent) => {

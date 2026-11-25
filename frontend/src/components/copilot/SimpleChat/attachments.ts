@@ -78,7 +78,6 @@ export function onDrop(
   e: React.DragEvent,
   setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>,
   setIsDraggingOver: (value: boolean) => void,
-  options?: ImageInputGateOptions,
   existingCount = 0
 ): string | void {
   e.preventDefault();
@@ -88,19 +87,10 @@ export function onDrop(
   const files = Array.from(e.dataTransfer.files);
   if (files.length === 0) return;
 
-  // BLOCK-150 加映 / BLOCK-155 放宽 — 图片输入前置门（判据单源 imageInputAllowed：
-  // 识图角色 || 聊天渠道视觉能力，两者皆无才阻断。非图片附件不受影响——不经视觉解读）。
-  // BLOCK-340 P2 — 视频（video/* MIME 或视频扩展名）同源门控 videoInputAllowed：
-  // 无 vision 时诚实阻断（抽帧后需要 vision 解读，放行只会上传死文件）。
-  const hasVideo = files.some((file) => file.type?.startsWith('video/') || /\.(mp4|mov|webm|mkv|avi)$/i.test(file.name));
-  const hasImage = files.some((file) => file.type.startsWith('image/'));
-  if (options && !imageInputAllowed(options.visionEnabled, options.chatVisionCapable)
-      && (hasImage || hasVideo)) {
-    return VISION_NOT_CONFIGURED_NOTICE;
-  }
-  if (options && !videoInputAllowed(options.visionEnabled, options.chatVisionCapable) && hasVideo) {
-    return VISION_NOT_CONFIGURED_NOTICE;
-  }
+  // BLOCK-518 声明面退役 — 图片/视频输入前置门（BLOCK-150 加映 / BLOCK-155 放宽 /
+  // BLOCK-340 P2 的 visionConfigured+chatVisionCapable 双位门）整体退役：
+  // 多模态时代贴图/拖图始终放行，图片直接进请求体；文本模型收图=上游诚实报错
+  //（可见、可换模型重试），不再前置封锁。非图片附件不受影响。
 
   // BLOCK-91 — 上限守卫 + 拖入文件保留原始句柄（发送前由 uploadAttachment 读取）；
   // 图片异步读取 dataUrl（与粘贴行为对齐，此前拖入图片无内容载荷、发送即丢失）。
@@ -145,69 +135,10 @@ export function onDrop(
 }
 
 /** Paste: read clipboard image items as data URLs and append them to the attachment list. */
-/** BLOCK-150 加映 — 识图未配置时的前置阻断提示（onPaste/onDrop 共用，SimpleChat 落 attachmentNotice）。 */
-export const VISION_NOT_CONFIGURED_NOTICE =
-  '识图模型未配置：图片输入已停用（在模型菜单选择支持视觉的模型，或开启「自动（按任务选择）」；也可在设置 → AI 设置配置视觉模型 / API Key）';
-
-/** onPaste/onDrop 共用的图片输入门参数。 */
-type ImageInputGateOptions = {
-  /** 识图角色能力位（后端 /ai/settings vision_configured）。缺省=未知，保守不阻断。 */
-  visionEnabled?: boolean;
-  /** BLOCK-155 真·单通道 vision — 聊天渠道自身视觉能力（activeModel.capabilities 含 'vision'）。
-   *  渠道声明视觉能力时当前轮图片直接内联进聊天请求体，无需识图角色。 */
-  chatVisionCapable?: boolean;
-};
-
-/** BLOCK-155 真·单通道 vision — 图片粘贴/拖入放行判据（单源）：
- * 识图角色已配置（vision_configured）或 聊天渠道自身声明视觉能力 任一为真即放行；
- * 「两者皆无」才阻断。onPaste/onDrop 的前置门内部消费本函数（SimpleChat 侧只传
- * visionEnabled/chatVisionCapable 两个原始输入位，不直接调用）。 */
-export function imageInputAllowed(
-  visionConfigured: boolean | undefined,
-  chatVisionCapable: boolean | undefined
-): boolean {
-  if (visionConfigured === false && chatVisionCapable !== true) return false;
-  return true;
-}
-
-/** BLOCK-340 P2 — 视频输入前置门（与 imageInputAllowed 同源判据；video/* MIME）。
- *  vision 角色或聊天渠道视觉能力任一为真即放行；否则阻断并返回提示。 */
-export function videoInputAllowed(
-  visionConfigured: boolean | undefined,
-  chatVisionCapable: boolean | undefined
-): boolean {
-  return imageInputAllowed(visionConfigured, chatVisionCapable);
-}
-
-/** BLOCK-340 P2 — 载荷里是否含视频文件（粘贴或拖拽任一命中）。 */
-export function hasVideoPayload(
-  dataTransfer: { items?: ArrayLike<{ type: string }>; files?: ArrayLike<File> } | null | undefined
-): boolean {
-  if (!dataTransfer) return false;
-  for (const item of Array.from(dataTransfer.items ?? [])) {
-    if (item.type && item.type.startsWith('video/')) return true;
-  }
-  for (const file of Array.from(dataTransfer.files ?? [])) {
-    if (file.type?.startsWith('video/') || /\.(mp4|mov|webm|mkv|avi)$/i.test(file.name)) return true;
-  }
-  return false;
-}
-
-/** BLOCK-150 加映 — 载荷里是否含图片（粘贴 items 或拖拽 files 任一命中）。 */
-export function hasImagePayload(
-  dataTransfer: { items?: ArrayLike<{ type: string }>; files?: ArrayLike<File> } | null | undefined
-): boolean {
-  if (!dataTransfer) return false;
-  const items = dataTransfer.items;
-  if (items && Array.from(items).some((item) => item.type.startsWith('image/'))) return true;
-  const files = dataTransfer.files;
-  return !!files && Array.from(files).some((file) => file.type.startsWith('image/'));
-}
 
 export function onPaste(
   e: React.ClipboardEvent,
-  setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>,
-  options?: ImageInputGateOptions
+  setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>
 ): string | void {
   const items = e.clipboardData?.items;
   if (!items) return;
@@ -218,12 +149,8 @@ export function onPaste(
 
   e.preventDefault();
 
-  // BLOCK-150 加映 / BLOCK-155 放宽 — 图片输入前置门（判据单源 imageInputAllowed：
-  // 识图角色 || 聊天渠道视觉能力，两者皆无才阻断；后置 vision_failed 变前置诚实提示）。
-  if (options && !imageInputAllowed(options.visionEnabled, options.chatVisionCapable)) {
-    return VISION_NOT_CONFIGURED_NOTICE;
-  }
-
+  // BLOCK-518 声明面退役 — 贴图始终放行（原 visionConfigured+chatVisionCapable
+  // 双位前置门退役）；文本模型收图=上游诚实报错。
   imageItems.forEach((item) => {
     const file = item.getAsFile();
     if (!file) return;

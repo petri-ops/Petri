@@ -1,15 +1,16 @@
 /**
  * EndpointRowDetail — BLOCK-455 D6 渠道行详情（展开区）。
  *
- * 控件行 = 当前默认模型的「选择器显示 + 思考合并下拉 + 视觉 + 向量」；
- * 能力表 = 「渠道默认（兜底）」行（写渠道级 capabilities，照顾未发现/未单列的模型）
+ * BLOCK-518 声明面退役（2026-11-25 owner 批准）— 视觉/思考列隐藏（能力声明位退役，
+ * 多模态/思考由上游实测），保留向量列（embedding=知识库·记忆硬门，红线必留）
+ * 与思考探测钮（诚实探测证据展示）。控件行 = 选择器显示 + 向量 + 思考探测。
+ * 能力表 = 「渠道默认（兜底）」行（写渠道级 capabilities）
  * + 其余已发现模型逐行编辑（写 modelCapabilities 显式条目）。
  * 默认模型不进逐模型表——其能力位由控件行编辑，避免同一位两处视图。
  */
 
 import React, { useState } from 'react';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
-import { resolveModelCapabilities } from '@/lib/model-capabilities';
 import { probeReasoningCapability } from '@/lib/modelCapabilityProbeClient';
 import { EndpointCapabilityToggle } from './EndpointCapabilityToggle';
 import { ModelSelectorControls } from './sections/ModelSelectorControls';
@@ -21,26 +22,12 @@ interface EndpointRowDetailProps {
   onUpdate: (id: string, patch: Partial<ChatModelPreset>) => void;
 }
 
-const CAPABILITY_META = [
-  {
-    capability: 'vision',
-    label: '视觉',
-    title: '声明该模型支持图片输入（识图）：勾选后可在上方「识图模型」换绑；网关须真正支持 image_url 多模态，否则识图调用诚实报错',
-    aria: '支持识图（视觉输入）',
-  },
-  {
-    capability: 'reasoning',
-    label: '思考',
-    title: '声明该模型支持思考档位：勾选后 composer 的档位控件才会出现，并按协议映射上游参数',
-    aria: '支持思考档位',
-  },
-  {
-    capability: 'embedding',
-    label: '向量',
-    title: '声明该模型可用于向量化（embedding）：勾选后可在上方「向量模型」换绑；端点需支持 /embeddings 且输出 1024 维（如 bge-m3），否则整批拒收并降级',
-    aria: '支持向量化（embedding）',
-  },
-] as const;
+const EMBEDDING_META = {
+  capability: 'embedding',
+  label: '向量',
+  title: '声明该模型可用于向量化（embedding）：勾选后可在上方「向量模型」换绑；端点需支持 /embeddings 且输出 1024 维（如 bge-m3），否则整批拒收并降级',
+  aria: '支持向量化（embedding）',
+} as const;
 
 export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDetailProps): React.ReactElement {
   const label = profile.label || '自定义渠道';
@@ -49,6 +36,8 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
   const [probing, setProbing] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // BLOCK-518 声明面退役 — 探测结果只作诚实证据展示，不再物化 reasoning 声明位
+  //（声明位已退役，物化写面随批撤除；思考档位控制面保留、未声明时默认隐藏）。
   const runProbe = async (model: string) => {
     if (!model || probing) return;
     setProbing(model);
@@ -56,22 +45,17 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
     try {
       const result = await probeReasoningCapability({ profileId: profile.id, model });
       if (result.verdict === 'supported') {
-        const base = resolveModelCapabilities(profile, model);
-        const next = Array.from(new Set([...base, 'reasoning']));
-        onUpdate(profile.id, { modelCapabilities: { ...(profile.modelCapabilities || {}), [model]: next } });
         const requestId = result.evidence?.requestId;
         const responseModel = result.evidence?.responseModel;
         const aliasNote = responseModel && responseModel !== model ? `；上游响应模型=${responseModel}` : '';
-        setNotice(`探测到思考证据${requestId ? `（request_id=${requestId}）` : ''}${aliasNote}，已启用该模型思考。`);
+        setNotice(`探测到思考证据${requestId ? `（request_id=${requestId}）` : ''}${aliasNote}。思考档位控件对声明面退役的模型默认隐藏，档位可经 Ctrl+T 会话内切换。`);
       } else if (result.verdict === 'unsupported') {
-        const next = resolveModelCapabilities(profile, model).filter((cap) => cap !== 'reasoning');
-        onUpdate(profile.id, { modelCapabilities: { ...(profile.modelCapabilities || {}), [model]: next } });
-        setNotice('上游明确拒绝思考参数，已将该模型思考能力关闭。');
+        setNotice('上游明确拒绝思考参数：该模型不支持思考档位。');
       } else {
-        setNotice('未找到明确思考证据，未改动能力位；可在上方手动声明。');
+        setNotice('未找到明确思考证据。');
       }
     } catch (error) {
-      setNotice(`探测失败：${error instanceof Error ? error.message : String(error)}。能力位未改动。`);
+      setNotice(`探测失败：${error instanceof Error ? error.message : String(error)}。`);
     } finally {
       setProbing(null);
     }
@@ -84,19 +68,10 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
         <EndpointCapabilityToggle
           profile={profile}
           model={defaultModel}
-          capability="vision"
-          label="视觉"
-          title={CAPABILITY_META[0].title}
-          ariaLabel={`${label} ${defaultModel} ${CAPABILITY_META[0].aria}`}
-          onUpdate={onUpdate}
-        />
-        <EndpointCapabilityToggle
-          profile={profile}
-          model={defaultModel}
           capability="embedding"
-          label="向量"
-          title={CAPABILITY_META[2].title}
-          ariaLabel={`${label} ${defaultModel} ${CAPABILITY_META[2].aria}`}
+          label={EMBEDDING_META.label}
+          title={EMBEDDING_META.title}
+          ariaLabel={`${label} ${defaultModel} ${EMBEDDING_META.aria}`}
           onUpdate={onUpdate}
         />
         <button
@@ -113,8 +88,6 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
       </div>
       <div className="petri-endpoint-detail__models" aria-label={`${label} 逐模型能力声明`}>
         <span className="petri-endpoint-detail__models-header">模型</span>
-        <span className="petri-endpoint-detail__models-header">视觉</span>
-        <span className="petri-endpoint-detail__models-header">思考</span>
         <span className="petri-endpoint-detail__models-header">向量</span>
         <span className="petri-endpoint-detail__models-header">探测</span>
         <span
@@ -123,33 +96,29 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
         >
           渠道默认（兜底）
         </span>
-        {CAPABILITY_META.map((meta) => (
-          <EndpointCapabilityToggle
-            key={`channel-${meta.capability}`}
-            profile={profile}
-            capability={meta.capability}
-            label={meta.label}
-            title={meta.title}
-            ariaLabel={`${label} 渠道默认 ${meta.aria}`}
-            onUpdate={onUpdate}
-          />
-        ))}
+        <EndpointCapabilityToggle
+          key="channel-embedding"
+          profile={profile}
+          capability="embedding"
+          label={EMBEDDING_META.label}
+          title={EMBEDDING_META.title}
+          ariaLabel={`${label} 渠道默认 ${EMBEDDING_META.aria}`}
+          onUpdate={onUpdate}
+        />
         <span aria-hidden="true" />
         {otherModels.map((model) => (
           <React.Fragment key={model}>
             <span className="petri-endpoint-detail__model-name" title={model}>{model}</span>
-            {CAPABILITY_META.map((meta) => (
-              <EndpointCapabilityToggle
-                key={`${model}-${meta.capability}`}
-                profile={profile}
-                model={model}
-                capability={meta.capability}
-                label={meta.label}
-                title={meta.title}
-                ariaLabel={`${label} ${model} ${meta.aria}`}
-                onUpdate={onUpdate}
-              />
-            ))}
+            <EndpointCapabilityToggle
+              key={`${model}-embedding`}
+              profile={profile}
+              model={model}
+              capability="embedding"
+              label={EMBEDDING_META.label}
+              title={EMBEDDING_META.title}
+              ariaLabel={`${label} ${model} ${EMBEDDING_META.aria}`}
+              onUpdate={onUpdate}
+            />
             <button
               type="button"
               className="petri-btn petri-btn--ghost petri-btn--sm"
@@ -166,7 +135,7 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
       </div>
       {otherModels.length === 0 && (
         <p className="petri-field__hint" role="note">
-          暂无其他已发现模型：测试连通性成功后，这里会列出该渠道的模型供逐个声明能力（发现时按模型名自动预填，可纠正）。
+          暂无其他已发现模型：测试连通性成功后，这里会列出该渠道的模型供声明向量能力（发现时按模型名自动预填，可纠正）。
         </p>
       )}
       {notice && <p className="petri-field__hint" role="status">{notice}</p>}

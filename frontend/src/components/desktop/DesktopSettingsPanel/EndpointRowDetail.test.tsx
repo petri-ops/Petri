@@ -15,17 +15,33 @@ const profile: ChatModelPreset = {
   provider: 'openai-compatible',
   model: 'deepseek-chat',
   defaultModel: 'deepseek-chat',
-  capabilities: ['chat', 'streaming', 'tools'],
+  capabilities: ['tools'],
 };
 
-describe('EndpointRowDetail（BLOCK-455 D6 行详情：默认模型控件 + 逐模型能力表）', () => {
-  it('默认模型的视觉/向量勾选写模型级条目（不动渠道声明）', () => {
-    const onUpdate = vi.fn();
-    render(<EndpointRowDetail profile={profile} models={['deepseek-chat']} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByLabelText('DeepSeek deepseek-chat 支持识图（视觉输入）'));
-    expect(onUpdate).toHaveBeenCalledWith('p1', {
-      modelCapabilities: { 'deepseek-chat': ['chat', 'streaming', 'tools', 'vision'] },
-    });
+describe('EndpointRowDetail（BLOCK-518 声明面退役：视觉/思考列隐藏，向量列+探测钮保留）', () => {
+  it('视觉/思考勾选位不渲染（声明位退役）；向量勾选位保留', () => {
+    render(
+      <EndpointRowDetail
+        profile={profile}
+        models={['deepseek-chat', 'deepseek-reasoner', 'bge-m3']}
+        onUpdate={() => {}}
+      />,
+    );
+    expect(screen.queryByLabelText('DeepSeek deepseek-chat 支持识图（视觉输入）')).toBeNull();
+    expect(screen.queryByLabelText('DeepSeek deepseek-chat 支持思考档位')).toBeNull();
+    expect(screen.queryByLabelText('DeepSeek deepseek-reasoner 支持识图（视觉输入）')).toBeNull();
+    expect(screen.queryByLabelText('DeepSeek deepseek-reasoner 支持思考档位')).toBeNull();
+    // 红线：embedding 勾选位必留（渠道默认 + 逐模型）。
+    expect(screen.getByLabelText('DeepSeek deepseek-chat 支持向量化（embedding）')).toBeTruthy();
+    expect(screen.getByLabelText('DeepSeek bge-m3 支持向量化（embedding）')).toBeTruthy();
+    // 探测钮保留（默认模型 + 逐模型）。
+    expect(screen.getByLabelText('DeepSeek 探测 deepseek-chat 思考能力')).toBeTruthy();
+    expect(screen.getByLabelText('DeepSeek 探测 bge-m3 思考能力')).toBeTruthy();
+    // 表头列集 = 模型/向量/探测。
+    const headers = [...screen.getAllByText(/^(模型|向量|探测)$/)].map((el) => el.textContent);
+    expect(headers).toContain('向量');
+    expect(headers).not.toContain('视觉');
+    expect(headers).not.toContain('思考');
   });
 
   it('能力表含「渠道默认（兜底）」行：勾选写渠道级 capabilities（旧语义保留）', () => {
@@ -33,7 +49,7 @@ describe('EndpointRowDetail（BLOCK-455 D6 行详情：默认模型控件 + 逐�
     render(<EndpointRowDetail profile={profile} models={['deepseek-chat']} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByLabelText('DeepSeek 渠道默认 支持向量化（embedding）'));
     expect(onUpdate).toHaveBeenCalledWith('p1', {
-      capabilities: ['chat', 'streaming', 'tools', 'embedding'],
+      capabilities: ['tools', 'embedding'],
     });
   });
 
@@ -42,31 +58,16 @@ describe('EndpointRowDetail（BLOCK-455 D6 行详情：默认模型控件 + 逐�
     render(
       <EndpointRowDetail
         profile={profile}
-        models={['deepseek-chat', 'deepseek-reasoner']}
+        models={['deepseek-chat', 'bge-m3']}
         onUpdate={onUpdate}
       />,
     );
-    fireEvent.click(screen.getByLabelText('DeepSeek deepseek-reasoner 支持思考档位'));
+    fireEvent.click(screen.getByLabelText('DeepSeek bge-m3 支持向量化（embedding）'));
     expect(onUpdate).toHaveBeenCalledWith('p1', {
-      modelCapabilities: { 'deepseek-reasoner': ['chat', 'streaming', 'tools', 'reasoning'] },
+      modelCapabilities: { 'bge-m3': ['tools', 'embedding'] },
     });
     // 默认模型不在逐模型表里重复出现（其能力位由上方控件行编辑，避免同一位两处视图）
-    expect(screen.queryByLabelText('DeepSeek deepseek-chat 支持思考档位')).toBeNull();
-  });
-
-  it('模型级覆写优先：渠道声明 vision 但默认模型条目无 → 视觉勾选为未选', () => {
-    render(
-      <EndpointRowDetail
-        profile={{
-          ...profile,
-          capabilities: ['chat', 'streaming', 'tools', 'vision'],
-          modelCapabilities: { 'deepseek-chat': ['chat', 'streaming', 'tools'] },
-        }}
-        models={['deepseek-chat']}
-        onUpdate={() => {}}
-      />,
-    );
-    expect(screen.getByLabelText<HTMLInputElement>('DeepSeek deepseek-chat 支持识图（视觉输入）').checked).toBe(false);
+    expect(screen.queryByLabelText('DeepSeek 渠道默认 支持向量化（embedding）')).toBeTruthy();
   });
 
   it('未发现其他模型时给出诚实提示', () => {
@@ -74,7 +75,7 @@ describe('EndpointRowDetail（BLOCK-455 D6 行详情：默认模型控件 + 逐�
     expect(screen.getByRole('note').textContent).toContain('测试连通性');
   });
 
-  it('探测到思考证据后写 modelCapabilities.reasoning 显式开启', async () => {
+  it('探测到思考证据 → 仅诚实展示证据，不物化 reasoning 声明位（声明面退役）', async () => {
     const fetchMock = vi.fn(() => Promise.resolve(new Response(JSON.stringify({
       ok: true,
       verdict: 'supported',
@@ -85,14 +86,13 @@ describe('EndpointRowDetail（BLOCK-455 D6 行详情：默认模型控件 + 逐�
     render(<EndpointRowDetail profile={profile} models={['deepseek-chat', 'model-x']} onUpdate={onUpdate} />);
 
     fireEvent.click(screen.getByLabelText('DeepSeek 探测 model-x 思考能力'));
-    await waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByRole('status').textContent).toContain('探测到思考证据'));
     expect(fetchMock).toHaveBeenCalled();
-    const patch = onUpdate.mock.calls[0][1] as { modelCapabilities?: Record<string, string[]> };
-    expect(patch.modelCapabilities?.['model-x']).toContain('reasoning');
-    expect(screen.getByRole('status').textContent).toContain('探测到思考证据');
+    expect(screen.getByRole('status').textContent).toContain('req-1');
+    expect(onUpdate).not.toHaveBeenCalled();
   });
 
-  it('探测无证据时不写能力位，提示未知', async () => {
+  it('探测无证据时提示未知', async () => {
     vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(JSON.stringify({
       ok: true,
       verdict: 'unknown',
@@ -103,6 +103,20 @@ describe('EndpointRowDetail（BLOCK-455 D6 行详情：默认模型控件 + 逐�
 
     fireEvent.click(screen.getByLabelText('DeepSeek 探测 model-y 思考能力'));
     await waitFor(() => expect(screen.getByRole('status').textContent).toContain('未找到明确思考证据'));
+    expect(onUpdate).not.toHaveBeenCalled();
+  });
+
+  it('探测 unsupported → 明确告知该模型不支持思考档位', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(JSON.stringify({
+      ok: true,
+      verdict: 'unsupported',
+      evidence: { requestId: 'req-3', reasoningTokens: 0, observedAt: '2026-11-17T00:00:00.000Z' },
+    }), { status: 200 }))));
+    const onUpdate = vi.fn();
+    render(<EndpointRowDetail profile={profile} models={['deepseek-chat', 'model-z']} onUpdate={onUpdate} />);
+
+    fireEvent.click(screen.getByLabelText('DeepSeek 探测 model-z 思考能力'));
+    await waitFor(() => expect(screen.getByRole('status').textContent).toContain('不支持思考档位'));
     expect(onUpdate).not.toHaveBeenCalled();
   });
 });

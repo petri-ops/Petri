@@ -80,7 +80,6 @@ describe('BLOCK-245 P5 附件 drop：console.warn → 可见文案', () => {
       fakeDropEvent([csv('a.csv'), csv('b.csv'), csv('c.csv')]).event,
       setAttachments,
       vi.fn(),
-      undefined,
       MAX_ATTACHMENTS - 1,
     );
     expect(notice).toContain('2 个未加入');
@@ -101,7 +100,6 @@ describe('BLOCK-245 P5 附件 drop：console.warn → 可见文案', () => {
       ]).event,
       vi.fn(),
       vi.fn(),
-      undefined,
       MAX_ATTACHMENTS,
     );
     expect(notice).toContain('huge.csv 超过 10MB 附件上限');

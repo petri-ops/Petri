@@ -157,7 +157,7 @@ import { ModelMenu } from './SimpleChat/ModelMenu';
 import { resolveActiveRunStartIndex } from './SimpleChat/activeRunWindow';
 import { ModelChip } from './SimpleChat/ModelChip';
 import { useAutoModelPreference } from '@/hooks/useAutoModelPreference';
-import { describeAutoDecision, imageVisionCapable, resolveAutoPreset } from '@/lib/auto-model';
+import { describeAutoDecision, resolveAutoPreset } from '@/lib/auto-model';
 import { useTurnNotifications } from './useTurnNotifications';
 import { matchesCombo } from '@/lib/appKeymap';
 import { useKeymapSafe } from '@/lib/appKeymapContext';
@@ -253,30 +253,10 @@ export function SimpleChat({
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   // BLOCK-91 — 附件发送失败/守卫提示（诚实可见，不再静默丢弃）。
   const [attachmentNotice, setAttachmentNotice] = useState<string | null>(null);
-  // BLOCK-150 加映 — 识图能力位：后端 /ai/settings vision_configured=false 时图片输入
-  // 前置阻断（贴图/拖图即提示配置去向，替代发出去之后的 vision_failed）。缺省 true：
-  // 仅在后端明确回报不可用时才阻断（取数失败/旧后端无字段 → 维持旧行为）。
-  // BLOCK-155 放宽 — 本位不再是图片输入的唯一放行条件：聊天渠道自身声明视觉能力
-  // （chatVisionCapable，见 useAiSettings 解构之后）时同样放行，合并判据单源
-  // imageInputAllowed（两者皆无才阻断）。
-  const [visionConfigured, setVisionConfigured] = useState(true);
-  useEffect(() => {
-    // 能力位必须问「将执行识图的聊天后端」——dev 双后端形态下 rApiBase 才是执行方
-    // （BLOCK-85 端口纪律①：跨进程状态同源；问错侧=能力位与执行位脑裂）。
-    const rApiBase = (window as unknown as { petriDesktop?: { backendConfig?: { rApiBase?: string } } })
-      ?.petriDesktop?.backendConfig?.rApiBase;
-    const apiBase = rApiBase || (import.meta.env.DEV ? 'http://localhost:3001/api' : '/api');
-    let cancelled = false;
-    fetch(`${apiBase}/ai/settings`)
-      .then((resp) => (resp.ok ? resp.json() as Promise<{ settings?: { vision_configured?: boolean } } | null> : Promise.resolve(null)))
-      .then((data) => {
-        if (!cancelled && data?.settings && typeof data.settings.vision_configured === 'boolean') {
-          setVisionConfigured(data.settings.vision_configured);
-        }
-      })
-      .catch(() => { /* 保守：取数失败不阻断 */ });
-    return () => { cancelled = true; };
-  }, []);
+  // BLOCK-518 声明面退役 — 原 visionConfigured（/ai/settings vision_configured 前置
+  // 取数）+ chatVisionCapable（渠道 vision 声明位）双位贴图门整体退役：多模态时代
+  // 贴图/拖图始终放行，图片直接进请求体；文本模型收图=上游诚实报错（可见、可换
+  // 模型重试），不再前置封锁。
   // BLOCK-171 CP-4 — steer 状态行内提示（原 CK-01 4s 自动消退形态；
   // 持续可见语义见 hook 调用后的 steerNotice 副本——state 移至 useChatStream
   // 之后声明，使 effect 依赖可读 streaming）
@@ -527,12 +507,6 @@ export function SimpleChat({
     activeModel?.defaultThinkingLevel,
     thinkingLevel,
   );
-  // BLOCK-155 真·单通道 vision — 聊天渠道自身视觉能力位（同源读 activeModel.capabilities，
-  // 对齐上方 reasoning 能力位读取先例）：渠道声明 vision 时当前轮图片直接内联进聊天请求体，
-  // 识图角色未配置（vision_configured=false）也不必前置阻断贴图/拖图。合并放行判据
-  // （vision_configured || 渠道视觉能力）单源在 attachments.ts 的 imageInputAllowed。
-  const chatVisionCapable = imageVisionCapable({ autoModel, activeModel, presets: modelPresets,
-    autoImagePreset: resolveAutoPreset({ presets: modelPresets, catalog: modelCatalog, roleBindings, hasImages: true, fallbackId: activeModelId })?.preset });
   // Ctrl+T 循环档位（对齐 ZCode 习惯）；未声明能力的渠道不响应。
   // BLOCK-200 P1：组合串读键位注册表（`thinking.cycle`），能力门与局部生效条件留在这里。
   const { bindings: keymapBindings } = useKeymapSafe();
@@ -823,15 +797,13 @@ export function SimpleChat({
     setAttachments,
     setIsDraggingOver,
     existingCount: attachments.length,
-    visionEnabled: visionConfigured,
-    chatVisionCapable,
     onNotice: setAttachmentNotice,
   });
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    const notice = onPaste(e, setAttachments, { visionEnabled: visionConfigured, chatVisionCapable });
+    const notice = onPaste(e, setAttachments);
     if (notice) setAttachmentNotice(notice);
-  }, [visionConfigured, chatVisionCapable]);
+  }, []);
 
   const removeAttachment = useCallback((id: string) => {
     removeAttachmentById(id, setAttachments);

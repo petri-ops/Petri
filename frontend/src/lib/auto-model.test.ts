@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeAutoDecision, imageVisionCapable, resolveAutoPreset } from './auto-model';
+import { describeAutoDecision, resolveAutoPreset } from './auto-model';
 import { EMPTY_MODEL_CATALOG } from './model-catalog';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 
@@ -94,45 +94,6 @@ describe('resolveAutoPreset', () => {
   });
 });
 
-describe('imageVisionCapable（UI-614 图片入口门禁）', () => {
-  it('自动模式：用有图决议，手动 active 非视觉也放行', () => {
-    expect(imageVisionCapable({
-      autoModel: true,
-      autoImagePreset: preset({ endpointProfileId: 'p2', capabilities: ['chat', 'vision'] }),
-      activeModel: preset({ endpointProfileId: 'p1', capabilities: ['chat', 'tools'] }),
-      presets,
-    })).toBe(true);
-  });
-
-  it('自动模式：有图决议也无视觉 → 阻断', () => {
-    expect(imageVisionCapable({
-      autoModel: true,
-      autoImagePreset: preset({ capabilities: ['chat', 'tools'] }),
-      activeModel: preset({ capabilities: ['chat', 'vision'] }),
-    })).toBe(false);
-  });
-
-  it('手动模式：当前模型声明 vision 放行，显式非视觉阻断', () => {
-    expect(imageVisionCapable({
-      autoModel: false,
-      activeModel: preset({ capabilities: ['chat', 'vision'] }),
-    })).toBe(true);
-    expect(imageVisionCapable({
-      autoModel: false,
-      activeModel: preset({ capabilities: ['chat', 'tools'] }),
-    })).toBe(false);
-  });
-
-  it('手动模式：legacy preset 缺 capabilities → 按同 profile 从完整 presets 补能力位', () => {
-    const legacy = { id: 'p2::m2', label: 'P2', provider: 'openai-compatible', model: 'm2' };
-    expect(imageVisionCapable({
-      autoModel: false,
-      activeModel: legacy,
-      presets: [preset({ id: 'p2::m2', endpointProfileId: 'p2', model: 'm2', capabilities: ['chat', 'vision'] })],
-    })).toBe(true);
-  });
-});
-
 describe('BLOCK-455 渠道::模型 对绑定', () => {
   it('vision 绑定精确命中绑定模型（不再拿渠道默认模型顶替）', () => {
     const candidates = [
@@ -147,17 +108,5 @@ describe('BLOCK-455 渠道::模型 对绑定', () => {
     });
     expect(decision?.preset.model).toBe('b');
     expect(decision?.role).toBe('vision');
-  });
-
-  it('补能力位优先同 endpoint 同模型（能力跟模型走）', () => {
-    const legacy = { id: 'ep::b', label: 'EP', provider: 'openai-compatible', model: 'b', endpointProfileId: 'ep' };
-    expect(imageVisionCapable({
-      autoModel: false,
-      activeModel: legacy,
-      presets: [
-        preset({ id: 'ep::a', endpointProfileId: 'ep', model: 'a', capabilities: ['chat', 'vision'] }),
-        preset({ id: 'ep::b', endpointProfileId: 'ep', model: 'b', capabilities: ['chat'] }),
-      ],
-    })).toBe(false);
   });
 });
