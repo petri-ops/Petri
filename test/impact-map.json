@@ -2133,6 +2133,7 @@
         "acceptance/harness-plugin-prototype/**",
         "acceptance/harness-plugins/**",
         "acceptance/harness-scientific-task/**",
+        "acceptance/harness-observability/**",
         "acceptance/ui-032/**",
         "acceptance/ui-034/**",
         "acceptance/MODEL-ANTHROPIC-NATIVE/**",
