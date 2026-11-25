@@ -698,7 +698,7 @@ export default function Home(): React.ReactElement {
               </button>
             ))}
           </div>
-          <div className={styles.workbenchSectionLabel}>创建新项目</div>
+          <div className={styles.workbenchSectionLabel}>新建项目</div>
           <div className={styles.workbenchCreate}>
             {createControls}
           </div>

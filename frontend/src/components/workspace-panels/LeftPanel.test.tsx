@@ -1,5 +1,5 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LeftPanel, type LeftPanelContext } from './LeftPanel';
@@ -167,16 +167,15 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
     expect(screen.queryByRole('button', { name: 'Skills' })).toBeNull();
   });
 
-  it('calls onOpen when the + button is clicked (UI-304 简化版 - 直接触发原生面板)', () => {
+  it('item26 — 项目区 ➕ 建项目入口撤销（项目创建唯一入口=工作台创建区）', () => {
     const ctx = buildCtx('chat');
     render(
       <MemoryRouter>
         <LeftPanel ctx={ctx} />
       </MemoryRouter>
     );
-    const plusBtn = screen.getByRole('button', { name: /新建项目/ });
-    fireEvent.click(plusBtn);
-    expect(ctx.createPanel.onOpen).toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: /新建项目/ })).toBeNull();
+    expect(ctx.createPanel.onOpen).not.toHaveBeenCalled();
   });
 
   it('displays error message when createPanel.error is set', () => {
@@ -278,129 +277,25 @@ describe('BLOCK-67 左栏 ssh 项目标识与远程连接', () => {
   });
 });
 
-describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', () => {
-  it('别名模式：连接 → 进入终端式路径步（输入预填 $HOME/、候选自动加载）', async () => {
+describe('item26 — 🌐 SSH 创建并入 home 统一面板（能力不丢、组件去重）', () => {
+  it('点击 globe 跳转 home 创建区（?create=ssh），不再渲染行内向导', () => {
     const ctx = buildCtx('chat');
-    render(
-      <MemoryRouter>
-        <LeftPanel ctx={ctx} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
-    const panel = screen.getByTestId('left-ssh-create-panel');
-    const setVal = (el: HTMLInputElement, v: string) => {
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-      setter?.call(el, v);
-      el.dispatchEvent(new Event('input', { bubbles: true }));
+    const LocationProbe = () => {
+      const loc = useLocation();
+      return <span data-testid="loc">{loc.pathname + loc.search}</span>;
     };
-    setVal(panel.querySelector('input[aria-label="SSH 主机别名"]') as HTMLInputElement, 'aliyun');
-    fireEvent.click(screen.getByText('连接'));
-    const pathInput = (await waitFor(() => {
-      const el = panel.querySelector('[data-testid="ssh-path-input"]') as HTMLInputElement;
-      expect(el.value).toBe('/root/');
-      return el;
-    }));
-    expect(ctx.sshListDirs).toHaveBeenCalledWith('aliyun', '/root');
-    await waitFor(() => expect(screen.getByText('/root/petri-block67-demo/')).toBeTruthy());
-    void pathInput;
-  });
-
-  it('Tab 补全：输入 /root/pe → Tab → 自动完成 /root/petri-block67-demo/', async () => {
-    const ctx = buildCtx('chat');
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/project/p1/chat']}>
         <LeftPanel ctx={ctx} />
+        <LocationProbe />
       </MemoryRouter>,
     );
     fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
-    const panel = screen.getByTestId('left-ssh-create-panel');
-    fireEvent.click(screen.getByText('连接'));
-    const pathInput = (await waitFor(() => {
-      const el = panel.querySelector('[data-testid="ssh-path-input"]') as HTMLInputElement;
-      expect(el.value).toBe('/root/');
-      return el;
-    }));
-    const setVal = (v: string) => {
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-      setter?.call(pathInput, v);
-      pathInput.dispatchEvent(new Event('input', { bubbles: true }));
-    };
-    setVal('/root/pe');
-    fireEvent.keyDown(pathInput, { key: 'Tab', bubbles: true, cancelable: true });
-    await waitFor(() => expect(pathInput.value).toBe('/root/petri-block67-demo/'));
-  });
-
-  it('IP+密码模式：出现密码字段（type=password）与 IP/端口/用户名', () => {
-    const ctx = buildCtx('chat');
-    render(
-      <MemoryRouter>
-        <LeftPanel ctx={ctx} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'IP + 密码' }));
-    const panel = screen.getByTestId('left-ssh-create-panel');
-    expect((panel.querySelector('input[aria-label^="SSH 密码"]') as HTMLInputElement).type).toBe('password');
-    expect(panel.querySelector('input[aria-label="主机 IP 或域名"]')).toBeTruthy();
-    expect(panel.querySelector('input[aria-label="SSH 端口"]')).toBeTruthy();
-    expect(panel.querySelector('input[aria-label="SSH 用户名"]')).toBeTruthy();
-  });
-
-  it('在此路径创建项目：尾斜杠归一后触发 sshCreateAt', async () => {
-    const ctx = buildCtx('chat');
-    render(
-      <MemoryRouter>
-        <LeftPanel ctx={ctx} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
-    const panel = screen.getByTestId('left-ssh-create-panel');
-    const aliasInput = panel.querySelector('input[aria-label="SSH 主机别名"]') as HTMLInputElement;
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-    setter?.call(aliasInput, 'aliyun');
-    aliasInput.dispatchEvent(new Event('input', { bubbles: true }));
-    fireEvent.click(screen.getByText('连接'));
-    await waitFor(() => expect(screen.getByRole('button', { name: '创建项目' })).toBeTruthy());
-    fireEvent.click(screen.getByRole('button', { name: '创建项目' }));
-    await waitFor(() => expect(ctx.sshCreateAt).toHaveBeenCalledWith({ alias: 'aliyun', remotePath: '/root' }));
+    expect(screen.getByTestId('loc').textContent).toBe('/?create=ssh');
+    expect(screen.queryByTestId('left-ssh-create-panel')).toBeNull();
   });
 });
 
-describe('UI-327 Tab 多候选：补全到公共前缀', () => {
-  it('多候选匹配同一前缀时 Tab 补全到公共段，不误选', async () => {
-    const ctx = buildCtx('chat');
-    ctx.sshListDirs = vi.fn(() => Promise.resolve({
-      ok: true, path: '/root',
-      dirs: [
-        { name: 'petri-a', path: '/root/petri-a' },
-        { name: 'petri-b', path: '/root/petri-b' },
-      ],
-    }));
-    render(
-      <MemoryRouter>
-        <LeftPanel ctx={ctx} />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: '新建 SSH 远程项目' }));
-    const panel = screen.getByTestId('left-ssh-create-panel');
-    fireEvent.click(screen.getByText('连接'));
-    const pathInput = (await waitFor(() => {
-      const el = panel.querySelector('[data-testid="ssh-path-input"]') as HTMLInputElement;
-      expect(el.value).toBe('/root/');
-      return el;
-    }));
-    const setVal = (v: string) => {
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-      setter?.call(pathInput, v);
-      pathInput.dispatchEvent(new Event('input', { bubbles: true }));
-    };
-    setVal('/root/pe');
-    fireEvent.keyDown(pathInput, { key: 'Tab', bubbles: true, cancelable: true });
-    await waitFor(() => expect(pathInput.value).toBe('/root/petri-'));
-  });
-});
-
-// UI-335 — 「新建任务」归组至工作台快捷区首位（UI-328 悬浮行退役）
 describe('UI-335 新建任务在工作台分组内', () => {
   it('「新建任务」位于工作台快捷区首位，点击回工作台创建页', () => {
     const ctx = buildCtx('chat');

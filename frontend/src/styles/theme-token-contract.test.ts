@@ -701,7 +701,6 @@ describe('theme token contract', () => {
       'components/svg-editor/SvgEditorViewer.tsx': 5,
       'components/work-surface/Model3DScene.tsx': 1,
       'components/workspace-panels/AnalysisLaunchPanel.tsx': 1,
-      'components/workspace-panels/LeftSshCreatePanel.tsx': 3,
       'components/workspace-panels/OrchestrationGraph.tsx': 8,
       'pages/project-workspace/WorkspaceFilePreview.tsx': 1,
     }

@@ -86,8 +86,8 @@
       "wave": "B",
       "module": "W-02",
       "lines": 758,
-      "bytes": 33716,
-      "sha256": "324a282467c40ff6ea0572364141b269efbce1ab2a80d1b5b6f136541e4dc498"
+      "bytes": 33713,
+      "sha256": "ec04b96d26194877095bc115db03ce20009342cb821cd666ee6962fa412afada"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts",
@@ -125,9 +125,9 @@
       "path": "core/petri-server/helpers/tools-executor.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 2080,
-      "bytes": 87758,
-      "sha256": "fa22bfafbf1ab7aa45d19b9c64a23d555877ca59f16058b61fb1bdc543beabcb"
+      "lines": 2081,
+      "bytes": 87779,
+      "sha256": "76e1215b91b531bd937731e33be139b1c49f3ca5b4f7854ba618013c687f8070"
     },
     {
       "path": "core/petri-server/db.js",
@@ -397,9 +397,9 @@
       "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 972,
-      "bytes": 38789,
-      "sha256": "4777887a5e2149be11942949660602d261c501513a625d372cd00bf6495d6494"
+      "lines": 962,
+      "bytes": 38447,
+      "sha256": "fff1394f35f3c9b15271b9b53d45014d853ce148beb35299c1bdf1ea76c900e4"
     },
     {
       "path": "core/shared-backend/scientific-replay-package.js",
@@ -429,9 +429,9 @@
       "path": "src/main.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 920,
-      "bytes": 47095,
-      "sha256": "c4348feaa8033c3aa1757865463100e85133671afa7a667aee824fa04ab9fa71"
+      "lines": 926,
+      "bytes": 47486,
+      "sha256": "9f0e9a18690371dd1b0283514d615ad433d24fa909ad59b6412dc8e6e3e8ec36"
     },
     {
       "path": "frontend/src/pages/extensions/styles.module.css",
@@ -646,6 +646,26 @@
       "to": {
         "lines": 1191,
         "bytes": 62710
+      }
+    },
+    {
+      "path": "core/petri-server/helpers/tools-executor.js",
+      "reason": "BLOCK-520 P0 OB-001 引入结构化 logger（+1 行）",
+      "date": "2026-11-25",
+      "from": null,
+      "to": {
+        "lines": 2081,
+        "bytes": 87779
+      }
+    },
+    {
+      "path": "src/main.js",
+      "reason": "BLOCK-520 P1 OB-002 全局 IPC trace 安装（信任门后 6 行，feature 接入）",
+      "date": "2026-11-25",
+      "from": null,
+      "to": {
+        "lines": 926,
+        "bytes": 47486
       }
     }
   ]

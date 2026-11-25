@@ -10079,6 +10079,23 @@
       "tests": [
         "test/block520-p1-observability.test.mjs"
       ]
+    },
+    {
+      "id": "create-entry-refactor",
+      "note": "item26 创建入口重构：新建任务=新建会话/➕撤销/🌐并入 home 统一面板/拖拽链保留。HK-01 红绿先行，证据=acceptance/create-entry-refactor/ITEM26-PLAN.md。",
+      "patterns": [
+        "frontend/src/components/desktop/AppRail.tsx",
+        "frontend/src/components/workspace-panels/LeftPanel.tsx",
+        "frontend/src/components/workspace-panels/LeftPanel.test.tsx",
+        "frontend/src/components/workspace-panels/LeftSshCreatePanel.tsx",
+        "frontend/src/components/workspace-panels/CreateEntryRefactor.test.tsx",
+        "frontend/src/pages/home.tsx",
+        "frontend/src/styles/theme-token-contract.test.ts",
+        "acceptance/create-entry-refactor/**"
+      ],
+      "tests": [
+        "frontend/src/components/workspace-panels/CreateEntryRefactor.test.tsx"
+      ]
     }
   ]
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { treeRovingIntent, rovingTabIndex } from './treeRoving';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/icons/Icon';
@@ -7,7 +7,6 @@ import { SshStatusDot } from './SshStatusDot';
 import { MobileSyncPanel } from '@/components/desktop/DesktopSettingsPanel/sections/MobileSync';
 import { FederationPanel } from '@/components/desktop/DesktopSettingsPanel/sections/Federation';
 import type { Project } from '@/lib/project-types';
-import { SshCreateInlinePanel } from './LeftSshCreatePanel';
 import { listConversations, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import { setConversationDragData } from '@/components/copilot/SimpleChat/conversationDrag';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -116,13 +115,16 @@ export interface LeftPanelProps {
  *   └──────────────────────────────┘
  */
 export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElement {
+  const navigate = useNavigate();
+  // item26 — 🌐 SSH 创建并入 home 统一面板（能力不丢、组件去重为 home 一处）
+  const openSshCreateInHome = React.useCallback(() => void navigate('/?create=ssh'), [navigate]);
   // BLOCK-53 P1 — 拖拽目录直达创建：drop 到左栏 → validateDirectory 校验 →
   // 打开既有内联创建面板（ctx.createPanel）并回填路径。复用 UI-257 既有确认链，
   // 用户仍需看到完整路径并点「创建项目」，拖拽不绕过任何确认环节。
   const [dropActive, setDropActive] = useState(false);
   const [dropHint, setDropHint] = useState<string | null>(null);
-  // UI-327 — 左栏行内 SSH 创建面板（globe 按钮切换；不跳首页）
-  const [sshCreateOpen, setSshCreateOpen] = useState(false);
+  // item26（创建入口重构）— SSH 行内向导已并入 home 统一创建面板（?create=ssh）；
+  // 左栏 🌐 改为跳转 home 触发，本组件不再持有第二套创建面板态。
   // UI-445 — 会话标题搜索（搜索钮切换；跨项目按标题过滤，点结果直达会话）
   const [convSearchOpen, setConvSearchOpen] = useState(false);
   const [convSearchQuery, setConvSearchQuery] = useState('');
@@ -189,8 +191,7 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
         <QuickActions ctx={ctx} />
         <ProjectTreeHeader
           ctx={ctx}
-          sshCreateOpen={sshCreateOpen}
-          onToggleSshCreate={() => setSshCreateOpen((v) => !v)}
+          onOpenSshCreate={openSshCreateInHome}
           convSearchOpen={convSearchOpen}
           onToggleConvSearch={() => {
             setConvSearchOpen((v) => !v);
@@ -209,9 +210,6 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
               autoFocus
             />
           </div>
-        )}
-        {sshCreateOpen && (
-          <SshCreateInlinePanel ctx={ctx} onClose={() => setSshCreateOpen(false)} />
         )}
         {convSearchOpen && convSearchQuery.trim() ? (
           <ConversationSearchResults ctx={ctx} query={convSearchQuery.trim()} />
@@ -353,7 +351,7 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
       label: '新建任务',
       icon: 'plus',
       onClick: ctx.handleNavigateToHome,
-      title: '新建任务：在工作台选择项目路径（本地目录 / 手动路径 / SSH 远程）',
+      title: '新建任务：在当前项目新建会话（点即出）',
     },
     {
       // BLOCK-156 — 插件+Skills 两入口收敛为「扩展」单入口：扩展中心四货架
@@ -399,7 +397,7 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   );
 }
 
-function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate, convSearchOpen, onToggleConvSearch }: { ctx: LeftPanelContext; sshCreateOpen: boolean; onToggleSshCreate: () => void; convSearchOpen: boolean; onToggleConvSearch: () => void }): React.ReactElement {
+function ProjectTreeHeader({ ctx, onOpenSshCreate, convSearchOpen, onToggleConvSearch }: { ctx: LeftPanelContext; onOpenSshCreate: () => void; convSearchOpen: boolean; onToggleConvSearch: () => void }): React.ReactElement {
   return (
     <>
       <div className={styles.leftPanelHeader}>
@@ -415,25 +413,17 @@ function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate, convSearchOp
           >
             <Icon name="search" size={14} />
           </button>
-          {/* UI-327 — ssh 创建入口前置到左栏：行内面板，不跳首页 */}
+          {/* item26 — 🌐 SSH 创建并入 home 统一面板（能力不丢、组件去重）。 */}
           <button
-            className={`${button.iconBase} ${styles.iconBtn} ${sshCreateOpen ? styles.iconBtnInactive : ''}`}
-            onClick={onToggleSshCreate}
-            title={sshCreateOpen ? '收起 SSH 远程项目创建' : '新建 SSH 远程项目（IP/密码 或 别名）'}
-            aria-label={sshCreateOpen ? '收起 SSH 远程项目创建' : '新建 SSH 远程项目'}
-            aria-expanded={sshCreateOpen}
+            className={`${button.iconBase} ${styles.iconBtn}`}
+            onClick={onOpenSshCreate}
+            title="新建 SSH 远程项目（在工作台创建区）"
+            aria-label="新建 SSH 远程项目"
           >
             <Icon name="globe" size={14} />
           </button>
-          <button
-            className={`${button.iconBase} ${styles.iconBtn}`}
-            onClick={() => void ctx.createPanel.onOpen()}
-            title="新建项目（选择工作目录）"
-            aria-expanded={ctx.createPanel.open}
-            disabled={ctx.creatingProject}
-          >
-            <Icon name="plus" size={16} />
-          </button>
+          {/* item26 — 项目区 ➕ 建项目入口撤销：项目创建唯一入口为工作台创建区。
+              拖拽建项目链（handlePanelDrop → ctx.createPanel.onPickExternal）保留。 */}
         </div>
       </div>
       {/* UI-304 简化版 — 错误提示（如果有）*/}

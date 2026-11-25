@@ -65,14 +65,17 @@ export function AppRail(): React.ReactElement {
 
   const workspaceMode = modeFromPath(location.pathname);
 
-  /** 「新建任务」＝新建会话（用户裁决语义：新建项目交给项目区 + 与内联创建面板）。 */
+  /** item26 —「新建任务」＝新建会话，点即出（不跳项目流创建项目）。
+   *  有当前项目直接用；无当前项目但有既有项目取第一个建会话；
+   *  冷启动零项目才回工作台——此时没有可承载会话的项目，属诚实边界。 */
   const handleNewTask = React.useCallback(() => {
-    if (currentProjectId) {
-      void createConversationForProject(currentProjectId);
+    const pid = currentProjectId || allProjects[0]?.id;
+    if (pid) {
+      void createConversationForProject(pid);
       return;
     }
     void navigate('/');
-  }, [createConversationForProject, currentProjectId, navigate]);
+  }, [allProjects, createConversationForProject, currentProjectId, navigate]);
 
   const ctx: LeftPanelContext = {
     width: leftWidth,
