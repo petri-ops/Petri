@@ -9751,6 +9751,21 @@
       ]
     },
     {
+      "id": "a3-d1-lesson-injection-guard",
+      "note": "A3-D1 注入边界 frequency_rebound 事前机械门：lesson-injection-guard 纯函数（仅 rollback 剔除、verdict 随行留痕）+ agent-runner 注入前接线。degrade 不冻、不改 DB status、无 MD 回读与记忆门、红线表不变、零新依赖。证据=acceptance/harness-invisible-issues/A3-D1-EVIDENCE.md。HK-01 红绿先行。",
+      "patterns": [
+        "core/petri-server/helpers/lesson-injection-guard.js",
+        "core/petri-server/agent-runner.js",
+        "test/a3-d1-lesson-injection-guard.test.mjs",
+        "acceptance/harness-invisible-issues/A3-D1-EVIDENCE.md"
+      ],
+      "tests": [
+        "test/a3-d1-lesson-injection-guard.test.mjs",
+        "test/evo3-verify-frequency.test.mjs",
+        "test/evo2-distill-evolve.test.mjs"
+      ]
+    },
+    {
       "id": "evo4-evidence-panel",
       "note": "EVO-4 harness 自进化证据前端面板：新增 data.lessonEvidence 只读 IPC（四处同步）+ 设置页 maintenance 内嵌 LessonEvidencePanel（只读频率曲线/lesson 状态，零写入控件、观感零代签）。证据=acceptance/evo-4/**。EVO-3 deferred 项转正（用户发令「冲」）。",
       "patterns": [

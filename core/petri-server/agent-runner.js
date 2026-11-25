@@ -190,10 +190,10 @@ async function runAgentLoop({
   // lessons 走系统提示词动态段，不进 staticPrefix，保护历史 prompt 前缀缓存）。
   if (!isGuest) {
     try {
-      const { listActiveLessons } = require('./helpers/lesson-store');
-      const lessons = listActiveLessons(8);
-      if (Array.isArray(lessons) && lessons.length > 0) ctxForPrompt.selfEvolutionLessons = lessons;
-    } catch { /* 自进化经验读取失败不影响本轮运行 */ }
+      const { listActiveLessons, verifyLessonFrequency } = require('./helpers/lesson-store');
+      const { lessons } = require('./helpers/lesson-injection-guard').guardLessonInjection(listActiveLessons(8), verifyLessonFrequency);
+      if (lessons.length > 0) ctxForPrompt.selfEvolutionLessons = lessons;
+    } catch { /* 自进化经验读取 / 冻结失败不影响本轮运行 */ }
   }
 
   // BLOCK-337 P2 — 会话侧治理装载：workspacePath 只从 projects 表派生（覆盖/剥除客户端
