@@ -10059,6 +10059,26 @@
       "tests": [
         "test/block520-p0-observability.test.mjs"
       ]
+    },
+    {
+      "id": "block520-p1-observability",
+      "note": "BLOCK-520 P1 链路可追状态可量（2026-11-25）：OB-002 IPC trace / OB-003 metrics+内部端点 / OB-005 health 统一 shape。HK-01 红绿先行，证据=acceptance/harness-observability/P1-EVIDENCE.md。",
+      "patterns": [
+        "core/shared-backend/metrics.js",
+        "core/shared-backend/health.js",
+        "core/shared-backend/ipc-trace.js",
+        "core/petri-server/db/connection.js",
+        "core/petri-server/routes/index.js",
+        "core/petri-server/mobile-gateway/index.js",
+        "src/ipc/_ipc-trace.js",
+        "src/preload.js",
+        "src/main.js",
+        "src/main/backend-proc-manager.js",
+        "acceptance/harness-observability/**"
+      ],
+      "tests": [
+        "test/block520-p1-observability.test.mjs"
+      ]
     }
   ]
 }

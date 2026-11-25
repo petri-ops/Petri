@@ -210,7 +210,8 @@ function buildMobileGateway({
   }
 
   app.get('/m/api/health', (_req, res) => {
-    res.json({ ok: true, service: 'petri-mobile-gateway' });
+    const { buildHealthShape } = require('../../shared-backend/health');
+    res.json({ ...buildHealthShape({ service: 'petri-mobile-gateway', readiness: true }), ok: true });
   });
 
   // ── UI-357 桌面投影（用户裁决「整个软件桌面原封不动的过来」）────────
@@ -269,7 +270,10 @@ function buildMobileGateway({
         executors[lang] = Boolean(executor && executor.binPath && fs.existsSync(executor.binPath));
       }
     } catch { /* 执行器探测失败诚实报 false */ }
+    const { buildHealthShape } = require('../../shared-backend/health');
+    const readiness = executors.r || executors.python;
     res.json({
+      ...buildHealthShape({ service: 'petri-federation', readiness, details: { executors } }),
       ok: true,
       service: 'petri-federation',
       protocol: 1,

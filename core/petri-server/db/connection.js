@@ -23,6 +23,30 @@ const DB_PATH = resolveDbPath(process.env) || path.join(__dirname, '..', 'petri.
 // BLOCK-379（S4 / G-17）——实例化单源：openDatabase 工厂（pragma 套装与实例化同源）
 const db = openDatabase(DB_PATH, { busyTimeoutMs: 10000, ctor: Database });
 db.pragma('foreign_keys = OFF');
+
+// BLOCK-520 P1 OB-003 — SQLite 写延迟观测：单点包装 prepare，仅对写语句的 run
+// 计时并交 metrics（纯内存、零依赖）。read 路径零改动，语句对象原样返回。
+try {
+  const { recordDbWrite } = require('../../shared-backend/metrics');
+  const originalPrepare = db.prepare.bind(db);
+  db.prepare = function prepareWithWriteTiming(sql, ...args) {
+    const stmt = originalPrepare(sql, ...args);
+    if (/^\s*(INSERT|UPDATE|DELETE|REPLACE)/i.test(String(sql))) {
+      const originalRun = stmt.run.bind(stmt);
+      stmt.run = (...params) => {
+        const start = process.hrtime.bigint();
+        try {
+          return originalRun(...params);
+        } finally {
+          recordDbWrite(Number(process.hrtime.bigint() - start) / 1e6);
+        }
+      };
+    }
+    return stmt;
+  };
+} catch {
+  // metrics 观测不可用时 DB 行为完全不变（fail-open，绝不阻断数据库初始化）。
+}
 // Run a manual checkpoint on startup to close any stale WAL from a previous unclean shutdown.
 try {
   db.pragma('wal_checkpoint(TRUNCATE)');

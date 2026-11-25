@@ -184,6 +184,9 @@ const rServerSupervisor = createOwnedBackendSupervisor({
         ...process.env,
         ELECTRON_RUN_AS_NODE: "1",
         PETRI_USER_DATA_DIR: app.getPath("userData"),
+        // BLOCK-520 P1 OB-002：后端进程带主进程 trace 会话 rid，诊断包可把后端
+        // 日志与同批 IPC 时间轴关联（rid 为观测元数据，不改变任何后端行为）。
+        PETRI_TRACE_RID: require(resolveCore("shared-backend", "ipc-trace.js")).newRid(),
       },
       stdio: ["ignore", "pipe", "pipe"],
     });

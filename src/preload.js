@@ -10,6 +10,25 @@
 
 const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
+// BLOCK-520 P1（OB-002）IPC trace — 自包含字面量（sandbox preload 不能 require 本地
+// 模块）。对每次 invoke 生成 rid 并作为尾参 __petriRid 透传；主进程 _ipc-trace 全局
+// 包装器摘走该尾参后调用原 handler，故 handler 收到的参数形状零变化（向后兼容）。
+let _petriRidSeq = 0;
+function petriTraceRid() {
+  _petriRidSeq += 1;
+  return `rid-renderer-${Date.now().toString(36)}-${_petriRidSeq.toString(36)}`;
+}
+const _rawIpcInvoke = ipcRenderer.invoke.bind(ipcRenderer);
+ipcRenderer.invoke = function tracedInvoke(channel, ...args) {
+  // 只对「带对象入参」的调用附加 rid 尾参：无参/基本类型调用的 handler 入参
+  // 必须逐字节原样（window:* 控制面精确契约），它们由主进程包装器 newRid() 兜底。
+  const last = args[args.length - 1];
+  if (last && typeof last === 'object' && !Array.isArray(last)) {
+    return _rawIpcInvoke(channel, ...args, { __petriRid: petriTraceRid() });
+  }
+  return _rawIpcInvoke(channel, ...args);
+};
+
 // A-009: pull the petri-server port fallback from env-coordinator
 // instead of duplicating the per-port fallback defaults here. The
 // Electron main process sets R_SERVER_PORT on

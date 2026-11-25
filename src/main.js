@@ -38,6 +38,12 @@ const {
 // 集合为空时 fail-closed，且窗口事件不会早于导航完成）。
 require("./ipc/_ipc-trust").installGlobalIpcSenderGuard(ipcMain);
 
+// BLOCK-520 P1（OB-002）全局 IPC trace——同样必须在任何 ipcMain.handle 注册之前
+// 安装：此后每条 IPC 自动按 rid 记录时间轴（invoke→handler→done），rid 为可选
+// 参数（preload 末尾附 __petriRid），老调用方不传也不改 handler 签名。
+const { installGlobalIpcTrace } = require("./ipc/_ipc-trace");
+installGlobalIpcTrace(ipcMain);
+
 // UI-400-1 抓真（2026-09-17）——Windows 原生窗口遮挡追踪对无边框窗口（frame:false）
 // 会误报「已遮挡」→ document.visibilityState=hidden → Chromium PDF 查看器在
 // hidden frame 冻结渲染（用户实拍 PDF 预览整块空白；窗口明明在前台）。

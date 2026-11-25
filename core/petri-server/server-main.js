@@ -336,7 +336,17 @@ try {
 
 app.get('/api/health', (req, res) => {
   // L3-5（L-22）：权限门 degraded 标记上健康面（运维/探针可见，不再只有 console）
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), permissionGateDegraded: process.env.PETRI_PERMISSION_GATE_DEGRADED === '1' });
+  const { buildHealthShape } = require('../shared-backend/health');
+  res.json({
+    ...buildHealthShape({ service: 'petri-r', readiness: true }),
+    permissionGateDegraded: process.env.PETRI_PERMISSION_GATE_DEGRADED === '1',
+  });
+});
+
+// BLOCK-520 P1 OB-003 — 进程内 metrics 快照（零新依赖；仅 BackendPort 回环可达）
+app.get('/api/_internal/metrics', (_req, res) => {
+  const { getMetricsSnapshot } = require('../shared-backend/metrics');
+  res.json(getMetricsSnapshot());
 });
 
 // BLOCK-511 S3.4 — Express 4 全局错误中间件（async handler 经 asyncHandler 转交 next(err)
