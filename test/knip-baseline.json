@@ -190,6 +190,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/rw02-ui-evidence-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/rw06-proxy-main-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/s5-default-identity.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/settings-speech-section.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/trio-dark-diag.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/trio-dark.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui301-385-spawn-live.cjs",
@@ -499,6 +500,11 @@
       "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui694-settings-live.cjs",
       "reason": "BLOCK-517 W5 dev-verify flow 入口（同上）",
       "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/settings-speech-section.cjs",
+      "reason": "item40 设置页语音独立成区 dev-verify flow 入口（BLOCK-517 W3/W4/W5 同根先例，不删 flow 文件）",
+      "date": "2026-11-25"
     }
   ]
 }

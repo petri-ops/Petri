@@ -42,7 +42,7 @@ export const WATERMARK_OPACITY_MIN = 0;
 export const WATERMARK_OPACITY_MAX = 0.3;
 export const WATERMARK_OPACITY_DEFAULT = 0.1;
 /** 缓存上限 2MB（base64 约 2.7M 字符）；超限不采用，避免 localStorage 被单张图撑爆。 */
-export const WATERMARK_CUSTOM_MAX_CHARS = 2 * 1024 * 1024;
+const WATERMARK_CUSTOM_MAX_CHARS = 2 * 1024 * 1024;
 
 export function isWatermarkMode(value: unknown): value is WatermarkMode {
   return typeof value === 'string' && (WATERMARK_MODE_VALUES as ReadonlyArray<string>).includes(value);

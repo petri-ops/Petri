@@ -7,7 +7,7 @@
 /** 单张自定义水印上限 2MB（防止 localStorage data URI 缓存被撑爆）。 */
 export const WATERMARK_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
 /** 只接受位图；SVG 可能带脚本、GIF 动画不适合静态水印。 */
-export const WATERMARK_IMAGE_TYPES: ReadonlyArray<string> = ['image/png', 'image/jpeg', 'image/webp'];
+const WATERMARK_IMAGE_TYPES: ReadonlyArray<string> = ['image/png', 'image/jpeg', 'image/webp'];
 
 export interface WatermarkFileLike {
   type: string;
