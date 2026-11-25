@@ -293,9 +293,9 @@
       "path": "core/packages/shared-config/config-schema.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1191,
-      "bytes": 62710,
-      "sha256": "41342a4fc9de14dc8d806680eb4e100169daf736c3570a6b4e56617ee017f8d6"
+      "lines": 1198,
+      "bytes": 63161,
+      "sha256": "50679cfda80f2b9a044df1c04eec5339d7bf43acc3e2f7f8f0b00daf44361044"
     },
     {
       "path": "core/shared-backend/skill-runtime.js",
@@ -350,8 +350,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1038,
-      "bytes": 58012,
-      "sha256": "83f672c450c7fa30813e4f2a112dd947358221aa634e85da474dd364fefcfac9"
+      "bytes": 58077,
+      "sha256": "3331f07a288f1caf71fae7747939a5fcfffbed46dbefe4f1e4896de7048210cc"
     },
     {
       "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86638,
+  "total": 86645,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -827,6 +827,19 @@
       "to": {
         "lines": 793,
         "bytes": 23419
+      }
+    },
+    {
+      "path": "core/packages/shared-config/config-schema.js",
+      "reason": "试用反馈③深化（owner msg_b9d146535752）：注册 generation.intentPreset 意图预设字段（策展四档 oneOf），配置归属扩展、底层 provider 链零改",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 1191,
+        "bytes": 62710
+      },
+      "to": {
+        "lines": 1198,
+        "bytes": 63161
       }
     }
   ]

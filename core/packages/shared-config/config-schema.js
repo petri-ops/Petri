@@ -285,6 +285,13 @@ const CONFIG_KEYS = Object.freeze([
     type: 'number', domain: { min: 256, max: 1000000, integer: 'floor' }, envKeys: ['PETRI_LLM_MAX_TOKENS'],
     aliases: [], mutable: true, ui: 'settings', dropInvalid: 'drop-key',
   },
+  // —— 意图预设（试用反馈③深化，owner msg_b9d146535752）——
+  // 用户选意图不选参数；策展四档 oneOf，agent 无写入口（防自我强化回路）。
+  {
+    key: 'generation.intentPreset', family: 'generation', path: 'intentPreset',
+    type: 'string', domain: { oneOf: ['precise', 'balanced', 'creative', 'longform'] },
+    envKeys: [], aliases: [], mutable: true, ui: 'settings', dropInvalid: 'drop-key',
+  },
   // —— 成本上限（helpers/cost-cap.js:14-26；>0 且两位小数）——
   {
     key: 'cost.capCny', family: 'cost-cap', path: 'costCapCny',

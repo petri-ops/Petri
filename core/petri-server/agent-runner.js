@@ -650,9 +650,9 @@ async function runAgentLoop({
     userId,
     // BLOCK-244 — 审批卡来源变体：side-task（子代理）vs main。
     taskKind: kind || 'primary',
-    // BLOCK-172 CP-7 — 生成参数全局缺省进 loop（reqBody temperature/max_tokens 与
-    // 预算 headroom 消费；未配置=loop 侧既有 0.4/16384 零行为变化）
-    generationDefaults: getGenerationDefaults(),
+    // BLOCK-172 CP-7 + 试用反馈③深化：带意图上下文按 env>覆盖>旧值>自动档解析，
+    // 失败落平衡 0.4（零突变）；'adaptive' 交 loop 既有预算公式。
+    generationDefaults: getGenerationDefaults({ userText: latestUserText(messages), taskKind: kind }),
     // BLOCK-49 — 子 agent 派生工具（spawn/list/wait_agent）的父子关系锚点
     taskId,
     projectId: context && context.projectId,

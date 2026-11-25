@@ -167,7 +167,13 @@ function registerAiSettingsRoutes(app) {
   // BLOCK-172 CP-7 — 生成参数全局缺省（temperature/maxTokens；env 覆盖优先）。
   app.get('/api/ai/generation-defaults', (req, res) => {
     try {
-      return res.json({ status: 'ok', generation: getGenerationDefaults() });
+      // 试用反馈③深化：GET 回传文件原始 intentPreset（覆盖档），其余字段沿用原 sanitized 视图
+      const generation = { ...getGenerationDefaults() };
+      const storedGeneration = getAiSettings() && getAiSettings().generation;
+      if (storedGeneration && typeof storedGeneration.intentPreset === 'string') {
+        generation.intentPreset = storedGeneration.intentPreset;
+      }
+      return res.json({ status: 'ok', generation });
     } catch (e) {
       return res.status(500).json({ status: 'error', error: e.message });
     }

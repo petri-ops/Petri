@@ -419,9 +419,28 @@ function _sanitizeGeneration(raw) {
   return out;
 }
 
-function getGenerationDefaults() {
+function getGenerationDefaults(context) {
   const stored = getAiSettings();
-  return _sanitizeGeneration(stored && typeof stored === 'object' ? stored.generation : null);
+  const generation = stored && typeof stored === 'object' ? stored.generation : null;
+  // 试用反馈③深化（owner msg_b9d146535752）：仅在调用方带意图上下文时启用三层优先级链；
+  // 无 context 的所有既有调用保持原路径零行为变化（env > generation 裸值 > 内置缺省）。
+  if (context && typeof context === 'object') {
+    const { detectIntentPreset, resolveGenerationParams } = require('./generation-intent');
+    const detected = detectIntentPreset({ userText: context.userText, taskKind: context.taskKind });
+    const resolved = resolveGenerationParams({
+      env: process.env,
+      intentPreset: generation && typeof generation.intentPreset === 'string' ? generation.intentPreset : '',
+      generation: generation && typeof generation === 'object' ? generation : {},
+      detected: detected.preset,
+    });
+    const out = {};
+    if (typeof resolved.temperature === 'number') out.temperature = resolved.temperature;
+    // 'adaptive'  signal → 不写 maxTokens，交 loop 既有 resolveOutputBudget 自适应
+    if (typeof resolved.maxTokens === 'number') out.maxTokens = resolved.maxTokens;
+    out.source = resolved.source;
+    return out;
+  }
+  return _sanitizeGeneration(generation);
 }
 
 function saveGenerationDefaults(partial) {
@@ -429,7 +448,7 @@ function saveGenerationDefaults(partial) {
   // 非法/未知键一律拒绝并带结构化诊断；`null` 仍是清键语义。
   // 这是本包里唯一有意改变的既有行为：原先非法值被静默丢键（用户以为保存了），现在改 400。
   const patch = {};
-  for (const key of ['temperature', 'maxTokens']) {
+  for (const key of ['temperature', 'maxTokens', 'intentPreset']) {
     if (partial && typeof partial === 'object' && Object.prototype.hasOwnProperty.call(partial, key)) patch[key] = partial[key];
   }
   const guard = commitGuardGeneration(patch);

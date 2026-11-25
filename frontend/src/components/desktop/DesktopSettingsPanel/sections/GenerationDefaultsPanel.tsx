@@ -2,20 +2,37 @@ import { useCallback, useEffect, useState } from 'react';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
 /**
- * GenerationDefaultsPanel — 生成参数全局缺省（BLOCK-172 CP-7）。
+ * GenerationDefaultsPanel — 生成意图覆盖档（试用反馈③深化，owner msg_b9d146535752）。
  *
- * temperature/max_tokens 进 ai-settings.json `generation` 键（env
- * PETRI_LLM_TEMPERATURE/PETRI_LLM_MAX_TOKENS 覆盖优先，UI 如实提示）；
- * 消费方=agent loop reqBody 与预算 headroom。未保存=loop 侧既有 0.4/16384。
+ * 用户选意图（精准/平衡/创作/长文）而非裸 temperature/max_tokens 滑杆；
+ * 写 ai-settings.json `generation.intentPreset`（策展四档，oneOf 注册）。
+ * 未设置=自动档：loop 按任务意图本地规则选预设（判定失败落平衡）。
+ * env PETRI_LLM_TEMPERATURE/PETRI_LLM_MAX_TOKENS 仍最高优先（专家后门）。
  */
 interface GenerationDefaults {
   temperature?: number;
   maxTokens?: number;
+  intentPreset?: string;
+}
+const PRESET_OPTIONS = [
+  { value: '', label: '自动（按任务意图）' },
+  { value: 'precise', label: '精准（0.2）' },
+  { value: 'balanced', label: '平衡（0.4）' },
+  { value: 'creative', label: '创作（0.8）' },
+  { value: 'longform', label: '长文（预算自适应）' },
+];
+function legacyToPreset(g: GenerationDefaults): string {
+  if (g.intentPreset) return g.intentPreset;
+  if (typeof g.temperature === 'number') {
+    if (g.temperature <= 0.3) return 'precise';
+    if (g.temperature >= 0.7) return 'creative';
+    return 'balanced';
+  }
+  return '';
 }
 
 export function GenerationDefaultsPanel(): React.ReactElement {
-  const [temperature, setTemperature] = useState<string>('');
-  const [maxTokens, setMaxTokens] = useState<string>('');
+  const [preset, setPreset] = useState<string>('');
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -33,9 +50,7 @@ export function GenerationDefaultsPanel(): React.ReactElement {
         });
         const data = (await response.json().catch(() => ({}))) as { status?: string; generation?: GenerationDefaults };
         if (!cancelled && response.ok && data.status === 'ok') {
-          const generation = data.generation || {};
-          setTemperature(typeof generation.temperature === 'number' ? String(generation.temperature) : '');
-          setMaxTokens(typeof generation.maxTokens === 'number' ? String(generation.maxTokens) : '');
+          setPreset(legacyToPreset(data.generation || {}));
           setLoaded(true);
         }
       } catch {
@@ -52,16 +67,6 @@ export function GenerationDefaultsPanel(): React.ReactElement {
     setBusy(true);
     setNotice(null);
     try {
-      const parsedTemperature = temperature.trim() === '' ? undefined : Number(temperature);
-      const parsedMaxTokens = maxTokens.trim() === '' ? undefined : Number(maxTokens);
-      if (parsedTemperature !== undefined && (!Number.isFinite(parsedTemperature) || parsedTemperature < 0 || parsedTemperature > 2)) {
-        setNotice('temperature 需在 0–2 之间');
-        return;
-      }
-      if (parsedMaxTokens !== undefined && (!Number.isFinite(parsedMaxTokens) || parsedMaxTokens < 256)) {
-        setNotice('max_tokens 需 ≥256');
-        return;
-      }
       const token = getToken();
       const response = await fetch(`${getPlatformApiPrefix()}/ai/generation-defaults`, {
         method: 'PUT',
@@ -69,10 +74,7 @@ export function GenerationDefaultsPanel(): React.ReactElement {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({
-          ...(parsedTemperature !== undefined ? { temperature: parsedTemperature } : {}),
-          ...(parsedMaxTokens !== undefined ? { maxTokens: parsedMaxTokens } : {}),
-        }),
+        body: JSON.stringify({ intentPreset: preset || null }),
       });
       const data = (await response.json().catch(() => ({}))) as { status?: string; error?: string };
       if (response.ok && data.status === 'ok') {
@@ -85,40 +87,27 @@ export function GenerationDefaultsPanel(): React.ReactElement {
     } finally {
       setBusy(false);
     }
-  }, [maxTokens, temperature]);
+  }, [preset]);
 
   return (
     <div className="petri-generation-defaults" data-testid="generation-defaults">
       <div className="petri-settings-section__heading">
         <h3>生成参数（全局缺省）</h3>
-        <p>Agent 循环请求体的 temperature 与 max_tokens；留空=内置缺省（0.4 / 16384）。env PETRI_LLM_TEMPERATURE / PETRI_LLM_MAX_TOKENS 覆盖优先。</p>
+        <p>选意图不选参数；自动档按任务意图本地判定（失败落平衡 0.4）。env PETRI_LLM_TEMPERATURE / PETRI_LLM_MAX_TOKENS 为专家后门、优先级最高。</p>
       </div>
       {loaded ? (
         <div className="petri-generation-defaults__fields">
           <label className="petri-generation-defaults__field">
-            <span>temperature（0–2）</span>
-            <input
-              type="number"
-              step="0.1"
-              min="0"
-              max="2"
-              value={temperature}
-              onChange={(event) => setTemperature(event.target.value)}
-              placeholder="0.4"
-              data-testid="generation-temperature"
-            />
-          </label>
-          <label className="petri-generation-defaults__field">
-            <span>max_tokens（≥256）</span>
-            <input
-              type="number"
-              step="256"
-              min="256"
-              value={maxTokens}
-              onChange={(event) => setMaxTokens(event.target.value)}
-              placeholder="16384"
-              data-testid="generation-max-tokens"
-            />
+            <span>生成意图（用户选意图，不选参数）</span>
+            <select
+              value={preset}
+              onChange={(event) => setPreset(event.target.value)}
+              data-testid="generation-intent-preset"
+            >
+              {PRESET_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
           </label>
           <button
             type="button"
@@ -127,7 +116,7 @@ export function GenerationDefaultsPanel(): React.ReactElement {
             data-testid="generation-save"
             onClick={() => void save()}
           >
-            保存生成参数
+            保存生成意图
           </button>
           {notice && (
             <span className="petri-generation-defaults__notice" role="status">{notice}</span>
