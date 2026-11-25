@@ -459,7 +459,10 @@ describe('theme token contract', () => {
       'components/branch/BranchTabs.module.css': 5,
       'pages/extensions/extensions.module.css': 5,
       'components/result-studio/LineageStrip.module.css': 5,
-      'pages/welcome.module.css': 2,
+      // harness 队列 B4（UI-727）键盘可达性：+1 = 首屏 4 个交互类共用 :focus-visible
+      // 焦点环 outline（welcome.module.css:397），宪章五类「交互态焦点环」合法语义，
+      // 修的是「Tab 50 次困在左栏、主区不可达」P0。ratchet 2→3 带因上调。
+      'pages/welcome.module.css': 3,
       'components/copilot/integration/integration.module.css': 4,
       'components/desktop/WorkingTreeReview/WorkingTreeReview.css': 4,
       'components/result-studio/CompactResultNavigator.module.css': 2,
