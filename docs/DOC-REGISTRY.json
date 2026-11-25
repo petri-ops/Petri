@@ -14029,7 +14029,7 @@
    "id": "BLOCK-520",
    "path": "docs/block520-harness-observability-plan.md",
    "kind": "work-package",
-   "status": "planned",
+   "status": "active",
    "canonical": true,
    "truthDomain": "block520-harness-observability",
    "entrypoint": "docs/README.md",

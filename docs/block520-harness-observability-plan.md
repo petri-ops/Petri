@@ -1,6 +1,6 @@
 ---
 capability: BLOCK-520
-status: planned
+status: active
 kind: work-package
 canonical: true
 truthDomain: block520-harness-observability
@@ -10,7 +10,7 @@ owner: main-agent
 phase: G0
 ---
 
-# BLOCK-520 Harness 稳定性/可观测性整改（排期建议稿 · 未开工）
+# BLOCK-520 Harness 稳定性/可观测性整改（P0 已落地 · P1/P2 待发令）
 
 > 授权：主人 2026-11-25 经 Orca「按建议推进」；请求=按治理流程立 backlog / remaining-work-plan 项、给波次排期、第 9 项单列 U 类材料 pending_user_ruling。**本文件只立项排期，不含实现；每项开工仍需发令。**
 > 源材料：兴奋 2026-11-25 评估 + `docs/agent-harness-observability-audit-2026-08-17.md`；方案 9 项按 ROI 分 P0/P1/P2。
@@ -29,10 +29,10 @@ phase: G0
 
 ## §2 排期建议（单工作包串行，逐波发令）
 
-### 波次 P0 — 让失败可见（低风险高收益，建议下一波首选）
-- **OB-001** console→logger 渐进替换（按 §1 重选的 4 文件，不跨层硬改）：验 `console.` 计数收敛、行为基线前后同套绿。
-- **OB-004** error-log 静默 catch 修复 + `console.error`→`logError` 桥接 + dedupe（不重做默认路径）：验 macOS 写盘与 tail、`catch` 留痕。
-- **OB-007** 进程错误处理器加固（复用 server-main.js 已注册点，补覆盖/去重）：验 unhandledRejection 必触 error-log（E-019）。
+### 波次 P0 — 让失败可见（✅ 已落地 2026-11-25，待 wave 回执；证据 `acceptance/harness-observability/P0-EVIDENCE.md`）
+- **OB-001** ✅ 四文件 console→logger（tools-executor/server-main/ai-chat/server.js），`console.` 合计 88→4（仅注释/默认值残留），HK-01 静态校验含路径可解析。
+- **OB-004** ✅ error-log 静默 catch 修复（`getLastWriteError`+stderr 留痕）+ 全局 `console.error`→`logError` 桥接 + dedupe（不重做默认路径）；server.js 端口守卫路径刻意不装桥接以守 block457 零副作用契约。
+- **OB-007** ✅ 抽 `installProcessErrorHandlers` 统一注册（复用 server-main.js 原注册点），unhandledRejection/uncaughtException 必触 error-log（E-019），保留 exit(1) 受控重启语义。
 
 ### 波次 P1 — 链路可追、状态可量（中风险，P0 收口后另点）
 - **OB-002** IPC trace 贯穿（preload/main handler/backend spawn env，rid 可选参数向后兼容）：验单条 IPC 全链 rid 时间轴可重建。
