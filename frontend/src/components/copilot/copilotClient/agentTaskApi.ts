@@ -54,7 +54,10 @@ export async function previewAgentTaskResume(taskId: string): Promise<{
   let body: Record<string, unknown> = {};
   try {
     body = (await resp.json()) as Record<string, unknown>;
-  } catch {}
+  } catch {
+    // A1 A 类：响应体解析失败按空 body 降级（只读预览），错误由 resp.ok 分支统一抛出；
+    // 预览是 best-effort，不因畸形 body 把「不可续跑」变成整页错误。
+  }
   if (!resp.ok) {
     throw new Error(String((body as { error?: string }).error || `HTTP ${resp.status}`));
   }
@@ -83,7 +86,10 @@ export async function resumeAgentTask(taskId: string): Promise<{
   let body: Record<string, unknown> = {};
   try {
     body = (await resp.json()) as Record<string, unknown>;
-  } catch {}
+  } catch {
+    // A1 A 类：解析失败保留空 body，下面 !taskId 分支照常抛 HTTP 错误——错误不会静默，
+    // 吞掉的只是 JSON 解析异常本身（错误文案由 status / body.error 给出）。
+  }
   if (!resp.ok || !body.taskId) {
     throw new Error(String((body as { error?: string }).error || `HTTP ${resp.status}`));
   }
@@ -111,7 +117,10 @@ export async function retryToolSummary(input: {
   let body: { content?: string; error?: string; message?: string } = {};
   try {
     body = (await resp.json()) as typeof body;
-  } catch {}
+  } catch {
+    // A1 A 类：重试摘要解析失败落到空 body，下面 !content 分支照常抛错（可感知），
+    // 吞掉的只是解析异常；不需要第二套报错路径。
+  }
   if (!resp.ok || !body.content) {
     throw new Error(body.error || body.message || `HTTP ${resp.status}`);
   }
@@ -133,7 +142,10 @@ export async function cancelAgentTask(taskId: string): Promise<void> {
     try {
       const body = (await resp.json()) as AgentApiEnvelope;
       message = String(body?.error || body?.message || message);
-    } catch {}
+    } catch {
+      // A1 A 类：取消失败的响应体解析失败时保留 `HTTP <status>` 兜底文案后照常抛错，
+      // 吞掉的只是「取更详细错误文案」的解析异常，用户仍看到失败。
+    }
     throw new Error(message);
   }
 }
@@ -231,7 +243,11 @@ export async function ackRunTool(
       body: JSON.stringify({ approve, projectId: scope.projectId, conversationId: scope.conversationId }),
     });
     return response.ok;
-  } catch {
+  } catch (error) {
+    // A1 B 类：确认按钮点了没反应是用户可感知失败。renderer 无 error-log 模块，
+    // 复用既有 renderer console 链带 reasonCode 留痕（主窗 console-message 捕获），
+    // 保持返回 false 的 fail-soft 契约不改调用方语义。
+    console.error('[A1][reasonCode=A1_ACK_SUBMIT_FAILED] 重操作确认提交失败', error);
     return false;
   }
 }

@@ -1,5 +1,7 @@
 'use strict';
 const logger = require('../../shared-backend/logger');
+// A1 静默吞错分级治理：用户可见失败走既有 error-log（BLOCK-520 OB-004 单源），零新依赖。
+const { logError } = require('../../shared-backend/error-log');
 
 const { ARTIFACT_SCHEMA_VERSION } = require('../../shared-backend/schema-versions');
 const fs = require('fs');
@@ -172,7 +174,9 @@ function createToolsExecutor({
     void (async () => {
       const direct = activeDirectJobs.get(jobId);
       if (direct) {
-        await direct.runner.cancel({ pid: direct.pid }).catch(() => {});
+        // A1 A 类：取消是 best-effort 信号投递，durable 取消态由 job 表/owner 对账收敛，
+        // 节点侧已退出时 cancel 失败属预期，不应影响 cancel 请求返回。
+        await direct.runner.cancel({ pid: direct.pid }).catch(() => { /* A1 A 类：best-effort 取消 */ });
       }
     })();
     return requestActiveToolJobCancellation(activeToolJobs, jobId);
@@ -473,7 +477,8 @@ function createToolsExecutor({
                 url: `/api/tools/file/${encodeURIComponent(req.params.jobId)}/${report.fileName}`,
               });
             } finally {
-              try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
+              // A1 A 类：临时文件清理失败不影响已生成的报告响应（留待系统回收）。
+              try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* 清理失败不阻断报告返回 */ }
             }
           }
         }
@@ -543,7 +548,7 @@ function createToolsExecutor({
               '因无法证明 PID 归属，未发送信号；已如实标记 failed。',
             ],
           });
-        } catch {}
+        } catch { /* A1 A 类：通知面故障不影响作业链；zombie 已标 failed 在作业面可见 */ }
       }
       // BLOCK-57：远程作业对账恢复（D5.2）——running + 有目标 + 本进程无 owner
       // （重启遗留）→ re-attach；节点状态真相决定终态。
@@ -686,7 +691,7 @@ function createToolsExecutor({
       try {
         const u = await db.prepare('SELECT username FROM users WHERE id=?').get(job.user_id);
         username = u && u.username;
-      } catch {}
+      } catch { /* A1 A 类：用户名仅用于通知文案，查询失败按匿名通知照常发送 */ }
       notify.toolJobFailed({
         jobId,
         toolId: job.tool_id,
@@ -835,7 +840,8 @@ function createToolsExecutor({
     const mirrorLogPath = path.join(jobDir, 'output', 'remote-runner.log');
     const appendLog = (text) => {
       stdoutText = (stdoutText + text).slice(-REMOTE_LOG_CAP_BYTES);
-      try { fs.appendFileSync(mirrorLogPath, text); } catch {}
+      // A1 A 类：本地日志镜像是运行期缓存，服务器 run.log 为真值；写盘失败不阻断轮询。
+      try { fs.appendFileSync(mirrorLogPath, text); } catch { /* 镜像缓存失败可容忍 */ }
     };
 
     let logOffset = 0;
@@ -853,7 +859,8 @@ function createToolsExecutor({
       } catch { /* 日志传输失败不影响状态轮询 */ }
       if (owner.cancelRequested && !cancelSent) {
         cancelSent = true;
-        await runner.cancel({ pid }).catch(() => {});
+        // A1 A 类：取消按 best-effort 投递，终态由 .exit/.pid 对账收敛，不因 cancel 失败卡死轮询。
+        await runner.cancel({ pid }).catch(() => { /* A1 A 类：best-effort 取消，终态由 .exit 对账 */ });
       }
       let status;
       try {
@@ -876,7 +883,7 @@ function createToolsExecutor({
         unknownCount = 0;
         try {
           await db.prepare("UPDATE tool_jobs SET heartbeat_at=? WHERE id=? AND status='running'").run(Date.now(), jobId);
-        } catch {}
+        } catch { /* A1 A 类：心跳更新失败不影响本轮状态轮询，活性窗口会自行收敛 */ }
         owner.lastHeartbeatAt = Date.now();
         continue;
       }
@@ -1056,14 +1063,22 @@ function createToolsExecutor({
         try {
           const log = `=== STDOUT ===\n${stdout || ''}\n\n=== STDERR ===\n${stderr || ''}\n\n=== EXIT ===\n${err ? 'ERROR: ' + err.message : 'OK'}\nTimestamp: ${new Date().toISOString()}\n`;
           fs.writeFileSync(path.join(outputDir, 'run.log'), log);
-        } catch {}
+        } catch (error) {
+          // A1 B 类：run.log 是用户可追溯的运行产物，写失败必须留痕；
+          // 保持 fail-soft 不阻断作业终态收敛（错误走既有 error-log + reasonCode）。
+          logError('a1.tools.run_log_write_failed', error, {
+            reasonCode: 'A1_TOOL_RUN_LOG_WRITE_FAILED',
+            jobId,
+            toolId,
+          });
+        }
 
         let currentJob = null;
         try {
           currentJob = await db
             .prepare('SELECT status, is_test_run, result_json FROM tool_jobs WHERE id=?')
             .get(jobId);
-        } catch {}
+        } catch { /* A1 A 类：作业行读取失败按 null 处理，取消/失败收敛照常按 owner 状态推进 */ }
         const finalizeCancellation = async (recorded = null) => {
           try {
             const finalOutput = await directoryBytes(outputDir);
@@ -1073,7 +1088,8 @@ function createToolsExecutor({
           }
           let cancellationProvenance = recorded;
           if (!cancellationProvenance) {
-            try { cancellationProvenance = buildProvenance(); } catch {}
+            // A1 A 类：取消 provenance 是加分项，构造失败按无 provenance 收敛，不阻断取消落定。
+            try { cancellationProvenance = buildProvenance(); } catch { /* provenance 降级可容忍 */ }
           }
           const cancelledResult = buildCancelledToolResult({
             existingResult: parseStoredToolResult(currentJob),
@@ -1113,7 +1129,7 @@ function createToolsExecutor({
           try {
             retryCount =
               (await db.prepare('SELECT retry_count FROM tool_jobs WHERE id=?').get(jobId))?.retry_count ?? 0;
-          } catch {}
+          } catch { /* A1 A 类：重试计数读失败按 0（不重试）保守收敛，不阻断既有失败路径 */ }
           // BLOCK-135：分析级重试——默认关闭（PETRI_TOOL_RETRY_MAX>0 才启用），加法式接入。
           // 取消与 executor setup 失败不接（确定性路径语义不变）；仅「外部 SIGKILL 且非取消
           // 请求」判瞬态（系统 OOM/资源挤占）。分类判定见 helpers/tool-retry-policy.js。
@@ -1210,7 +1226,7 @@ function createToolsExecutor({
                   : item
               )
             : [];
-        } catch {}
+        } catch { /* A1 A 类：插件定义读取失败按无预期产物降级，实际产物仍按目录真相收敛 */ }
         const produced = resolveProducedResultDirectory({ jobDir, outputDir, expectedArtifacts });
         const resultDir = produced.resultDir;
         const manifestPath = produced.manifestPath;
@@ -1238,7 +1254,16 @@ function createToolsExecutor({
           try {
             const manifest = decodeRDeparseManifest(JSON.parse(fs.readFileSync(manifestPath, 'utf-8'))); // BLOCK-133：R deparse <U+XXXX> 解码
             result = { ...manifest, manifest };
-          } catch {}
+          } catch (error) {
+            // A1 B 类：manifest 解析失败会让作业结果静默变空，用户无从判断——
+            // 保持既有降级行为（result={}）不破坏 truth 链，但必须留痕可追。
+            logError('a1.tools.manifest_parse_failed', error, {
+              reasonCode: 'A1_TOOL_RESULT_MANIFEST_PARSE_FAILED',
+              jobId,
+              toolId,
+              manifestPath,
+            });
+          }
         } else {
           const files = fs.existsSync(resultDir) ? fs.readdirSync(resultDir) : [];
           result.files = files.map((f) => ({
@@ -1926,7 +1951,7 @@ function createToolsExecutor({
     if (!uploadResult.ok) {
       try {
         fs.rmSync(jobDir, { recursive: true, force: true });
-      } catch {}
+      } catch { /* A1 A 类：校验失败已返回明确错误，临时目录清理失败不覆盖原错误 */ }
       return res.status(400).json({ ok: false, error: uploadResult.error });
     }
 
@@ -1936,7 +1961,7 @@ function createToolsExecutor({
     if (validationError) {
       try {
         fs.rmSync(jobDir, { recursive: true, force: true });
-      } catch {}
+      } catch { /* A1 A 类：校验失败已返回明确错误，临时目录清理失败不覆盖原错误 */ }
       return res.status(400).json({ ok: false, error: validationError });
     }
 
@@ -1948,7 +1973,7 @@ function createToolsExecutor({
     if (domain.findings.length > 0) {
       try {
         fs.rmSync(jobDir, { recursive: true, force: true });
-      } catch {}
+      } catch { /* A1 A 类：域校验失败已带 findings 返回，临时目录清理失败不覆盖原错误 */ }
       return res.status(400).json({
         ok: false,
         error: 'domain_validation_failed',

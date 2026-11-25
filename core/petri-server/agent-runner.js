@@ -1,4 +1,6 @@
 'use strict';
+// A1 静默吞错分级治理：用户可见失败走既有 error-log（BLOCK-520 OB-004 单源），零新依赖。
+const { logError } = require('./helpers/error-log');
 const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('./helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 /**
@@ -353,7 +355,15 @@ async function runAgentLoop({
   // ---------- Event emitter: onEvent + task_events persistence ----------
   let _seq = 0;
   const _emit = (obj) => {
-    try { onEvent && onEvent(obj); } catch {}
+    try { onEvent && onEvent(obj); } catch (error) {
+      // A1 B 类：消费端回调抛错会静默丢掉用户可见的事件流（进度/工具/终态），
+      // 留痕但保持 loop 不中断（fail-soft 语义不变）。
+      logError('a1.agent.event_emit_failed', error, {
+        reasonCode: 'A1_AGENT_EVENT_EMIT_FAILED',
+        eventType: (obj && obj.event) || 'delta',
+        taskId,
+      });
+    }
     const eventType = (obj && obj.event) || 'delta';
     try {
       _seq += 1;
@@ -450,7 +460,7 @@ async function runAgentLoop({
   try {
     const pluginBlock = renderContentPluginsForPrompt(1200);
     if (pluginBlock) systemPrompt += pluginBlock;
-  } catch {}
+  } catch { /* A1 A 类：内容插件教程目录注入是 prompt 增强项，读取失败按空目录照常跑 */ }
 
   // BLOCK-157 W1 P2（KNW-2）— 技能索引常驻注入（渐进披露：描述常驻有界、正文经 skill_get 触发加载；
   // 空清单零注入；装载失败 fail-soft 不破轮）
@@ -745,11 +755,13 @@ async function runAgentLoop({
         if (route.route) {
           effectiveTools = narrowToolDefsByFamily(tools, route.family, DOMAIN_TOOL_DEFS);
           // 观测事件（BLOCK-113）：走单一事件通道落 task_events；前端未知事件天然 no-op。
-          try { _emit({ event: 'tool_route', family: route.family, confidence: route.confidence, defs: `${effectiveTools.length}/${tools.length}` }); } catch {}
-          try { console.log(`[block113] tool route adopted: family=${route.family} confidence=${route.confidence} defs=${effectiveTools.length}/${tools.length}`); } catch {}
+          // A1 A 类：路由观测事件/日志失败不影响已选定的工具集（_emit 自身亦 fail-soft）。
+          try { _emit({ event: 'tool_route', family: route.family, confidence: route.confidence, defs: `${effectiveTools.length}/${tools.length}` }); } catch { /* 观测失败不阻断路由 */ }
+          try { console.log(`[block113] tool route adopted: family=${route.family} confidence=${route.confidence} defs=${effectiveTools.length}/${tools.length}`); } catch { /* 日志自身失败不阻断 */ }
         }
       } catch (e) {
-        try { console.warn('[block113] tool route failed, falling back to full defs:', e && e.message); } catch {}
+        // A1 A 类：兜底日志自身失败不改变「回落到完整工具集」的既有降级行为。
+        try { console.warn('[block113] tool route failed, falling back to full defs:', e && e.message); } catch { /* warn 自身失败可忽略 */ }
       }
     }
   }
@@ -759,7 +771,8 @@ async function runAgentLoop({
   try {
     effectiveTools = require('./helpers/runtime-policy').filterToolDefs(effectiveTools);
   } catch (e) {
-    try { console.warn('[block202] tool deny filter skipped:', e && e.message); } catch {}
+    // A1 A 类：deny 过滤器异常已走回落（完整工具集），warn 自身失败无需再上报。
+    try { console.warn('[block202] tool deny filter skipped:', e && e.message); } catch { /* warn 自身失败可忽略 */ }
   }
 
   // Build tool context
@@ -863,7 +876,8 @@ async function runAgentLoop({
       if (deliveredRefs.length > 0) {
         _emit({ event: 'parent_message_delivered', refs: deliveredRefs, at: new Date().toISOString() });
       }
-      try { console.log('[block98-steer] injected', pendingInputs.length, 'queued user message(s)'); } catch {}
+      // A1 A 类：注入日志失败不影响已注入的排队消息进入本轮模型调用。
+      try { console.log('[block98-steer] injected', pendingInputs.length, 'queued user message(s)'); } catch { /* 日志自身失败可忽略 */ }
     }
     try {
       return await callOnce(projected);
@@ -879,7 +893,8 @@ async function runAgentLoop({
         agentResilience.recordRetryUsage({
           userId, conversationId: convId, modelName, attempt: 1, contextExceeded: true, error: err,
         });
-        try { console.log('[block98-reactive] context-exceeded → 原地裁剪重试, run 使用次数=', resilienceState.reactiveUses); } catch {}
+        // A1 A 类：重试观测日志失败不改变原地裁剪重试的既有决策路径。
+        try { console.log('[block98-reactive] context-exceeded → 原地裁剪重试, run 使用次数=', resilienceState.reactiveUses); } catch { /* 日志自身失败可忽略 */ }
         const trimmed = agentResilience.reactiveTrim(Array.isArray(projected.messages) ? projected.messages : [], { contextWindow: safeCtx });
         if (trimmed) {
           return callOnce({ ...projected, messages: trimmed.messages });
@@ -1031,7 +1046,7 @@ async function runAgentLoop({
         assistantAcc: assistantText,
         projectId: context && context.projectId,
       });
-    } catch {}
+    } catch { /* A1 A 类：后台事实抽取/会话摘要 fire-and-forget，失败不阻塞终态落库 */ }
   }
 
   // ---------- Terminal task resolution ----------
@@ -1042,7 +1057,7 @@ async function runAgentLoop({
   try {
     const { collectFilesChangedForTask } = require('./agent-files-changed');
     taskFilesChanged = collectFilesChangedForTask(agentTaskStore, taskId).files;
-  } catch {}
+  } catch { /* A1 A 类：filesChanged 聚合失败按空清单落终态，前端已有兜底 */ }
   try {
     const terminal = resolveAgentTaskTerminal({
       cancelled: cancellationObserved || (typeof shouldAbort === 'function' ? shouldAbort() : false),
@@ -1070,7 +1085,7 @@ async function runAgentLoop({
           _activeConv,
           emit: (evt) => _emit(evt),
         });
-      } catch {}
+      } catch { /* A1 A 类：任务级降级续跑是可选增强，判定/启动失败保持诚实失败终态 */ }
     }
     // BLOCK-109-CORE-ARCH P1（附录 A E1 裁决）— 终态生命周期事件（completed/failed/cancelled
     // + reason），与 run_started 配对成运行边界；先落库再扇出，与其余事件同通道。
@@ -1134,12 +1149,12 @@ async function runAgentLoop({
     // 恒等；详见 agent-task-store.coalesceTaskDeltas 头注）。合并失败不阻塞终态。
     try {
       agentTaskStore.coalesceTaskDeltas(taskId);
-    } catch {}
-  } catch {}
+    } catch { /* A1 A 类：终态 delta 合并失败不阻塞已落定的终态 */ }
+  } catch { /* A1 A 类：终态对账/投递增强失败不影响主终态与并发释放 */ }
 
   try {
     aiTaskConcurrencyRelease(userId, taskId);
-  } catch {}
+  } catch { /* A1 A 类：并发槽释放失败由 TTL 兜底回收，不覆盖本轮返回值 */ }
 
   return { assistantText };
 }
