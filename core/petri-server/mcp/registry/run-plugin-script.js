@@ -5,6 +5,7 @@
 // 经接缝参数传入（调用点同步穿参），函数体逐字未动。
 
 const { execFile } = require('child_process');
+const logger = require('../../../shared-backend/logger');
 const { publishJobTerminalState } = require('../../helpers/job-events');
 const { ARTIFACT_SCHEMA_VERSION } = require('../../../shared-backend/schema-versions');
 const { decodeRDeparseManifest } = require('../../../shared-backend/r-deparse-decode');
@@ -72,14 +73,14 @@ async function _runPluginScript(
       const ensureResult = await ensureBundlesForPlugin(plugin);
       if (ensureResult && !ensureResult.ok) {
         requiredBundleFailureText = formatRequiredBundleFailure(plugin.id, ensureResult);
-        console.warn(
+        logger.warn(
           `[mcp-registry] capability bundle(s) not ready for ${plugin.id}, failing the job:`,
           JSON.stringify(ensureResult.results)
         );
       }
     } catch (e) {
       requiredBundleFailureText = `执行失败: capability bundle 预检异常（${plugin.id}）: ${e.message}`;
-      console.warn(`[mcp-registry] ensureBundlesForPlugin failed for ${plugin.id}:`, e.message);
+      logger.warn(`[mcp-registry] ensureBundlesForPlugin failed for ${plugin.id}:`, e.message);
     }
   }
   return new Promise((resolve) => {
@@ -133,7 +134,7 @@ async function _runPluginScript(
         if (!job || !job.id) throw new Error('tool_job_create_failed');
         toolJobId = job && job.id;
       } catch (e) {
-        console.warn('[mcp-registry] prepare/create toolJob failed:', e.message);
+        logger.warn('[mcp-registry] prepare/create toolJob failed:', e.message);
         const failureLabel = existingToolJobId ? '身份校验失败' : '持久化校验失败';
         return resolve({
           content: [{ type: 'text', text: `执行失败: tool_job ${failureLabel}: ${e.message}` }],
@@ -178,7 +179,7 @@ async function _runPluginScript(
     } catch (e) {
       // 有 projectId 但解析失败（不存在/归档/无权限/不可写）→ 硬失败，不静默写全局。
       const errText = `执行失败: 项目结果目录解析失败: ${e.message}`;
-      console.warn('[mcp-registry] resolveProjectRunLayout failed:', e.message);
+      logger.warn('[mcp-registry] resolveProjectRunLayout failed:', e.message);
       if (db && toolJobId) {
         try {
           db.updateToolJob(toolJobId, {
@@ -438,7 +439,7 @@ async function _runPluginScript(
           publishJobTerminalState(toolJobId, 'failed');
           if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', errText);
         } catch (e) {
-          console.warn('[mcp-registry] updateToolJob(runtime failed) failed:', e.message);
+          logger.warn('[mcp-registry] updateToolJob(runtime failed) failed:', e.message);
         }
       }
       return resolve({
@@ -526,11 +527,11 @@ async function _runPluginScript(
                     publishJobTerminalState(toolJobId, 'cancelled');
                     if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'cancelled');
                 } catch (e) {
-                    console.warn('[mcp-registry] updateToolJob(cancelled) failed:', e.message);
+                    logger.warn('[mcp-registry] updateToolJob(cancelled) failed:', e.message);
                 }
             }
             notifyScheduler();
-            console.log('[mcp-registry] Job ' + toolJobId + ' cancellation confirmed by finalize (kill/durable race window)');
+            logger.info('[mcp-registry] Job ' + toolJobId + ' cancellation confirmed by finalize (kill/durable race window)');
             return resolve({
                 content: [{ type: 'text', text: JSON.stringify(cancelledResult) }],
                 isError: false,
@@ -550,7 +551,7 @@ async function _runPluginScript(
               const parsed = JSON.parse(fs.readFileSync(blockedManifestPath, 'utf8'));
               if (parsed && parsed.status === 'blocked') blockedManifest = parsed;
             } catch (manifestError) {
-              console.warn('[mcp-registry] blocked artifact manifest parse failed:', manifestError.message);
+              logger.warn('[mcp-registry] blocked artifact manifest parse failed:', manifestError.message);
             }
           }
           const failedProvenance = provenanceFor({
@@ -588,7 +589,7 @@ async function _runPluginScript(
               // 同步 plan step 状态（方案 C，agent-led Task 2）
               if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', errText);
             } catch (e) {
-              console.warn('[mcp-registry] updateToolJob(failed) failed:', e.message);
+              logger.warn('[mcp-registry] updateToolJob(failed) failed:', e.message);
             }
           }
           return resolve({
@@ -746,7 +747,7 @@ async function _runPluginScript(
               publishJobTerminalState(toolJobId, 'failed');
               if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', truthError);
             } catch (e) {
-              console.warn(
+              logger.warn(
                 '[mcp-registry] updateToolJob(artifact validation failed) failed:',
                 e.message
               );
@@ -771,7 +772,7 @@ async function _runPluginScript(
             // 同步 plan step 状态（方案 C，agent-led Task 2）
             if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'completed');
           } catch (e) {
-            console.warn('[mcp-registry] updateToolJob(completed) failed:', e.message);
+            logger.warn('[mcp-registry] updateToolJob(completed) failed:', e.message);
           }
         }
         resolve({
@@ -805,7 +806,7 @@ async function _runPluginScript(
           }
           fs.writeFileSync(path.join(jobDir, 'params.json'), JSON.stringify(rewritten));
         } catch (e) {
-          console.warn('[mcp-registry] remote file-input rewrite failed:', e.message);
+          logger.warn('[mcp-registry] remote file-input rewrite failed:', e.message);
         }
         const remoteOutcome = await runPluginToolRemote({
           sessionExecutionTargetId,
@@ -832,7 +833,7 @@ async function _runPluginScript(
               publishJobTerminalState(toolJobId, 'completed');
               if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'completed');
             } catch (e) {
-              console.warn('[mcp-registry] direct summary persistence failed:', e.message);
+              logger.warn('[mcp-registry] direct summary persistence failed:', e.message);
             }
           }
           resolve({
@@ -854,7 +855,7 @@ async function _runPluginScript(
             fs.writeFileSync(provPath, JSON.stringify(prov, null, 2));
           }
           } catch (e) {
-            console.warn('[mcp-registry] executionTarget provenance merge failed:', e.message);
+            logger.warn('[mcp-registry] executionTarget provenance merge failed:', e.message);
           }
         }
         return undefined;

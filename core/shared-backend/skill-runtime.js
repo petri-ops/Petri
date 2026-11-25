@@ -21,6 +21,8 @@
  */
 
 const crypto = require('crypto');
+const util = require('util');
+const logger = require('./logger');
 
 // ---------------------------------------------------------------------------
 // Execution States
@@ -1084,15 +1086,16 @@ class SkillRuntime {
   }
 
   _log(level, ...args) {
-    const prefix = this._logPrefix;
+    // util.format 与原 console 调用的格式化口径一致，保证多参/对象日志内容零丢失
+    const message = util.format(this._logPrefix, ...args);
     if (level === 'error') {
-      console.error(prefix, ...args);
+      logger.error(message);
     } else if (level === 'warn') {
-      console.warn(prefix, ...args);
+      logger.warn(message);
     } else if (level === 'debug') {
-      console.debug(prefix, ...args);
+      logger.debug(message);
     } else {
-      console.log(prefix, ...args);
+      logger.info(message);
     }
   }
 }

@@ -26,6 +26,7 @@ const path = require('path');
 const { execFile } = require('child_process');
 
 const config = require('./config');
+const logger = require('../shared-backend/logger');
 const TEMP_DIR = config.tempDir || '/tmp/petri-tmp';
 const CACHE_DIR = path.join(TEMP_DIR, '_cache');
 
@@ -308,7 +309,7 @@ function withTimeout(fn, ms, fallbackValue) {
   } catch {
     clearTimeout(timer);
     if (timedOut) {
-      console.warn(`[CacheManager] getStats timed out after ${ms}ms — returning partial data`);
+      logger.warn(`[CacheManager] getStats timed out after ${ms}ms — returning partial data`);
     }
     return fallbackValue;
   }
@@ -323,7 +324,7 @@ function rmrf(p) {
     fs.rmSync(p, { recursive: true, force: true });
     return true;
   } catch (e) {
-    console.error(`[Cache] rm failed: ${p} - ${e.message}`);
+    logger.error(`[Cache] rm failed: ${p} - ${e.message}`);
     return false;
   }
 }
@@ -516,15 +517,15 @@ function startScheduler() {
     schedulerHandle = setTimeout(() => {
       try {
         const localReport = cleanup();
-        console.log(
+        logger.info(
           `[CacheManager] Local cleanup: freed ${localReport.bytesFreedHuman}, removed ${localReport.tempDeleted.length} temp dirs, ${localReport.cacheDeleted.length} cache files`
         );
       } catch (e) {
-        console.error('[CacheManager] Local cleanup error:', e);
+        logger.error('[CacheManager] Local cleanup error:', e);
       }
       scheduleNext();
     }, delay);
-    console.log(
+    logger.info(
       `[CacheManager] Next cleanup scheduled at ${next.toISOString()} (in ${Math.round(delay / 60000)} min)`
     );
   }

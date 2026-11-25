@@ -12,6 +12,7 @@ const express = require('express');
 const dbMod = require('../db');
 const notify = require('../notify-feishu');
 const ipGeo = require('../helpers/ip-geo');
+const logger = require('../../shared-backend/logger');
 // Keep request-path feedback operations on the async database adapter.
 const _dbSync = dbMod.getDatabase(); // for CREATE TABLE (runs once at startup)
 const dbAsync = dbMod.getAsyncDatabase();
@@ -111,7 +112,7 @@ module.exports = function registerFeedback(app) {
       ).run(userId, username, cat, trimmed, url, userAgent, ip, Date.now());
       feedbackId = insertResult && insertResult.rows && insertResult.rows[0] && insertResult.rows[0].id;
     } catch (e) {
-      console.error('[feedback] insert failed:', e.message);
+      logger.error('[feedback] insert failed:', e.message);
       return res.status(500).json({status: 'error', error: '提交失败，请稍后再试'});
     }
 
@@ -136,7 +137,7 @@ module.exports = function registerFeedback(app) {
         },
       });
     } catch (e) {
-      console.warn('[feedback] notify failed:', e.message);
+      logger.warn('[feedback] notify failed:', e.message);
     }
 
     res.json({status: 'ok', id: feedbackId});
@@ -157,14 +158,14 @@ module.exports = function registerFeedback(app) {
     try {
       rows = await dbAsync.prepare(sql).all(...args);
     } catch (e) {
-      console.error('[feedback/admin] list failed:', e.message);
+      logger.error('[feedback/admin] list failed:', e.message);
       return res.status(500).json({status: 'error', error: '查询失败'});
     }
     // Enrich each feedback with IP geolocation. Best-effort — ip-geo caches 7d.
     try {
       rows = await ipGeo.attachGeoToRows(rows, 'ip');
     } catch (e) {
-      console.warn('[feedback] geo enrich failed:', e.message);
+      logger.warn('[feedback] geo enrich failed:', e.message);
     }
     let counts = {};
     try {
@@ -173,7 +174,7 @@ module.exports = function registerFeedback(app) {
       ).all();
       counts = countRows.reduce((acc, r) => { acc[r.status] = r.n; return acc; }, {});
     } catch (e) {
-      console.warn('[feedback] counts query failed:', e.message);
+      logger.warn('[feedback] counts query failed:', e.message);
     }
     res.json({status: 'ok', items: rows, counts});
   });
@@ -205,7 +206,7 @@ module.exports = function registerFeedback(app) {
     try {
       r = await dbAsync.prepare(`UPDATE feedbacks SET ${fields.join(', ')} WHERE id = ?`).run(...args);
     } catch (e) {
-      console.error('[feedback/admin] update failed:', e.message);
+      logger.error('[feedback/admin] update failed:', e.message);
       return res.status(500).json({status: 'error', error: '更新失败'});
     }
     if (r.changes === 0) return res.status(404).json({status: 'error', error: 'not_found'});

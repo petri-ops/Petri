@@ -22,6 +22,7 @@
 const agentTaskStore = require('../../agent-task-store');
 // EVO-1 — Observe SSE 具名失败自观测（fail-soft；sseSend reasonCode 窄守卫，零外发）
 const { recordIncident } = require('../../helpers/incident-log');
+const logger = require('../../../shared-backend/logger');
 
 module.exports = {
     register(app) {
@@ -123,7 +124,7 @@ module.exports = {
         } catch (e) {
           // L3-2（L-14）：空吞改具名降级——查询失败时 failedPayload 显式标注，
           // 前端投影读不到 fallbackTaskId 即走人工续跑，不再静默缺字段。
-          console.warn(`[events] fallback lookup failed (task=${taskId}):`, e && e.message);
+          logger.warn(`[events] fallback lookup failed (task=${taskId}):`, e && e.message);
           return { lookupFailed: 'fallback_lookup_failed' };
         }
         return null;
@@ -155,7 +156,7 @@ module.exports = {
         // L3-2（L-14）：回放失败显式重置 lastSeq=afterSeq 并发结构化标注帧
         //（原空吞会让重连客户端以为回放成功、静默丢事件）。
         lastSeq = afterSeq;
-        console.warn(`[events] replay failed (task=${taskId}):`, e && e.message);
+        logger.warn(`[events] replay failed (task=${taskId}):`, e && e.message);
         sseSend({ event: 'error', reasonCode: 'event_replay_failed', retryable: true, lastSeqResetTo: afterSeq });
       }
 
@@ -164,7 +165,7 @@ module.exports = {
       try {
         freshTask = agentTaskStore.getAgentTask(taskId);
       } catch (e) {
-        console.warn(`[events] terminal read failed (task=${taskId}):`, e && e.message);
+        logger.warn(`[events] terminal read failed (task=${taskId}):`, e && e.message);
         sseSend({ event: 'error', reasonCode: 'sse_task_read_failed', retryable: true, message: e && e.message });
         finish(true);
         return;
@@ -211,7 +212,7 @@ module.exports = {
           consecutiveFails = 0;
         } catch (e) {
           consecutiveFails += 1;
-          console.warn(`[events] poll failed (task=${taskId}) ${consecutiveFails}/${POLL_MAX_CONSECUTIVE_FAILS}:`, e && e.message);
+          logger.warn(`[events] poll failed (task=${taskId}) ${consecutiveFails}/${POLL_MAX_CONSECUTIVE_FAILS}:`, e && e.message);
           if (consecutiveFails >= POLL_MAX_CONSECUTIVE_FAILS) {
             // L3-2（L-13）：连续 3 次失败熔断——结构化 error 帧 + 清理 + 关流
             //（原「下轮继续」在 DB 持续故障时每 500ms 无限静默重试）。
