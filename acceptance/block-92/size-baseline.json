@@ -549,9 +549,9 @@
       "path": "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 727,
-      "bytes": 34624,
-      "sha256": "3f3ef623137f57b0d76170a5766419d49b4258ea06e6bd5152befab5b1da7023"
+      "lines": 731,
+      "bytes": 35060,
+      "sha256": "def0075fb1874adfab9d3c4c11058d65a0f376e639ebd64e3f86cae2b748d444"
     },
     {
       "path": "core/shared-backend/result-studio-contracts.js",

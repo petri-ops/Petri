@@ -81,7 +81,7 @@
 | `git diff --check` | 见提交前实测 | 空白/冲突标记 |
 | `npm run quality:ts-syntax` | **PASS 4/4** | 本次新增，缺依赖下仍绿 |
 | `npm run quality:frontend-deps` | **本地 FAIL（缺依赖，符合 HK-01）** | owner dev 实例有完整 frontend 依赖则 PASS |
-| `npm run gate:code-size` | **FAIL，仅存量 WorkspaceFilePreview 2 条** | 非本笔回归，待主人裁决 |
+| `npm run gate:code-size` | **PASS（见 coordinator 补记）** | 7 集成文件重打 + WorkspaceFilePreview 存量按裁决重锚后转绿 |
 | `npm run quality:lint` / `quality:types` | **未本地全验** | 本 worktree 无 `frontend/node_modules`，lint 类型感知规则缺完整 program（本地产生大量 `no-unsafe-*` 噪音），tsc 报缺 `vitest`/`@testing-library/react` 等模块；按令不强装依赖、不借他方实例。CI（`npm --prefix frontend ci` 后跑两门）才是其真值环境。 |
 | `npm run quality:knip:check` | **本地 FAIL（环境阻塞）** | 缺 `frontend/node_modules` 导致 knip 把 285 处 frontend export 误报为新增死代码；输出**零命中**本笔新增文件，属既有环境假红，非本笔引入；有依赖的 CI 环境为真值。 |
 | `npx eslint scripts/quality-frontend-deps-gate.mjs test/b1-inline-var-syntax.test.mjs` | **PASS（exit 0）** | 两个改动 JS 文件定向 lint 零违规。 |
@@ -92,3 +92,11 @@
 - 观感零代签、无 UI/视觉改动；未翻 `qualificationEligible`；未扩 G1 范围。
 - 未碰 owner dev 实例 / 主工作区他方 WIP / 19 项未跟踪文件 / 兄弟 worktree；临时 symlink 与注入探针均已清除。
 - 提交留本地，**未 push**（由 coordinator fetch 核实后亲自执行）。
+
+## 第五部分：coordinator 补记 — WorkspaceFilePreview 存量重锚（2026-11-25）
+
+worker 交付后按兴奋 msg_602bf9f8ef61 / msg_32555ffe46d7 裁决补齐：该存量债来自提交 `f5ef94165`「fix(workspace): 3D html 预览放行 allow-scripts 保 opaque origin（HTML-SANDBOX-A）」，727→731（+4 行）是**有正当理由的安全修复**，但该笔未重打基线才留存量红。按裁决「带提交号留因重锚」处置：
+
+- `acceptance/block-92/size-baseline.json` 中 `frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx` 条目：lines 727→731、bytes 34624→35060、sha256 → `def0075fb1874adfab9d3c4c11058d65a0f376e639ebd64e3f86cae2b748d444`（当前文件真值）。
+- 仅改这一条，`total` 字段保持原值 86730（非 files 求和语义，不擅改）；其余 7 个集成文件重打不变。
+- 复验：`node scripts/code-size-ledger.mjs --check` → **PASS v2**（台账 74 文件，基线 86730，生效例外 16，预算 700），exit 0。gate:code-size 红消除。
