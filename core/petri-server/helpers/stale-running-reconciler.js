@@ -32,6 +32,7 @@ function reconcileStaleRunningToolJobs({
   now = Date.now,
   staleAfterMs = DEFAULT_STALE_AFTER_MS,
   startupGraceMs = DEFAULT_STARTUP_GRACE_MS,
+  onHeartbeatTimeout,
 } = {}) {
   if (!db) {
     // L3-5（蓝图 L-22）：db 缺席=「本轮无滞留」误判源——显式 degraded 让调用方可见。
@@ -57,6 +58,11 @@ function reconcileStaleRunningToolJobs({
     if (result && result.changes >= 1) {
       publishJobTerminalState(row.id, 'failed');
       reconciled.push(row.id);
+      // A5 C 先行：真收口时只读通知观测汇（默认 no-op；抛错必吞）。
+      // 不参与判定、不改 SQL、不改返回——DB 收口语义零漂移。
+      if (typeof onHeartbeatTimeout === 'function') {
+        try { onHeartbeatTimeout({ sessionKey: row.id, at: observedAt }); } catch { /* 观测失败不阻断对账 */ }
+      }
     }
   }
   if (reconciled.length > 0) notifyScheduler();
@@ -68,10 +74,11 @@ function scheduleStaleRunningReconciler({
   intervalMs = DEFAULT_INTERVAL_MS,
   setIntervalFn = setInterval,
   reconcile = reconcileStaleRunningToolJobs,
+  onHeartbeatTimeout,
 } = {}) {
   const timer = setIntervalFn(() => {
     try {
-      const { reconciled } = reconcile({ db });
+      const { reconciled } = reconcile({ db, onHeartbeatTimeout });
       if (reconciled.length > 0) {
         console.warn(`[stale-running-reconciler] ${reconciled.length} job(s) reconciled to failed:`, reconciled.join(','));
       }
