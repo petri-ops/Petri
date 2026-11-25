@@ -177,11 +177,11 @@ function AppShell(): React.ReactElement {
               type="button"
               aria-label="关闭导航"
               onClick={() => setLeftOpen(false)}
-              style={{ position: 'fixed', inset: 0, zIndex: 78, background: 'rgba(24,24,27,0.4)', border: 'none', cursor: 'default' }}
+              style={{ position: 'fixed', inset: 0, zIndex: var(--petri-z-overlay), background: 'rgba(24,24,27,0.4)', border: 'none', cursor: 'default' }}
             />
             <div
               style={{
-                position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 79,
+                position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: var(--petri-z-modal),
                 width: 'min(300px, 86vw)', overflowY: 'auto', height: '100%',
                 background: 'var(--petri-bg-surface)', boxShadow: 'var(--petri-shadow-menu)',
               }}

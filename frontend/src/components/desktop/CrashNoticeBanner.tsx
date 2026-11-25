@@ -87,7 +87,7 @@ export function CrashNoticeBanner(): React.ReactElement | null {
         top: 48,
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 9998,
+        zIndex: var(--petri-z-toast),
         display: 'flex',
         alignItems: 'center',
         flexWrap: 'wrap',

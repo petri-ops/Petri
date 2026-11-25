@@ -166,7 +166,7 @@
   top: 0; /* 顶栏已隐藏，面板从顶部开始 */
   left: 0;
   bottom: 0;
-  z-index: 9998;
+  z-index: var(--petri-z-base);
   background: var(--petri-bg-canvas);
   border-right: 1px solid var(--petri-divider);
   box-shadow: var(--petri-shadow-menu);
@@ -2131,7 +2131,7 @@
   height: 2px;
   background: var(--petri-teal);
   border-radius: 1px;
-  z-index: 1;
+  z-index: var(--petri-z-base);
 }
 
 [data-theme='dark'] .petri-desktop-dock__draggable.drag-over::before {
@@ -2149,7 +2149,7 @@
   bottom: 0;
   left: 0;
   width: 320px;
-  z-index: 9998;
+  z-index: var(--petri-z-base);
   background: var(--petri-bg-canvas, var(--petri-bg-canvas));
   border-right: 1px solid var(--petri-divider);
   box-shadow: var(--petri-shadow-menu);

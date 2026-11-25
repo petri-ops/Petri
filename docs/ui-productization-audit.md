@@ -11,6 +11,13 @@
 - **验证（代码）**：HK-01 `test/harness-b4b5-contract.test.mjs` 红 5 fail → 绿 6/6；`ui:audit:check`/`docs:check` 绿；零新依赖。frontend 的 vitest/vite 本机未安装，`theme-token-contract` 未能执行——新增规则仅用已定义 token，静态契约已断言禁裸色/禁动效。
 - **状态边界**：in_progress（静态契约绿，dev Electron 实机未跑）；不翻 verified、观感零代签、不碰 owner 实例、不外推 G1+。证据=`acceptance/harness-invisible-issues/A2-B4B5-EVIDENCE.md`。
 
+## UI-728: z-index 六档语义 token 替换（2026-11-25 **in_progress**；harness 隐形体验优化队列 3 B1；视觉层级，观感零代签）
+
+- **变化面**：`frontend/src` 全源 104 处裸 `z-index:N`（CSS 94 + TS/TSX 内联 10）迁移到既有 `--petri-z-*` 语义档位；新增 `--petri-z-chrome: 7000`（标题栏/列头专用，介于 modal 6000 与 lightbox 8000 之间），保留「顶栏压过普通弹窗」的既有行为，同时让 Toast(10000) 成为最高档。顶层通知（CrashNoticeBanner / ThemeProvider 同步失败条 / workspaceNotice）走 toast，登录与确认弹层走 modal，普通遮罩走 overlay。
+- **为什么这样设计**：2026-10-10 UX 审计抓真 Toast(9999) 被标题栏(10001) 与登录弹窗(10000) 压住；不另立并行 token 家族，复用主题系统既有档位（任务要求六档为子集，raised/chrome/lightbox 为按需扩展档），零新依赖，双主题无关，reduced-motion 兜底不改。
+- **验证（代码）**：HK-01 `test/harness-b1-zindex-contract.test.mjs` 红 6 测试中 4 失败 → 绿 6/6；`gate:ui-visual` 绿；theme-token-contract 裸 z 棘轮归零（本机缺 `frontend/node_modules`，vitest 未能执行，静态层级契约由 Node 侧 B1 与 BLOCK-413 复核）。
+- **状态边界**：in_progress（静态契约绿，dev Electron 实机未跑）；视觉层级观感项 `pending_human_eye` 一律不代签、不翻 verified，待主人过目；不碰 owner dev 实例、主线 WIP 零触碰、G0 开发期常态。证据=`acceptance/harness-invisible-issues/A3-B1-EVIDENCE.md`。
+
 ## UI-725: 背景水印可替换设置（2026-11-25 **in_progress**；独立 worktree `petri-ops/watermark-swap`）
 
 - **变化面**：设置页「外观」新增「背景水印」项（三态 无/内置水墨/自定义图片 + 本地图片导入/路径 + 浅底转透明 + 透明度 0–30%）；`GlobalWatermarkAI` 改为读偏好动态注入背景图，暗色反相沿用既有 CSS 规则。

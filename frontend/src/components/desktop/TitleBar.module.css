@@ -462,7 +462,7 @@
 .toolMenuOverlay {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: var(--petri-z-dropdown);
   border: none;
   background: transparent;
 }
@@ -472,7 +472,7 @@
   top: calc(100% + 5px);
   left: calc(100% + 6px);
   right: auto;
-  z-index: 10001;
+  z-index: var(--petri-z-dropdown);
   display: grid;
   width: 176px;
   /* UI-606 — 项数可到 18+（工具面全集），小屏高度溢出窗口底部会让菜单「看不见」
@@ -493,7 +493,7 @@
   position: absolute;
   top: calc(100% + 5px);
   right: 0;
-  z-index: 10001;
+  z-index: var(--petri-z-dropdown);
   display: flex;
   flex-direction: column;
   width: 360px;

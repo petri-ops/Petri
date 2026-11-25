@@ -4,7 +4,7 @@
 .header p { margin: var(--petri-space-1) 0 0; color: var(--petri-text-secondary); font-size: var(--petri-font-size-sm); }
 .actions { display: flex; gap: var(--petri-space-2); align-items: flex-start; flex-wrap: wrap; }
 .actions button, .status button, .surface > button { border: 1px solid var(--petri-border-card); border-radius: var(--petri-radius-md); background: var(--petri-surface); color: var(--petri-text-primary); padding: 5px 9px; cursor: pointer; }
-.menu { display: grid; gap: var(--petri-space-1); position: absolute; right: 0; z-index: 2; min-width: 150px; padding: var(--petri-space-3); background: var(--petri-surface); border: 1px solid var(--petri-border-card); border-radius: var(--petri-radius-md); box-shadow: var(--petri-shadow-sm); }
+.menu { display: grid; gap: var(--petri-space-1); position: absolute; right: 0; z-index: var(--petri-z-dropdown); min-width: 150px; padding: var(--petri-space-3); background: var(--petri-surface); border: 1px solid var(--petri-border-card); border-radius: var(--petri-radius-md); box-shadow: var(--petri-shadow-sm); }
 .actions details { position: relative; }
 .actions summary { list-style: none; border: 1px solid var(--petri-border-card); border-radius: var(--petri-radius-md); padding: 5px 9px; cursor: pointer; }
 .status { display: flex; gap: var(--petri-space-3); align-items: center; color: var(--petri-text-secondary); font-size: var(--petri-font-size-sm); }

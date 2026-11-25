@@ -508,7 +508,7 @@ export function CommandCenterJobsWall({
                 checked={checked}
                 onChange={() => toggleSelect(job.id)}
                 onClick={(e) => e.stopPropagation()}
-                style={{ position: 'absolute', top: 6, right: 6, zIndex: 2 }}
+                style={{ position: 'absolute', top: 6, right: 6, zIndex: var(--petri-z-base) }}
                 data-testid="cc-tile-select"
               />
               <button

@@ -1,0 +1,129 @@
+✖ B1-1 九档语义 token 定义完整且严格递增（chrome 档为标题栏专用） (1.323959ms)
+✖ B1-2 Toast > 标题栏与弹窗；弹窗 > 普通遮罩（语义倒挂修复） (0.183792ms)
+✖ B1-3 全源零裸 z-index（CSS 94 + 内联 10 全量 token 化） (38.860541ms)
+✖ B1-4 双主题与 reduced-motion 兜底不被破坏 (0.352708ms)
+✔ B1-5 零新依赖（package.json 依赖清单与 HEAD 逐键一致） (15.147166ms)
+✔ B1-6 计数器合成红自证（新增裸值即红、token 形态不误伤） (0.079541ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 2
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 170.812334
+
+✖ failing tests:
+
+test at test/harness-b1-zindex-contract.test.mjs:52:1
+✖ B1-1 九档语义 token 定义完整且严格递增（chrome 档为标题栏专用） (1.323959ms)
+  AssertionError [ERR_ASSERTION]: --petri-z-chrome 未定义
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/timingila/test/harness-b1-zindex-contract.test.mjs:55:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: null,
+    operator: 'notStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/harness-b1-zindex-contract.test.mjs:63:1
+✖ B1-2 Toast > 标题栏与弹窗；弹窗 > 普通遮罩（语义倒挂修复） (0.183792ms)
+  AssertionError [ERR_ASSERTION]: 标题栏(null) 须高于普通弹窗(6000)，保持顶栏常驻可见
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/timingila/test/harness-b1-zindex-contract.test.mjs:71:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/harness-b1-zindex-contract.test.mjs:84:1
+✖ B1-3 全源零裸 z-index（CSS 94 + 内联 10 全量 token 化） (38.860541ms)
+  AssertionError [ERR_ASSERTION]: 仍有裸 z-index：App.tsx:2, components/annotations/AnnotationBar.module.css:1, components/annotations/AnnotationOverlay.module.css:2, components/copilot/ChatArtifactCard.tsx:1, components/copilot/ChatScrollbar.module.css:1, components/copilot/ContextBudgetBar.tsx:1, components/copilot/MessageRail.module.css:2, components/copilot/SimpleChat/PromptEnhanceDialog.module.css:1, components/copilot/SimpleChat/ScheduleDialog.module.css:1, components/copilot/ToolActivityDock.module.css:1, components/copilot/simple-chat.css:17, components/desktop/CrashNoticeBanner.tsx:1, components/desktop/InstallDeepLinkDialog.tsx:1, components/desktop/PluginStorePanel.tsx:1, components/desktop/TitleBar.module.css:3, components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css:1, components/desktop/WorkingTreeReview/ReviewMode.css:5, components/desktop/desktop.css:3, components/desktop/theme-control.css:1, components/desktop/titlebar/ColumnizedTitleBar.module.css:1, components/desktop/titlebar/TitleBarRightZone.tsx:1, components/knowledge/KnowledgeConsoleDock.module.css:2, components/result-studio/CompactResultNavigator.module.css:2, components/result-studio/ContinueAnalysisMenu.module.css:1, components/result-studio/RevisionCodeView.module.css:1, components/shell/QuitSummaryDialog.module.css:1, components/svg-editor/SvgEditorViewer.module.css:16, components/ui/Lightbox.css:1, components/workspace-panels/FloatCardResizer.module.css:1, pages/project-workspace.module.css:26, pages/welcome.module.css:2, pages/window/CommandCenterJobsWall.tsx:1, pages/window/SideChatWindowPage.module.css:1, themes/ThemeProvider.tsx:1
+  + actual - expected
+  
+  + [
+  +   'App.tsx:2',
+  +   'components/annotations/AnnotationBar.module.css:1',
+  +   'components/annotations/AnnotationOverlay.module.css:2',
+  +   'components/copilot/ChatArtifactCard.tsx:1',
+  +   'components/copilot/ChatScrollbar.module.css:1',
+  +   'components/copilot/ContextBudgetBar.tsx:1',
+  +   'components/copilot/MessageRail.module.css:2',
+  +   'components/copilot/SimpleChat/PromptEnhanceDialog.module.css:1',
+  +   'components/copilot/SimpleChat/ScheduleDialog.module.css:1',
+  +   'components/copilot/ToolActivityDock.module.css:1',
+  +   'components/copilot/simple-chat.css:17',
+  +   'components/desktop/CrashNoticeBanner.tsx:1',
+  +   'components/desktop/InstallDeepLinkDialog.tsx:1',
+  +   'components/desktop/PluginStorePanel.tsx:1',
+  +   'components/desktop/TitleBar.module.css:3',
+  +   'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css:1',
+  +   'components/desktop/WorkingTreeReview/ReviewMode.css:5',
+  +   'components/desktop/desktop.css:3',
+  +   'components/desktop/theme-control.css:1',
+  +   'components/desktop/titlebar/ColumnizedTitleBar.module.css:1',
+  +   'components/desktop/titlebar/TitleBarRightZone.tsx:1',
+  +   'components/knowledge/KnowledgeConsoleDock.module.css:2',
+  +   'components/result-studio/CompactResultNavigator.module.css:2',
+  +   'components/result-studio/ContinueAnalysisMenu.module.css:1',
+  +   'components/result-studio/RevisionCodeView.module.css:1',
+  +   'components/shell/QuitSummaryDialog.module.css:1',
+  +   'components/svg-editor/SvgEditorViewer.module.css:16',
+  +   'components/ui/Lightbox.css:1',
+  +   'components/workspace-panels/FloatCardResizer.module.css:1',
+  +   'pages/project-workspace.module.css:26',
+  +   'pages/welcome.module.css:2',
+  +   'pages/window/CommandCenterJobsWall.tsx:1',
+  +   'pages/window/SideChatWindowPage.module.css:1',
+  +   'themes/ThemeProvider.tsx:1'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/timingila/test/harness-b1-zindex-contract.test.mjs:94:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'App.tsx:2', 'components/annotations/AnnotationBar.module.css:1', 'components/annotations/AnnotationOverlay.module.css:2', 'components/copilot/ChatArtifactCard.tsx:1', 'components/copilot/ChatScrollbar.module.css:1', 'components/copilot/ContextBudgetBar.tsx:1', 'components/copilot/MessageRail.module.css:2', 'components/copilot/SimpleChat/PromptEnhanceDialog.module.css:1', 'components/copilot/SimpleChat/ScheduleDialog.module.css:1', 'components/copilot/ToolActivityDock.module.css:1', 'components/copilot/simple-chat.css:17', 'components/desktop/CrashNoticeBanner.tsx:1', 'components/desktop/InstallDeepLinkDialog.tsx:1', 'components/desktop/PluginStorePanel.tsx:1', 'components/desktop/TitleBar.module.css:3', 'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css:1', 'components/desktop/WorkingTreeReview/ReviewMode.css:5', 'components/desktop/desktop.css:3', 'components/desktop/theme-control.css:1', 'components/desktop/titlebar/ColumnizedTitleBar.module.css:1', 'components/desktop/titlebar/TitleBarRightZone.tsx:1', 'components/knowledge/KnowledgeConsoleDock.module.css:2', 'components/result-studio/CompactResultNavigator.module.css:2', 'components/result-studio/ContinueAnalysisMenu.module.css:1', 'components/result-studio/RevisionCodeView.module.css:1', 'components/shell/QuitSummaryDialog.module.css:1', 'components/svg-editor/SvgEditorViewer.module.css:16', 'components/ui/Lightbox.css:1', 'components/workspace-panels/FloatCardResizer.module.css:1', 'pages/project-workspace.module.css:26', 'pages/welcome.module.css:2', 'pages/window/CommandCenterJobsWall.tsx:1', 'pages/window/SideChatWindowPage.module.css:1', 'themes/ThemeProvider.tsx:1' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/harness-b1-zindex-contract.test.mjs:98:1
+✖ B1-4 双主题与 reduced-motion 兜底不被破坏 (0.352708ms)
+  AssertionError [ERR_ASSERTION]: z token 定义应恰好 9 处（仅 :root）
+  
+  8 !== 9
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/timingila/test/harness-b1-zindex-contract.test.mjs:103:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 8,
+    expected: 9,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

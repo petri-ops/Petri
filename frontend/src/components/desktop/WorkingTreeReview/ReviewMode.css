@@ -94,7 +94,7 @@
 /* UI-250 — 文件行悬停浮动预览：只读 diff/内容 + 状态统计头（fixed 定位，不拦截点击） */
 .rvw-hover-preview {
   position: fixed;
-  z-index: 80;
+  z-index: var(--petri-z-dropdown);
   width: 420px;
   max-width: calc(100vw - 16px);
   max-height: 60vh;
@@ -338,7 +338,7 @@
   color: var(--petri-text-muted);
   flex-shrink: 0;
   position: relative;
-  z-index: 1;
+  z-index: var(--petri-z-base);
 }
 
 /* BLOCK-29.6 UI-243 — 文件头行内「编辑」按钮（accent-ghost，接管原 wt-edit-btn 语义） */
@@ -404,7 +404,7 @@
   right: 2px;
   bottom: 0;
   width: 10px;
-  z-index: 5;
+  z-index: var(--petri-z-base);
   pointer-events: none;
 }
 
@@ -865,14 +865,14 @@
 .rvw-menu-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: var(--petri-z-dropdown);
 }
 
 .rvw-overflow-menu {
   position: absolute;
   right: 0;
   top: 32px;
-  z-index: 91;
+  z-index: var(--petri-z-dropdown);
   min-width: 168px;
   padding: var(--petri-space-1);
   background: var(--petri-bg-elevated, var(--petri-bg-surface));

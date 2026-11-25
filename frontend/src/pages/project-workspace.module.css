@@ -37,7 +37,7 @@
   top: var(--petri-titlebar-height);
   left: 0;
   right: 0;
-  z-index: 60;
+  z-index: var(--petri-z-overlay);
 }
 
 /* Header bar — draggable (no-drag on children) */
@@ -397,7 +397,7 @@
 .switcherOverlay {
   position: fixed;
   inset: 0;
-  z-index: 998;
+  z-index: var(--petri-z-dropdown);
 }
 
 .switcherDropdown {
@@ -409,7 +409,7 @@
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);
   box-shadow: var(--petri-shadow-menu);
-  z-index: 999;
+  z-index: var(--petri-z-dropdown);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1426,7 +1426,7 @@
   left: 0;
   width: 4px;
   height: 100%;
-  z-index: 10;
+  z-index: var(--petri-z-base);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1440,7 +1440,7 @@
   right: 0;
   width: 4px;
   height: 100%;
-  z-index: 10;
+  z-index: var(--petri-z-base);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1454,7 +1454,7 @@
   left: 0;
   width: 100%;
   height: 4px;
-  z-index: 10;
+  z-index: var(--petri-z-base);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1571,7 +1571,7 @@
      （用户实测「每次摘要图都有」）。贴齐后右侧让位给裁切区 → 灰带消失，
      只剩卡片自身 1px 边框；左/下阴影不受影响仍呈悬浮感。 */
   right: 0;
-  z-index: 40;
+  z-index: var(--petri-z-raised);
   max-height: calc(100% - 16px);
   /* UI-448 加映 v25 — 帽放宽到把手钳制上限（原 312 是摘要默认宽的电气帽；
      拖宽偏好可达 720，钳制逻辑在 FloatCardResizer，此处只兜底不越视口） */
@@ -2886,7 +2886,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   .panelBackdrop {
     position: absolute;
     inset: 0;
-    z-index: 40;
+    z-index: var(--petri-z-overlay);
     display: block;
     border: none;
     padding: 0;
@@ -2899,7 +2899,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
     position: absolute;
     top: 0;
     bottom: 0;
-    z-index: 41;
+    z-index: var(--petri-z-modal);
     max-width: calc(100vw - 56px);
     box-shadow: var(--petri-shadow-float);
   }
@@ -3270,7 +3270,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   position: absolute;
   right: 0;
   bottom: 6px;
-  z-index: 55;
+  z-index: var(--petri-z-sticky);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -3301,7 +3301,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 .embeddedTerminalResize {
   position: absolute;
   inset: 0 0 auto;
-  z-index: 3;
+  z-index: var(--petri-z-base);
   height: 7px;
   cursor: ns-resize;
 }
@@ -3626,7 +3626,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 
 .browserPanel {
   position: relative;
-  z-index: 0;
+  z-index: var(--petri-z-base);
   width: 100%;
   height: 100%;
   flex: 1 1 auto;
@@ -3887,7 +3887,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 .browserError {
   position: absolute;
   inset: 52px 12px 12px;
-  z-index: 2;
+  z-index: var(--petri-z-base);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3926,17 +3926,14 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   cursor: ew-resize;
   background: transparent;
   position: relative;
-  /* BLOCK-62 加映 — 接缝高亮须全高连续：列内 ColumnHeader(9999) 的不透明背景
-     会盖掉本元素悬停高亮横跨列边界的第二像素（::after hover 2px），呈现为
-     「header 带细、栏体带粗」的上下断层；提到 10000 让命中带与高亮线在 header
-     带同样连续（compact 断点内本元素 display:none，不参与 backdrop/absolute 列竞争）。 */
-  z-index: 10000;
+  /* BLOCK-62 — 接缝高亮须全高连续：命中带走 lightbox 档压过列头 chrome，
+     否则不透明列头会截掉 ::after 第二像素造成「header 带细、栏体带粗」。 */
+  z-index: var(--petri-z-lightbox);
   transition: background var(--petri-duration-fast) ease;
 }
 
-/* UI-668 — 全窗模态层（根节点 data-petri-layer="modal"）盖住各列时接缝让位：上面的 10000
-   只为压过列标题带；不让位就会穿过模态显示竖线，并截走模态内 9px 宽的点击/拖动
-   （实机抓真：在编辑器画布中间按下，拖动的是背后被盖住的列）。 */
+/* UI-668 — 模态层盖住各列时接缝让位（visibility:hidden），否则竖线穿模
+   并截走模态内 9px 的点击/拖动（实机抓真）。 */
 body:has([data-petri-layer='modal']) .resizeHandleV {
   visibility: hidden;
 }
@@ -3990,7 +3987,7 @@ body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.25);
-  z-index: 998;
+  z-index: var(--petri-z-overlay);
   animation: fadeIn 0.2s ease;
 }
 
@@ -4003,7 +4000,7 @@ body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   background: var(--petri-bg-surface);
   border-left: 1px solid var(--petri-divider);
   box-shadow: var(--petri-shadow-menu);
-  z-index: 999;
+  z-index: var(--petri-z-modal);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -5823,7 +5820,7 @@ body:global(.petri-resizing-columns) * {
 .fileTreeMenuLayer {
   position: fixed;
   inset: 0;
-  z-index: 320;
+  z-index: var(--petri-z-dropdown);
 }
 
 .fileTreeMenu {
@@ -5865,7 +5862,7 @@ body:global(.petri-resizing-columns) * {
 .fileTreeDialogBackdrop {
   position: fixed;
   inset: 0;
-  z-index: 340;
+  z-index: var(--petri-z-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6130,7 +6127,7 @@ body:global(.petri-resizing-columns) * {
 
 .workspaceTreeToggle {
   position: relative;
-  z-index: 12;
+  z-index: var(--petri-z-base);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -6601,7 +6598,7 @@ body:global(.petri-resizing-columns) * {
   position: absolute;
   top: 10px;
   right: 14px;
-  z-index: 6;
+  z-index: var(--petri-z-base);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -6627,7 +6624,7 @@ body:global(.petri-resizing-columns) * {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 5;
+  z-index: var(--petri-z-base);
   /* 右侧 48px 让位右上角 mdViewToggle 悬浮钮（目录开关已按用户裁决移回左上角） */
   padding: var(--petri-space-2) var(--petri-space-8) var(--petri-space-2) var(--petri-space-4);
   background: color-mix(in srgb, var(--petri-danger) 9%, transparent);
@@ -7095,7 +7092,7 @@ body:global(.petri-resizing-columns) * {
   position: fixed;
   top: calc(var(--petri-titlebar-height) + 8px);
   left: 50%;
-  z-index: 9000;
+  z-index: var(--petri-z-toast);
   max-width: min(460px, calc(100vw - 24px));
   padding: 7px 10px;
   border: 1px solid var(--petri-border-card);
@@ -7226,7 +7223,7 @@ body:global(.petri-resizing-columns) * {
 .sidebarMobileOverlay {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: var(--petri-z-dropdown);
   border: none;
   background: transparent;
 }
@@ -7235,7 +7232,7 @@ body:global(.petri-resizing-columns) * {
   position: fixed;
   left: 12px;
   bottom: 56px;
-  z-index: 10001;
+  z-index: var(--petri-z-modal);
   width: 320px;
   max-height: min(70vh, 560px);
   overflow: auto;
@@ -7319,7 +7316,7 @@ body:global(.petri-resizing-columns) * {
      正文顶部 46px 安全带保证钮带下无内容，不再复现早前左上角压 h1 首字的问题 */
   top: 10px;
   left: 10px;
-  z-index: 6;
+  z-index: var(--petri-z-base);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -7346,7 +7343,7 @@ body:global(.petri-resizing-columns) * {
   left: 10px;
   bottom: 14px;
   width: min(220px, 56%);
-  z-index: 5;
+  z-index: var(--petri-z-dropdown);
   overflow: auto;
   display: flex;
   flex-direction: column;

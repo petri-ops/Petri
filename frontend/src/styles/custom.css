@@ -194,6 +194,8 @@
   --petri-z-dropdown: 1000;
   --petri-z-overlay: 4000;
   --petri-z-modal: 6000;
+  /* chrome 档：高于模态、低于 lightbox/toast，杜绝通知被标题栏压住。 */
+  --petri-z-chrome: 7000;
   --petri-z-lightbox: 8000;
   --petri-z-toast: 10000;
 

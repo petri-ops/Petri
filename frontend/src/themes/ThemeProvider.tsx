@@ -394,7 +394,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     <ThemeContext.Provider value={value}>
       {prefsSync.state === 'failed' && (
         <div role="status" data-testid="prefs-sync-failed-banner"
-          style={{ position: 'fixed', right: 12, bottom: 12, zIndex: 1000, maxWidth: 320,
+          style={{ position: 'fixed', right: 12, bottom: 12, zIndex: var(--petri-z-toast), maxWidth: 320,
             padding: '8px 12px', borderRadius: 8, border: '1px solid var(--petri-border, #c33)',
             background: 'var(--petri-surface, #fff)', color: 'var(--petri-text, #222)', fontSize: 'var(--petri-font-size-sm, 12px)' }}>
           <strong>服务端同步失败（本端已生效）</strong>

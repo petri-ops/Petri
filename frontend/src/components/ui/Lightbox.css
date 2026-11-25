@@ -3,7 +3,7 @@
 .petri-lightbox {
   position: fixed;
   inset: 0;
-  z-index: 100000;
+  z-index: var(--petri-z-lightbox);
   background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;

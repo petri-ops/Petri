@@ -1,0 +1,14 @@
+✔ B1-1 九档语义 token 定义完整且严格递增（chrome 档为标题栏专用） (1.041167ms)
+✔ B1-2 Toast > 标题栏与弹窗；弹窗 > 普通遮罩（语义倒挂修复） (0.951083ms)
+✔ B1-3 全源零裸 z-index（CSS 94 + 内联 10 全量 token 化） (33.413041ms)
+✔ B1-4 双主题与 reduced-motion 兜底不被破坏 (0.339875ms)
+✔ B1-5 零新依赖（package.json 依赖清单与 HEAD 逐键一致） (12.884291ms)
+✔ B1-6 计数器合成红自证（新增裸值即红、token 形态不误伤） (0.078875ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 165.764958

@@ -118,14 +118,14 @@
 .sc-model-overlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: var(--petri-z-dropdown);
 }
 
 .sc-model-menu {
   position: absolute;
   bottom: calc(100% + 8px);
   right: 0;
-  z-index: 81;
+  z-index: var(--petri-z-dropdown);
   width: min(320px, calc(100vw - 32px));
   max-height: min(420px, calc(100vh - 168px));
   overflow-y: auto;
@@ -152,7 +152,7 @@
 }
 .sc-model-models-panel {
   position: fixed;
-  z-index: 82;
+  z-index: var(--petri-z-dropdown);
   max-height: min(420px, calc(100vh - 24px));
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -2072,7 +2072,7 @@
 
 .sc-composer {
   position: relative;
-  z-index: 2;
+  z-index: var(--petri-z-base);
   width: min(100%, var(--sc-composer-width));
   max-width: min(100%, 980px);
   border: 1px solid var(--petri-border-card);
@@ -2270,14 +2270,14 @@
 .sc-access-overlay {
   position: fixed;
   inset: 0;
-  z-index: 82;
+  z-index: var(--petri-z-dropdown);
 }
 
 .sc-access-menu {
   position: absolute;
   left: 0;
   bottom: calc(100% + 8px);
-  z-index: 83;
+  z-index: var(--petri-z-dropdown);
   width: 240px;
   padding: var(--petri-space-2);
   border: 1px solid var(--petri-border-card);
@@ -2489,7 +2489,7 @@
 .sc-queue-menu-overlay {
   position: fixed;
   inset: 0;
-  z-index: 95;
+  z-index: var(--petri-z-dropdown);
   border: none;
   padding: 0;
   background: transparent;
@@ -2500,7 +2500,7 @@
   position: absolute;
   right: 4px;
   bottom: calc(100% + 4px);
-  z-index: 96;
+  z-index: var(--petri-z-dropdown);
   display: flex;
   flex-direction: column;
   min-width: 172px;
@@ -2842,7 +2842,7 @@
   position: absolute;
   bottom: calc(100% + 8px);
   left: 0;
-  z-index: 90;
+  z-index: var(--petri-z-dropdown);
   width: 340px;
   padding: var(--petri-space-4) 14px;
   border: 1px solid var(--petri-border-card);
@@ -3314,7 +3314,7 @@
 .sc-scratch-viewer {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: var(--petri-z-base);
   display: flex;
   flex-direction: column;
   gap: var(--petri-space-2);
@@ -3350,7 +3350,7 @@
 /* BLOCK-246 C12 — 划词动作条（视口定位，调用方已算好 left/top 与贴边翻转） */
 .sc-selection-bar {
   position: fixed;
-  z-index: 120;
+  z-index: var(--petri-z-sticky);
   display: flex;
   align-items: center;
   gap: var(--petri-space-1);
@@ -3389,7 +3389,7 @@
 .cp-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: var(--petri-z-overlay);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -3979,8 +3979,8 @@
 .sc-preview-overlay {
   position: fixed;
   inset: 0;
-  /* UI-616 — 与 Lightbox 同口径：高于标题栏/列分隔（10001）的顶层预览遮罩。 */
-  z-index: 100000;
+  /* UI-616 — 与 Lightbox 同档：高于标题栏 chrome 的顶层预览遮罩。 */
+  z-index: var(--petri-z-lightbox);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4138,7 +4138,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 1;
+  z-index: var(--petri-z-base);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4246,7 +4246,7 @@
 /* UI-252 — 文件行悬停浮动预览：只读 diff（与审阅详情同源；fixed 定位不拦截点击） */
 .sc-changes-hover-preview {
   position: fixed;
-  z-index: 80;
+  z-index: var(--petri-z-dropdown);
   width: 420px;
   max-width: calc(100vw - 16px);
   max-height: 60vh;
@@ -4523,7 +4523,7 @@
   font-size: var(--petri-font-size-body);
   box-shadow: var(--petri-shadow-menu);
   cursor: pointer;
-  z-index: 6;
+  z-index: var(--petri-z-base);
 }
 
 .sc-jump-bottom:hover {
@@ -5397,7 +5397,7 @@
 .sc-full-access-overlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: var(--petri-z-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
