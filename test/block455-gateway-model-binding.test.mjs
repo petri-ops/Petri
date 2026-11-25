@@ -48,7 +48,7 @@ const baseProfile = {
   },
 };
 
-test('thinking 门跟实际 attempt 模型：覆写无 reasoning 的模型不发参', async () => {
+test('BLOCK-518 声明面退役：thinking 档跟实际模型但 reasoning 覆写归一时收窄，高档不发参', async () => {
   const { gateway, calls } = createGateway({
     model_profiles: [baseProfile],
     model_role_bindings: { chat: 'ep' },
@@ -59,16 +59,16 @@ test('thinking 门跟实际 attempt 模型：覆写无 reasoning 的模型不发
 
   await gateway.chat({ role: 'chat', modelOverride: 'reasoner-x', thinkingLevel: 'high', body: { messages: [] } });
   assert.equal(calls[1].body.model, 'reasoner-x');
-  assert.equal(calls[1].body.reasoning_effort, 'high');
+  assert.equal(calls[1].body.reasoning_effort, undefined, '模型名推断 reasoning 已退役，归一收窄后无声明位');
 });
 
-test('渠道无 reasoning 但模型覆写有 → 按模型发参（模型级优先双向）', async () => {
+test('BLOCK-518 — 渠道/模型旧 reasoning 声明均不发参（声明面退役，未声明不发参口径）', async () => {
   const { gateway, calls } = createGateway({
     model_profiles: [{ ...baseProfile, capabilities: ['chat', 'streaming', 'tools'] }],
     model_role_bindings: { chat: 'ep' },
   });
   await gateway.chat({ role: 'chat', modelOverride: 'reasoner-x', thinkingLevel: 'high', body: { messages: [] } });
-  assert.equal(calls[0].body.reasoning_effort, 'high');
+  assert.equal(calls[0].body.reasoning_effort, undefined);
 });
 
 test('vision 绑定 渠道::模型 对 → 请求用绑定模型', async () => {
@@ -81,13 +81,14 @@ test('vision 绑定 渠道::模型 对 → 请求用绑定模型', async () => {
   assert.equal(calls[0].body.model, 'vl-model');
 });
 
-test('vision 绑定模型无 vision 能力 → 诚实 mismatch（渠道有也不放行）', async () => {
-  const { gateway } = createGateway({
+test('BLOCK-518 槽位撤门：vision 绑定模型无 vision 声明也不 mismatch（请求仍用绑定模型）', async () => {
+  const { gateway, calls } = createGateway({
     model_profiles: [baseProfile],
     model_role_bindings: { vision: 'ep::plain-y' },
   });
   const result = await gateway.vision({ body: { messages: [] } });
-  assert.equal(result.error, 'model_capability_mismatch');
+  assert.equal(result.error, undefined);
+  assert.equal(calls[0].body.model, 'plain-y');
 });
 
 test('embed 绑定 渠道::模型 对 → embed 用绑定模型', async () => {

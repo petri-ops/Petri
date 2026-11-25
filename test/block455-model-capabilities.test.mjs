@@ -61,54 +61,52 @@ describe('BLOCK-455 resolveModelCapabilities 单源', () => {
   });
 });
 
-describe('BLOCK-455 inferModelCapabilities 名称启发式', () => {
-  it('视觉系模型名 → 含 vision 的聊天能力集', () => {
+describe('BLOCK-455 inferModelCapabilities 名称启发式（BLOCK-518 收窄后）', () => {
+  it('视觉系模型名 → 推断不再物化 vision 位（收窄=[tools]）', () => {
     for (const name of ['qwen-vl-max', 'gpt-4o', 'gpt-4o-mini', 'claude-sonnet-4-5', 'gemini-2.5-pro', 'qvq-max']) {
-      const caps = inferModelCapabilities(name);
-      assert.ok(caps.includes('vision'), `${name} 应推断 vision`);
-      assert.ok(caps.includes('chat'), `${name} 应保留 chat`);
+      assert.deepEqual(inferModelCapabilities(name), ['tools'], name);
     }
   });
 
-  it('思考系模型名 → 含 reasoning', () => {
+  it('思考系模型名 → 推断不再物化 reasoning 位（收窄=[tools]）', () => {
     for (const name of ['deepseek-reasoner', 'o3-mini', 'o1-preview', 'qwq-32b', 'kimi-k2-thinking', 'magistral-medium']) {
-      assert.ok(inferModelCapabilities(name).includes('reasoning'), `${name} 应推断 reasoning`);
+      assert.deepEqual(inferModelCapabilities(name), ['tools'], name);
     }
   });
 
-  it('向量系模型名 → 仅 embedding（不是聊天模型）', () => {
+  it('向量系模型名 → 仅 embedding（不是聊天模型；红线必留）', () => {
     for (const name of ['bge-m3', 'text-embedding-v3', 'text-embedding-3-small', 'gte-large']) {
       assert.deepEqual(inferModelCapabilities(name), ['embedding']);
     }
   });
 
-  it('普通聊天模型名 → 基础集，不滥猜', () => {
+  it('普通聊天模型名 → [tools]', () => {
     for (const name of ['deepseek-chat', 'llama-3-70b', 'qwen2.5-72b-instruct', '']) {
-      assert.deepEqual(inferModelCapabilities(name), ['chat', 'streaming', 'tools']);
+      assert.deepEqual(inferModelCapabilities(name), ['tools']);
     }
   });
 });
 
-describe('BLOCK-455 normalizeModelProfile 清洗 modelCapabilities', () => {
+describe('BLOCK-455 normalizeModelProfile 清洗 modelCapabilities（BLOCK-518 收窄口径）', () => {
   it('保留合法覆写、丢弃未知能力位与非对象输入', () => {
     const normalized = normalizeModelProfile({
       id: 'p1', provider: 'openai-compatible', model: 'gpt-4o',
-      capabilities: ['chat', 'streaming', 'tools'],
+      capabilities: ['tools'],
       modelCapabilities: {
         'gpt-4o': ['chat', 'streaming', 'tools', 'vision', 'bogus'],
         'bge-m3': ['embedding'],
       },
     });
-    assert.deepEqual(normalized.modelCapabilities['gpt-4o'], ['chat', 'streaming', 'tools', 'vision']);
+    assert.deepEqual(normalized.modelCapabilities['gpt-4o'], ['tools']);
     assert.deepEqual(normalized.modelCapabilities['bge-m3'], ['embedding']);
     const noMap = normalizeModelProfile({ id: 'p2', provider: 'openai-compatible', model: 'm', modelCapabilities: 'bad' });
     assert.equal(noMap.modelCapabilities, undefined);
   });
 
   it('无 modelCapabilities 的旧档案归一后不长出该字段（零迁移）', () => {
-    const normalized = normalizeModelProfile({ id: 'p3', provider: 'openai-compatible', model: 'm', capabilities: ['chat'] });
+    const normalized = normalizeModelProfile({ id: 'p3', provider: 'openai-compatible', model: 'm', capabilities: ['tools'] });
     assert.equal(normalized.modelCapabilities, undefined);
-    assert.deepEqual(normalized.capabilities, ['chat']);
+    assert.deepEqual(normalized.capabilities, ['tools']);
   });
 });
 
@@ -123,10 +121,10 @@ describe('BLOCK-455 角色绑定 渠道::模型 对', () => {
   const settings = {
     model_profiles: [{
       id: 'ep1', provider: 'openai-compatible', model: 'gpt-4o',
-      capabilities: ['chat', 'streaming', 'tools', 'vision'],
+      capabilities: ['tools'],
       modelCapabilities: {
-        'gpt-4o': ['chat', 'streaming', 'tools', 'vision'],
-        'text-only': ['chat', 'streaming', 'tools'],
+        'gpt-4o': ['tools'],
+        'text-only': ['tools'],
         'bge-m3': ['embedding'],
       },
     }],
@@ -143,12 +141,13 @@ describe('BLOCK-455 角色绑定 渠道::模型 对', () => {
     assert.equal(chat.model, 'gpt-4o'); // 裸 id = 渠道默认模型
   });
 
-  it('能力校验按绑定模型：渠道有 vision 但绑定模型无 → 诚实 mismatch', () => {
+  it('BLOCK-518 — vision 槽位撤门：绑定无 vision 声明的模型解析无 mismatch（槽位保留）', () => {
     const config = normalizeModelConfig(settings);
     const vision = resolveModelProfile(config, 'vision');
-    assert.equal(vision.error, 'model_capability_mismatch');
+    assert.equal(vision.error, undefined);
+    assert.equal(vision.model, 'text-only');
     const diagnostics = validateModelConfig(config);
-    assert.ok(diagnostics.some((d) => d.code === 'model_capability_mismatch' && d.role === 'vision'));
+    assert.ok(!diagnostics.some((d) => d.code === 'model_capability_mismatch' && d.role === 'vision'));
     assert.ok(!diagnostics.some((d) => d.code === 'model_capability_mismatch' && d.role === 'embedding'));
   });
 
@@ -159,13 +158,15 @@ describe('BLOCK-455 角色绑定 渠道::模型 对', () => {
     assert.equal(resolved.model, 'gpt-4o');
   });
 
-  it('默认绑定回退按渠道默认模型的解析能力挑选', () => {
+  it('BLOCK-518 — 无能力门角色缺省绑定回退确定性（默认档案缺席 → 首个档案）', () => {
     const config = normalizeModelConfig({
       model_profiles: [
-        { id: 'a', provider: 'openai-compatible', model: 'text-only', capabilities: ['chat', 'streaming', 'tools', 'vision'], modelCapabilities: { 'text-only': ['chat', 'streaming', 'tools'] } },
-        { id: 'b', provider: 'openai-compatible', model: 'vl-model', capabilities: ['chat', 'streaming', 'tools', 'vision'] },
+        { id: 'a', provider: 'openai-compatible', model: 'text-only', capabilities: ['tools'], modelCapabilities: { 'text-only': [] } },
+        { id: 'b', provider: 'openai-compatible', model: 'vl-model', capabilities: ['tools'] },
       ],
     });
-    assert.equal(config.roleBindings.vision, 'b'); // a 的默认模型实际无 vision
+    assert.equal(config.roleBindings.vision, 'a');
+    // agent 有 tools 硬门：a 显式无能力 → 回退 b（既有口径不变）。
+    assert.equal(config.roleBindings.agent, 'b');
   });
 });

@@ -33,7 +33,7 @@ test('ModelProfile v1 normalizes an OpenAI-compatible custom model', () => {
       defaultModel: 'qwen3-32b',
       baseUrl: 'http://127.0.0.1:8000/v1',
       credentialRef: 'provider:lab',
-      capabilities: ['chat', 'streaming', 'tools'],
+      capabilities: ['tools'],
       roles: ['chat', 'agent'],
       parameters: {},
     }
@@ -50,7 +50,7 @@ test('ModelProfile v1 infers the native Anthropic Messages protocol', () => {
   });
   assert.equal(profile.protocol, 'anthropic-messages');
   assert.equal(profile.baseUrl, 'https://api.anthropic.com/v1');
-  assert.deepEqual(profile.capabilities, ['chat', 'streaming', 'tools']);
+  assert.deepEqual(profile.capabilities, ['tools']);
 });
 
 test('legacy chat presets migrate without persisting their inline apiKey', () => {
@@ -71,7 +71,8 @@ test('legacy chat presets migrate without persisting their inline apiKey', () =>
   assert.equal(profile.apiKey, undefined);
   assert.equal(profile.credentialRef, 'provider:deepseek');
   assert.equal(config.roleBindings.chat, 'legacy');
-  assert.ok(config.profiles.some((item) => item.capabilities.includes('vision')));
+  // BLOCK-518 收窄 — 默认档案能力位只载 tools/embedding 两个真硬门。
+  assert.ok(config.profiles.some((item) => item.capabilities.includes('tools')));
   assert.ok(config.profiles.some((item) => item.capabilities.includes('embedding')));
 });
 
@@ -79,17 +80,19 @@ test('role resolution rejects a profile without the required capability', () => 
   const config = normalizeModelConfig({
     model_profiles: [
       {
-        id: 'chat-only',
+        id: 'no-tools',
         provider: 'deepseek',
         model: 'deepseek-chat',
-        capabilities: ['chat'],
+        capabilities: ['tools'],
+        // BLOCK-518 — 显式覆写空数组=该模型无任何能力（诚实缺 tools）。
+        modelCapabilities: { 'deepseek-chat': [] },
       },
     ],
-    model_role_bindings: { chat: 'chat-only', agent: 'chat-only' },
+    model_role_bindings: { chat: 'no-tools', agent: 'no-tools' },
   });
 
-  assert.equal(resolveModelProfile(config, 'chat').profile.id, 'chat-only');
-  assert.equal(resolveModelProfile(config, 'agent', 'chat-only').error, 'model_capability_mismatch');
+  assert.equal(resolveModelProfile(config, 'chat').profile.id, 'no-tools');
+  assert.equal(resolveModelProfile(config, 'agent', 'no-tools').error, 'model_capability_mismatch');
 });
 
 test('invalid role is diagnosed before a provider call', () => {
@@ -112,19 +115,20 @@ test('explicit profiles are authoritative and do not inject cloud defaults', () 
 
   assert.deepEqual(config.profiles.map((profile) => profile.id), ['local-chat']);
   assert.equal(config.roleBindings.chat, 'local-chat');
-  assert.ok(config.diagnostics.some((item) => item.code === 'model_role_unbound' && item.role === 'vision'));
+  // BLOCK-518 — chat 族/vision 槽位撤门：无能力门角色回退确定性绑定，不再 unbound。
+  assert.equal(config.roleBindings.vision, 'local-chat');
 });
 
 test('invalid explicit role bindings remain visible instead of silently switching models', () => {
   const config = normalizeModelConfig({
     model_profiles: [
-      { id: 'chat-only', provider: 'deepseek', model: 'deepseek-chat', capabilities: ['chat'] },
+      { id: 'no-tools', provider: 'deepseek', model: 'deepseek-chat', capabilities: ['tools'], modelCapabilities: { 'deepseek-chat': [] } },
     ],
-    model_role_bindings: { chat: 'missing', agent: 'chat-only' },
+    model_role_bindings: { chat: 'missing', agent: 'no-tools' },
   });
 
   assert.equal(config.roleBindings.chat, 'missing');
-  assert.equal(config.roleBindings.agent, 'chat-only');
+  assert.equal(config.roleBindings.agent, 'no-tools');
   assert.equal(resolveModelProfile(config, 'chat').error, 'model_profile_not_found');
   assert.equal(resolveModelProfile(config, 'agent').error, 'model_capability_mismatch');
   assert.deepEqual(
@@ -158,8 +162,9 @@ test('fallback policy is disabled by default and diagnoses invalid candidates', 
 
   assert.equal(config.fallbackEnabled, false);
   assert.deepEqual(config.fallbackBindings.chat, ['primary', 'missing', 'embed']);
+  // BLOCK-518 — chat 族撤门：embed（embedding 位）绑 chat fallback 不再报能力 mismatch。
   assert.deepEqual(
     config.diagnostics.filter((item) => item.role === 'chat' && item.code.startsWith('model_fallback')).map((item) => item.code),
-    ['model_fallback_matches_primary', 'model_fallback_not_found', 'model_fallback_capability_mismatch']
+    ['model_fallback_matches_primary', 'model_fallback_not_found']
   );
 });

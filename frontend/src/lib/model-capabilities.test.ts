@@ -59,48 +59,35 @@ describe('BLOCK-455 前后端能力解析一致性', () => {
   });
 });
 
-describe('BLOCK-455 prefillModelCapabilities 零回归预填', () => {
+describe('BLOCK-455 prefillModelCapabilities 零回归预填（BLOCK-518 收窄口径）', () => {
   it('不覆盖已有显式条目', () => {
     const next = prefillModelCapabilities(
-      { capabilities: ['chat'], modelCapabilities: { 'gpt-4o': ['chat'] } },
+      { capabilities: ['tools'], modelCapabilities: { 'gpt-4o': ['tools'] } },
       ['gpt-4o'],
     );
     expect(next).toBeUndefined();
   });
 
-  it('向量系模型名只写 embedding（即使渠道声明了 chat）', () => {
+  it('向量系模型名只写 embedding（即使渠道已声明 tools）', () => {
     const next = prefillModelCapabilities(
-      { capabilities: ['chat', 'streaming', 'tools'] },
+      { capabilities: ['tools'] },
       ['bge-m3', 'deepseek-chat'],
     );
     expect(next).toEqual({ 'bge-m3': ['embedding'] });
   });
 
-  it('GLM-4.5+ 发现时补 reasoning 覆写（既有档案无需重测连接）', () => {
-    const next = prefillModelCapabilities(
-      { capabilities: ['chat', 'streaming', 'tools'] },
-      ['glm-4.6', 'glm-5.3-flash', 'glm-4.5-air'],
-    );
-    expect(next).toEqual({
-      'glm-4.6': ['chat', 'streaming', 'tools', 'reasoning'],
-      'glm-5.3-flash': ['chat', 'streaming', 'tools', 'reasoning'],
-      'glm-4.5-air': ['chat', 'streaming', 'tools', 'reasoning'],
-    });
+  it('BLOCK-518 — 推断收窄 [tools]：渠道已含 tools 时聊天模型不再物化条目', () => {
+    expect(prefillModelCapabilities(
+      { capabilities: ['tools'] },
+      ['glm-4.6', 'glm-5.3-flash', 'gpt-4o', 'deepseek-reasoner', 'my-custom-model'],
+    )).toBeUndefined();
   });
 
-  it('推断增益超出渠道声明 → 写并集；无增益不物化（渠道声明不被静默移除）', () => {
+  it('渠道声明缺 tools 时按推断补齐并集', () => {
     const next = prefillModelCapabilities(
-      { capabilities: ['chat', 'streaming', 'tools'] },
-      ['gpt-4o', 'deepseek-reasoner', 'my-custom-model'],
+      { capabilities: [] },
+      ['gpt-4o'],
     );
-    expect(next).toEqual({
-      'gpt-4o': ['chat', 'streaming', 'tools', 'vision'],
-      'deepseek-reasoner': ['chat', 'streaming', 'tools', 'reasoning'],
-    });
-    // 渠道已声明 vision 时，自定义名的 VL 模型不物化条目 → 渠道兜底保留用户声明
-    expect(prefillModelCapabilities(
-      { capabilities: ['chat', 'streaming', 'tools', 'vision'] },
-      ['my-custom-vl'],
-    )).toBeUndefined();
+    expect(next).toEqual({ 'gpt-4o': ['tools'] });
   });
 });

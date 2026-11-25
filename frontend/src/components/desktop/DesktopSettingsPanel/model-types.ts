@@ -50,15 +50,17 @@ export const MODEL_ROLES: Array<{
 ];
 
 export function providerDefaults(provider: string, id: string): Partial<ChatModelPreset> {
+  // BLOCK-518 收窄 — 新渠道默认声明与后端推断同口径：['tools']
+  //（embedding 由向量渠道/发现预填承载；chat/streaming/vision/reasoning 非声明位）。
   const defaults: Record<string, Partial<ChatModelPreset>> = {
     'openai-compatible': {
       model: '',
-      capabilities: ['chat', 'streaming', 'tools'],
+      capabilities: ['tools'],
       credentialRef: modelProviderCredentialRef('openai-compatible', id),
     },
     anthropic: {
       model: '',
-      capabilities: ['chat', 'streaming', 'tools'],
+      capabilities: ['tools'],
       credentialRef: modelProviderCredentialRef('anthropic', id),
     },
   };

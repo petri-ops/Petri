@@ -37,6 +37,8 @@
     "test/block40-conversation-changes.test.mjs",
     "test/block48-computer-tools.test.mjs",
     "test/block48-sidecar-tools.test.mjs",
+    "test/block514-cron-schedule.test.mjs",
+    "test/block515-wakeup-trusted.test.mjs",
     "test/block56-model-fallback.test.mjs",
     "test/block57-session-target.test.mjs",
     "test/block63-sidecar-tools.test.mjs",

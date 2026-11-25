@@ -50,13 +50,13 @@ test('dashscope-vision 通道不转换（原生格式直传）', async () => {
   assert.ok(parts.some((p) => p.type === 'image'), 'dashscope-vision 原生 image 部件应原样保留: ' + JSON.stringify(parts));
 });
 
-test('能力门保留：渠道未声明 vision 能力 → 诚实拒绝 model_capability_mismatch（不静默发图）', async () => {
+test('BLOCK-518 槽位撤门：渠道未声明 vision 能力 → 不再 mismatch（vision 由上游诚实报错）', async () => {
   const gw = gatewayWithProfile(
-    { id: 'plain', provider: 'openai-compatible', model: 'x', credentialRef: 'c', capabilities: ['chat'] },
+    { id: 'plain', provider: 'openai-compatible', model: 'x', credentialRef: 'c', capabilities: ['tools'] },
     { chat: async () => ({ ok: true }) },
   );
   const r = await gw.vision({ body: { ...VISION_BODY } });
-  assert.equal(r.error, 'model_capability_mismatch');
+  assert.equal(r.error, undefined, 'vision 槽位保留但能力过滤退役：不再前置拒绝');
 });
 
 test('BLOCK-150 加映三 — openai 系响应归一化：vision 结果从原始信封取 content（修「消耗 token 却空描述」）', async () => {

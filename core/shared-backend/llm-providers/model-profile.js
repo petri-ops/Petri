@@ -9,13 +9,13 @@
 
 const MODEL_PROFILE_SCHEMA_VERSION = 1;
 
+// BLOCK-518 转型（2026-11-25 owner 批准能力渠道简化）— 能力白名单收窄为两个真硬门：
+// tools（agent loop 工具链）/ embedding（知识库·记忆向量化，砍了会静默污染）。
+// chat/streaming/vision/reasoning 不再是声明位：chat 族与 vision 槽位撤能力门
+// （多模态时代上游诚实报错优于前置封锁），旧数据在 normalize 时收窄（embedding/tools 必留）。
 const MODEL_CAPABILITIES = Object.freeze([
-  'chat',
-  'streaming',
   'tools',
-  'vision',
   'embedding',
-  'reasoning',
 ]);
 
 const THINKING_LEVELS = Object.freeze(['off', 'standard', 'high']);
@@ -31,15 +31,18 @@ const MODEL_ROLES = Object.freeze([
   'explanation',
 ]);
 
+// BLOCK-518 — 角色能力门收敛：仅 agent→tools、embedding→embedding 保持硬门
+//（砍了会静默坏：文本模型进 agent 模式工具 400 循环 / chat 模型算向量静默污染知识库）。
+// chat 族与 vision 槽位撤门（null=不校验；vision 槽位保留、能力过滤退役，阶段三另议）。
 const ROLE_CAPABILITY = Object.freeze({
-  chat: 'chat',
+  chat: null,
   agent: 'tools',
-  planner: 'chat',
-  vision: 'vision',
+  planner: null,
+  vision: null,
   embedding: 'embedding',
-  summary: 'chat',
-  report: 'chat',
-  explanation: 'chat',
+  summary: null,
+  report: null,
+  explanation: null,
 });
 
 const DEFAULT_MODEL_PROFILES = Object.freeze([
@@ -49,11 +52,11 @@ const DEFAULT_MODEL_PROFILES = Object.freeze([
     label: 'DeepSeek Chat',
     provider: 'deepseek',
     protocol: 'openai-compatible',
-    // DeepSeek V4.1 Flash 原生多模态：默认档案同时承担识图（vision），
-    // 新装机不再依赖 DashScope（UI-638 加映 · 用户裁决 2026-10-30）。
+    // DeepSeek V4.1 Flash 原生多模态（BLOCK-518 后声明面退役：多模态不再需要
+    // vision 位，图片直接进请求体；默认档案只载 tools 硬门）。
     model: 'deepseek-flash',
     credentialRef: 'provider:deepseek',
-    capabilities: Object.freeze(['chat', 'streaming', 'tools', 'vision']),
+    capabilities: Object.freeze(['tools']),
     roles: Object.freeze(['chat', 'agent', 'planner', 'vision', 'summary', 'report', 'explanation']),
     parameters: Object.freeze({}),
   }),
@@ -65,7 +68,9 @@ const DEFAULT_MODEL_PROFILES = Object.freeze([
     protocol: 'dashscope-native',
     model: 'qwen-vl-max',
     credentialRef: 'provider:dashscope',
-    capabilities: Object.freeze(['vision']),
+    // BLOCK-518 — 能力位空（声明面退役）；该档案仅作为显式配置的 vision 槽位候选保留，
+    // 不再自动注入零配置（归一注入按能力位首位挑选，空位跳过）。
+    capabilities: Object.freeze([]),
     roles: Object.freeze(['vision']),
     parameters: Object.freeze({}),
   }),
@@ -112,9 +117,10 @@ function inferProtocol(provider) {
 }
 
 function inferCapabilities(provider) {
+  // BLOCK-518 收窄 — 推断只产两值：向量系渠道=embedding，其余=tools。
   if (provider === 'dashscope') return ['embedding'];
-  if (provider === 'dashscope-vision') return ['vision'];
-  return ['chat', 'streaming', 'tools'];
+  if (provider === 'dashscope-vision') return [];
+  return ['tools'];
 }
 
 // own-enumerable 查找：模型名来自远端 /models，动态下标不得命中原型键（constructor 等）。
@@ -168,21 +174,14 @@ function resolveModelThinkingDefault(profile, model) {
 /**
  * BLOCK-455 — 模型名启发式推断（连接测试发现模型时预填 modelCapabilities 用）。
  * 宁缺勿滥：推断结果在 UI 可见可纠；向量系不是聊天模型，只返回 embedding。
+ * BLOCK-518 收窄 — 声明面退役后推断只产 embedding/tools 两值（vision/reasoning
+ * 不再是声明位，多模态/思考能力由上游实测，诚实报错）。
  */
 function inferModelCapabilities(modelName) {
   const name = typeof modelName === 'string' ? modelName.trim().toLowerCase() : '';
-  if (!name) return ['chat', 'streaming', 'tools'];
+  if (!name) return ['tools'];
   if (/embed|bge|gte-|(?:^|[-_])m3(?:$|[-_])/.test(name)) return ['embedding'];
-  const capabilities = ['chat', 'streaming', 'tools'];
-  if (/vl|vision|4o|claude|gemini|qvq|omni/.test(name)) capabilities.push('vision');
-  // BLOCK-455 加映 — BigModel 官方：GLM-4.5 及以上支持 thinking；4.6/4.7/5.x 均按 reasoning 处理。
-  if (
-    /reasoner|reasoning|thinking|qwq|magistral|(?:^|[^a-z0-9])(?:o1|o3|o4|r1)(?:[^a-z0-9]|$)/.test(name)
-    || /^glm-(?:4\.[5-9]|5(?:\.\d+)?)(?:[-_]|$)/.test(name)
-  ) {
-    capabilities.push('reasoning');
-  }
-  return capabilities;
+  return ['tools'];
 }
 
 /**
@@ -241,13 +240,17 @@ function normalizeModelProfile(input, index = 0) {
     normalized.defaultThinkingLevel = input.defaultThinkingLevel;
   }
   // BLOCK-455 — 模型级能力覆写：只存显式条目；未知能力位丢弃；显式空数组有意义（该模型无任何能力）。
+  // BLOCK-518 销账 — 收窄后为空的物化条目整条清除（vision/reasoning 位失去载体，
+  // BLOCK-518 批量清除包转型并入本归一：一次性清全部失去声明位的物化覆写）。
   if (input.modelCapabilities && typeof input.modelCapabilities === 'object' && !Array.isArray(input.modelCapabilities)) {
     const entries = Object.entries(input.modelCapabilities)
       .map(([model, caps]) => [_cleanString(model), caps])
-      .filter(([model, caps]) => model && Array.isArray(caps));
+      .filter(([model, caps]) => model && Array.isArray(caps))
+      .map(([model, caps]) => [model, _uniqueKnown(caps, MODEL_CAPABILITIES), caps.length])
+      .filter(([, caps, originalLength]) => caps.length > 0 || originalLength === 0);
     if (entries.length) {
       normalized.modelCapabilities = Object.fromEntries(
-        entries.map(([model, caps]) => [model, _uniqueKnown(caps, MODEL_CAPABILITIES)])
+        entries.map(([model, caps]) => [model, caps])
       );
     }
   }
@@ -299,10 +302,11 @@ function normalizeModelProfiles(settings) {
   // Defaults are a first-run / legacy migration aid only. Once a caller saves
   // explicit ModelProfiles, that list is authoritative: silently adding cloud
   // models would make the model-management UI lie about what is configured.
+  // BLOCK-518 — 注入按能力位首位挑选；能力位为空的默认档案（dashscope-vision）跳过。
   if (supplied.length) return profiles;
   for (const defaultProfile of DEFAULT_MODEL_PROFILES) {
     const capability = defaultProfile.capabilities[0];
-    if (!profiles.some((profile) => profile.capabilities.includes(capability))) {
+    if (capability && !profiles.some((profile) => profile.capabilities.includes(capability))) {
       profiles.push(normalizeModelProfile(defaultProfile));
       ids.add(defaultProfile.id);
     }
@@ -331,9 +335,13 @@ function normalizeRoleBindings(settings, profiles) {
     const defaultId = DEFAULT_MODEL_ROLE_BINDINGS[role];
     const defaultProfile = byId.get(defaultId);
     // BLOCK-455 — 回退挑选按渠道默认模型的解析能力（模型级覆写优先）。
-    const fallback = defaultProfile && resolveModelCapabilities(defaultProfile, defaultProfile.model).includes(capability)
-      ? defaultProfile
-      : profiles.find((profile) => resolveModelCapabilities(profile, profile.model).includes(capability));
+    // BLOCK-518 — 无能力门角色（chat 族/vision 槽位）回退确定性绑定：
+    // 默认档案在位用默认档案，否则首个档案；有门角色仍按能力位挑选。
+    const fallback = !capability
+      ? (defaultProfile || profiles[0])
+      : (defaultProfile && resolveModelCapabilities(defaultProfile, defaultProfile.model).includes(capability)
+        ? defaultProfile
+        : profiles.find((profile) => resolveModelCapabilities(profile, profile.model).includes(capability)));
     if (fallback) bindings[role] = fallback.id;
   }
   return bindings;
@@ -400,7 +408,8 @@ function validateModelConfig(config) {
     }
     const capability = ROLE_CAPABILITY[role];
     const boundModel = binding.model || profile.model;
-    if (!resolveModelCapabilities(profile, boundModel).includes(capability)) {
+    // BLOCK-518 — 能力门收敛：null 门（chat 族/vision 槽位）不校验。
+    if (capability && !resolveModelCapabilities(profile, boundModel).includes(capability)) {
       diagnostics.push({
         code: 'model_capability_mismatch',
         role,
@@ -428,7 +437,7 @@ function validateModelConfig(config) {
           profileId: fallbackId,
           message: `模型角色 ${role} 的 fallback 不存在: ${fallbackId}`,
         });
-      } else if (!resolveModelCapabilities(fallback, fallbackBinding.model || fallback.model).includes(capability)) {
+      } else if (capability && !resolveModelCapabilities(fallback, fallbackBinding.model || fallback.model).includes(capability)) {
         diagnostics.push({
           code: 'model_fallback_capability_mismatch',
           role,
@@ -456,7 +465,8 @@ function resolveModelProfile(config, role, requestedId) {
   const model = binding.model || profile.model;
   const capabilities = resolveModelCapabilities(profile, model);
   const required = ROLE_CAPABILITY[role];
-  if (!capabilities.includes(required)) {
+  // BLOCK-518 — 能力门收敛：null 门（chat 族/vision 槽位）不校验。
+  if (required && !capabilities.includes(required)) {
     return {
       error: 'model_capability_mismatch',
       message: `模型 ${profile.label}（${model}）不支持 ${required} 能力（任务角色: ${role}）`,

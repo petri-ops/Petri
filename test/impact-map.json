@@ -9981,6 +9981,18 @@
       "tests": [
         "test/ui-ledger-status-contract.test.mjs"
       ]
+    },
+    {
+      "id": "acceptance-evidence-dirs-2026-11-25",
+      "note": "2026-11-25 新增 acceptance 目录的 evidence.json 虚拟路径机械认领（能力简化方案/语音本地模型与运行时裁决材料随 HEAD docs 提交带入，漏登记即 test-affected 全映射门 unknown 红；对标 block494/ui696 先例，只做映射不冒充验证）。",
+      "patterns": [
+        "acceptance/model-capability-simplification/**",
+        "acceptance/voice-local-model/**",
+        "acceptance/voice-local-runtime/**"
+      ],
+      "tests": [
+        "test/block518-capability-narrowing.test.mjs"
+      ]
     }
   ]
 }

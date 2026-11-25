@@ -81,12 +81,13 @@ const DASHSCOPE_VISION = {
   capabilities: ['vision'],
 };
 
-test('零配置：视觉得到的是声明 vision 的 DeepSeek 档案（开箱可用，不依赖 DashScope）', () => {
+test('零配置：vision 角色绑定默认 DeepSeek 档案（开箱可用；BLOCK-518 后能力位只载 tools）', () => {
   const config = normalizeModelConfig({});
   assert.equal(config.roleBindings.vision, 'deepseek-chat');
   const profile = config.profiles.find((item) => item.id === 'deepseek-chat');
   assert.ok(profile, '默认档案必须存在');
-  assert.ok(profile.capabilities.includes('vision'), '默认 DeepSeek 档案必须声明 vision');
+  assert.deepEqual(profile.capabilities, ['tools'], 'BLOCK-518 收窄：默认档案能力位=[tools]');
+  // 槽位撤门：vision 绑定不再要求 vision 声明，解析无 mismatch。
   assert.equal(resolveModelProfile(config, 'vision').profile.id, 'deepseek-chat');
 });
 
@@ -117,9 +118,10 @@ test('BLOCK-454 P1 — 旧安装版档案缺 vision 声明：deepseek 多模态�
   const result = runSettingsProbe(dir);
   assert.equal(result.vision, 'deepseek-chat', `运行时绑定=${result.vision}`);
   assert.equal(result.onDiskVision, 'deepseek-chat', `迁移必须落盘，磁盘=${result.onDiskVision}`);
-  assert.ok(result.deepseekCaps.includes('vision'), `运行时档案必须补 vision 能力: ${JSON.stringify(result.deepseekCaps)}`);
-  assert.ok(result.onDiskDeepseekCaps.includes('vision'), `落盘档案必须补 vision 能力: ${JSON.stringify(result.onDiskDeepseekCaps)}`);
-  assert.equal(result.visionResolveError, null, `改绑后 vision 角色必须可解析（不报 capability mismatch）: ${JSON.stringify(result)}`);
+  // BLOCK-518 — 运行时归一化把 vision 位收窄掉（能力位只载 tools）；
+  // 落盘档案的补声明写面保留（读取侧 normalize 收窄，无害）。
+  assert.deepEqual(result.deepseekCaps, ['tools'], `运行时档案能力位收窄: ${JSON.stringify(result.deepseekCaps)}`);
+  assert.equal(result.visionResolveError, null, `改绑后 vision 角色必须可解析（槽位撤门）: ${JSON.stringify(result)}`);
   assert.equal(result.visionResolvedProfile, 'deepseek-chat');
 });
 

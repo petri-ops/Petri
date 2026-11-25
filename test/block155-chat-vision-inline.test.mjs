@@ -164,32 +164,28 @@ test('BLOCK-155 ⑥ 扩展过滤：png/jpg/jpeg 在列；svg/txt 不在（svg �
 });
 
 // ---------- ⑦ chatVisionInlineCapable 真值表 ----------
-test('BLOCK-155 ⑦ chatVisionInlineCapable 真值表（openai-family+vision=true；dashscope 系=false；无 vision=false；anthropic=true）', () => {
+test('BLOCK-518 ⑦ chatVisionInlineCapable 真值表（声明面退役：openai-family/anthropic=true；dashscope 系=false；协议约束保留）', () => {
   assert.ok(!visionInlineLoadError, `vision-inline 模块应可加载: ${visionInlineLoadError}`);
 
-  // openai-family 集合（model-gateway.js OPENAI_FAMILY_PROVIDERS 单源）
-  assert.equal(chatVisionInlineCapable({ provider: 'openai-compatible', capabilities: ['chat', 'streaming', 'tools', 'vision'] }), true, 'openai-compatible+vision');
-  assert.equal(chatVisionInlineCapable({ provider: 'deepseek', capabilities: ['chat', 'streaming', 'tools', 'vision'] }), true, 'deepseek+vision');
-  assert.equal(chatVisionInlineCapable({ provider: 'openai', capabilities: ['chat', 'vision'] }), true, 'openai+vision');
-  assert.equal(chatVisionInlineCapable({ provider: 'ollama', capabilities: ['chat', 'tools', 'vision'] }), true, 'ollama+vision');
+  // openai-family 集合（model-gateway.js OPENAI_FAMILY_PROVIDERS 单源）——
+  // BLOCK-518 声明面退役：不再要求 capabilities 含 vision，图片直接进请求体
+  //（多模态模型直接支持；文本模型上游诚实报错）。
+  assert.equal(chatVisionInlineCapable({ provider: 'openai-compatible', capabilities: ['tools'] }), true, 'openai-compatible');
+  assert.equal(chatVisionInlineCapable({ provider: 'deepseek', capabilities: ['tools'] }), true, 'deepseek');
+  assert.equal(chatVisionInlineCapable({ provider: 'openai', capabilities: [] }), true, 'openai');
+  assert.equal(chatVisionInlineCapable({ provider: 'ollama' }), true, 'ollama（无声明）');
 
-  // dashscope 系原生协议不在集合
-  assert.equal(chatVisionInlineCapable({ provider: 'dashscope', capabilities: ['vision'] }), false, 'dashscope（原生协议）');
-  assert.equal(chatVisionInlineCapable({ provider: 'dashscope-vision', capabilities: ['vision'] }), false, 'dashscope-vision（原生协议）');
-
-  // 无 vision 能力
-  assert.equal(chatVisionInlineCapable({ provider: 'openai-compatible', capabilities: ['chat', 'streaming', 'tools'] }), false, '无 vision 能力');
-  assert.equal(chatVisionInlineCapable({ provider: 'deepseek', capabilities: ['chat'] }), false, 'deepseek 无 vision');
+  // dashscope 系原生协议不在集合（协议约束保留）
+  assert.equal(chatVisionInlineCapable({ provider: 'dashscope', capabilities: ['embedding'] }), false, 'dashscope（原生协议）');
+  assert.equal(chatVisionInlineCapable({ provider: 'dashscope-vision', capabilities: [] }), false, 'dashscope-vision（原生协议）');
 
   // anthropic：chat/chatStream 均经 openAIToAnthropicRequest → openAIContentToAnthropic
   // 转换 image_url 部件（anthropic.js :150/:177；protocol-conversion.js :27-36），实证纳入。
-  assert.equal(chatVisionInlineCapable({ provider: 'anthropic', capabilities: ['chat', 'streaming', 'tools', 'vision'] }), true, 'anthropic+vision（协议链实证）');
-  assert.equal(chatVisionInlineCapable({ provider: 'anthropic', capabilities: ['chat', 'tools'] }), false, 'anthropic 无 vision');
+  assert.equal(chatVisionInlineCapable({ provider: 'anthropic', capabilities: ['tools'] }), true, 'anthropic（协议链实证）');
 
   // 边界
   assert.equal(chatVisionInlineCapable(null), false, 'null profile');
-  assert.equal(chatVisionInlineCapable({}), false, '空 profile');
-  assert.equal(chatVisionInlineCapable({ provider: 'openai-compatible' }), false, '缺 capabilities');
+  assert.equal(chatVisionInlineCapable({}), false, '空 profile（无 provider）');
 });
 
 // ---------- ⑧ loop-orchestrator 非侵入（runLoop 直测）----------

@@ -15,6 +15,7 @@
  *     见 INLINE_IMAGE_EXT_RE 注释——svg 内联会被上游 chat 端点 400）
  *
  * chatVisionInlineCapable：渠道是否吃 image_url 部件的判定。
+ *   - BLOCK-518 声明面退役：不再要求 capabilities 含 vision，provider 协议形态单判
  *   - openai-family 集合单源取自 model-gateway.js OPENAI_FAMILY_PROVIDERS
  *     （deepseek/openai/openai-compatible/ollama/lmstudio/vllm，chat 原样
  *     JSON.stringify 透传 OpenAI 规范）
@@ -109,16 +110,16 @@ async function inlineVisionImagesForRequest(messages, deps = {}) {
 }
 
 /**
- * 渠道能力判定：profile 声明 vision 能力，且 provider 的 chat 发送链吃
- * OpenAI 规范 image_url 部件（openai-family 集合，单源 model-gateway；
- * anthropic 经 protocol-conversion 转换，实证纳入）。
+ * 渠道能力判定（BLOCK-518 声明面退役）：provider 的 chat 发送链吃
+ * OpenAI 规范 image_url 部件即内联（openai-family 集合，单源 model-gateway；
+ * anthropic 经 protocol-conversion 转换，实证纳入）。vision 能力声明位已退役——
+ * 多模态模型直接支持；文本模型收图=上游诚实报错。dashscope / dashscope-vision
+ * 原生协议不在集合，不内联（协议约束保留）。
  * @param {{provider?: string, capabilities?: string[]}|null} profile
  * @returns {boolean}
  */
 function chatVisionInlineCapable(profile) {
   if (!profile || typeof profile !== 'object') return false;
-  const capabilities = Array.isArray(profile.capabilities) ? profile.capabilities : [];
-  if (!capabilities.includes('vision')) return false;
   const provider = String(profile.provider || '');
   return OPENAI_FAMILY_PROVIDERS.has(provider) || provider === 'anthropic';
 }

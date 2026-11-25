@@ -42,6 +42,7 @@ test('defaultThinkingLevel 只保留已知三档，非法值丢弃', () => {
 test('既有字段与上下文窗口不受影响', () => {
   const normalized = normalizeModelProfile({ ...base, contextWindow: 128000.4, capabilities: ['chat', 'tools'] });
   assert.equal(normalized.contextWindow, 128000);
-  assert.deepEqual(normalized.capabilities, ['chat', 'tools']);
+  // BLOCK-518 收窄 — 白名单 [tools, embedding]；chat 位丢弃、tools 保留。
+  assert.deepEqual(normalized.capabilities, ['tools']);
   assert.equal(normalized.provider, 'anthropic');
 });

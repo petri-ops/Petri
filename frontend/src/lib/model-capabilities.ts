@@ -41,20 +41,18 @@ export function resolveModelCapabilities(
   return Array.isArray(profile.capabilities) ? profile.capabilities : [];
 }
 
+/**
+ * BLOCK-518 声明面退役（2026-11-25 owner 批准）— 推断只产两值：
+ * ①向量系模型名（推断仅 embedding）写 ['embedding']（红线必留）；
+ * ②其余 ['tools']（vision/reasoning/chat/streaming 不再是声明位，
+ * 多模态/思考能力由上游实测，诚实报错）。名称推断只用于「测试连接」发现模型时
+ * 预填显式条目，不是运行时隐式行为。
+ */
 export function inferModelCapabilities(modelName: string | undefined): string[] {
   const name = typeof modelName === 'string' ? modelName.trim().toLowerCase() : '';
-  if (!name) return ['chat', 'streaming', 'tools'];
+  if (!name) return ['tools'];
   if (/embed|bge|gte-|(?:^|[-_])m3(?:$|[-_])/.test(name)) return ['embedding'];
-  const capabilities = ['chat', 'streaming', 'tools'];
-  if (/vl|vision|4o|claude|gemini|qvq|omni/.test(name)) capabilities.push('vision');
-  // BLOCK-455 加映 — BigModel 官方：GLM-4.5 及以上支持 thinking；与后端同规则。
-  if (
-    /reasoner|reasoning|thinking|qwq|magistral|(?:^|[^a-z0-9])(?:o1|o3|o4|r1)(?:[^a-z0-9]|$)/.test(name)
-    || /^glm-(?:4\.[5-9]|5(?:\.\d+)?)(?:[-_]|$)/.test(name)
-  ) {
-    capabilities.push('reasoning');
-  }
-  return capabilities;
+  return ['tools'];
 }
 
 /** 角色绑定值解析：`profileId::encodeURIComponent(model)` 对；裸 id = 渠道默认模型。 */
@@ -77,6 +75,8 @@ export function parseModelBinding(value: string | undefined | null): { profileId
  * ①不覆盖已有显式条目；②向量系模型名（推断仅 embedding）写 ['embedding']；
  * ③其余仅在推断增益超出渠道声明时写「渠道∪推断」并集；无增益不物化。
  * 返回合并后的覆写表；无任何新增时返回 undefined（调用方保持原状）。
+ * BLOCK-518 收窄后推断只有 tools/embedding 两值 → 增益面自然收窄
+ *（渠道默认已含 tools 时聊天模型不再物化条目）。
  */
 export function prefillModelCapabilities(
   profile: ModelCapabilityProfileLike,

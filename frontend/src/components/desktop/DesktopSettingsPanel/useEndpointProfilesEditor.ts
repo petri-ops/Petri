@@ -22,7 +22,7 @@ import {
 } from '@/lib/model-endpoint-transfer';
 import { credentialId } from './model-types';
 import { MODEL_ROLES, providerDefaults, type ModelRole } from './model-types';
-import { parseModelBinding, prefillModelCapabilities, resolveModelCapabilities } from '@/lib/model-capabilities';
+import { parseModelBinding, prefillModelCapabilities } from '@/lib/model-capabilities';
 import { getBridge } from '@/lib/desktopBridge';
 
 /**
@@ -172,12 +172,9 @@ export function useEndpointProfilesEditor(): {
       credential_updates: Object.fromEntries(Object.entries(credentialInputs).filter(([, value]) => value.trim())),
       // Compatibility snapshot for older renderer builds. The Gateway only
       // reads ModelProfiles and role bindings.
-      // BLOCK-455 — 按实际请求模型的解析能力判定；未声明 legacy 保持旧宽松语义。
-      chat_model_presets: profiles.filter((profile) => {
-        const declared = Array.isArray(profile.capabilities)
-          || Array.isArray(profile.modelCapabilities?.[profile.model]);
-        return !declared || resolveModelCapabilities(profile, profile.model).includes('chat');
-      }).map(({ id, label, provider, model, defaultModel, baseUrl, contextWindow }) => ({ id, label, provider, model, defaultModel, baseUrl, contextWindow })),
+      // BLOCK-518 — chat 不再是声明位（能力数组收窄 tools[+embedding]）：
+      // chat_model_presets 兼容快照不再按 chat 位过滤（全保留）。
+      chat_model_presets: profiles.map(({ id, label, provider, model, defaultModel, baseUrl, contextWindow }) => ({ id, label, provider, model, defaultModel, baseUrl, contextWindow })),
       active_chat_model_id: roleBindings.chat,
       llm_provider: chatProfile?.provider,
       embed_provider: embedProfile?.provider,

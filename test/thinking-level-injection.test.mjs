@@ -1,13 +1,17 @@
 /**
- * thinking-level-injection.test.mjs — BLOCK-81 P1 网关级门禁：思考档位真身进请求体 + 容错。
+ * thinking-level-injection.test.mjs — BLOCK-81 P1 网关级门禁 + BLOCK-518 声明面退役。
  *
  * 用假 provider 构造真实 ModelGateway（注入 getSettings/getProvider/…），
  * 断言**实际发给上游的 requestBody**：
- *   1. high 档且在能力位内 → 请求体带 reasoning_effort（协议映射生效）
- *   2. standard / 缺省 → 请求体无任何思考参数（零行为变化）
- *   3. 未声明 capabilities.reasoning 的渠道 → 即便档位为 high 也不发参（D3 双保险①）
- *   4. 上游 400「未知参数」→ 去参重试一次成功（D3 双保险②）
- *   5. 非参数类 400（如鉴权失败）→ **不**去参重试，错误如实上抛（避免误剥参数掩盖真因）
+ *   1. BLOCK-518 — reasoning 不再是声明位（能力数组只载 tools[+embedding]）：
+ *      旧数据里残留的 reasoning 声明经归一收窄 → 网关 D3 ① 门恒不发思考参数
+ *      （思考档位控件默认隐藏；上游诚实报错优于假开关）。
+ *   2. standard / 缺省 / 非法档位 → 请求体无任何思考参数（零行为变化）。
+ *   3. 上游 400「未知参数」→ 未注入思考参数时不触发去参重试（D3 ② 门不误触）。
+ *   4. 非参数类 400（如鉴权失败）→ 不去参重试，错误如实上抛。
+ *
+ * 注：D3 ② 去参重试代码仍在网关内（其他参数来源的法律路径保留），
+ * 但 reasoning 声明位退役后经 thinkingLevel 注入的路径已不可达；本文件据实钉门行为。
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -45,7 +49,7 @@ function makeGateway(provider, capabilities) {
 const REASONING = ['chat', 'streaming', 'tools', 'reasoning'];
 const NO_REASONING = ['chat', 'streaming', 'tools'];
 
-test('high 档 + 声明 reasoning → 请求体带 reasoning_effort（协议映射生效）', async () => {
+test('BLOCK-518 — high 档 + 旧 reasoning 声明（归一时收窄）→ 请求体不带思考参数', async () => {
   const seen = [];
   const gateway = makeGateway({
     async chat(apiKey, body) { seen.push(body); return { choices: [{ message: { content: 'ok' } }] }; },
@@ -59,18 +63,19 @@ test('high 档 + 声明 reasoning → 请求体带 reasoning_effort（协议映�
   });
 
   assert.equal(seen.length, 1);
-  assert.equal(seen[0].reasoning_effort, 'high', '请求体应带 reasoning_effort=high');
+  assert.equal('reasoning_effort' in seen[0], false, 'reasoning 位退役后能力门恒不发参');
+  assert.equal('thinking' in seen[0], false);
   assert.equal(result.error, undefined);
 });
 
-test('off 档 + 声明 reasoning → 发最小档（协议无真关闭档时的诚实降级）', async () => {
+test('BLOCK-518 — off 档 + 旧 reasoning 声明 → 请求体不带思考参数', async () => {
   const seen = [];
   const gateway = makeGateway({
     async chat(apiKey, body) { seen.push(body); return { choices: [{ message: { content: 'ok' } }] }; },
   }, REASONING);
 
   await gateway.chat({ role: 'agent', profileId: 'p-test', body: { messages: [] }, thinkingLevel: 'off' });
-  assert.equal(seen[0].reasoning_effort, 'minimal');
+  assert.equal('reasoning_effort' in seen[0], false);
 });
 
 test('standard / 缺省 / 非法档位 → 请求体无任何思考参数（零行为变化）', async () => {
@@ -101,15 +106,12 @@ test('未声明 capabilities.reasoning → 即便 high 也不发参（D3 双保�
   assert.equal('reasoning_effort' in seen[0], false, '未声明能力位的渠道不得被注入思考参数');
 });
 
-test('上游 400「未知参数」→ 去参重试一次并成功（D3 双保险②）', async () => {
+test('上游 400「未知参数」+ 无注入思考参数 → 不去参重试，错误如实上抛（不误触 D3 ②）', async () => {
   const seen = [];
   const gateway = makeGateway({
     async chat(apiKey, body) {
       seen.push(JSON.parse(JSON.stringify(body)));
-      if (body.reasoning_effort) {
-        return { error: 'http_error', message: 'Unknown parameter: reasoning_effort', status: 400 };
-      }
-      return { choices: [{ message: { content: 'retried-ok' } }] };
+      return { error: 'http_error', message: 'Unknown parameter: reasoning_effort', status: 400 };
     },
   }, REASONING);
 
@@ -120,14 +122,9 @@ test('上游 400「未知参数」→ 去参重试一次并成功（D3 双保险
     thinkingLevel: 'high',
   });
 
-  assert.equal(seen.length, 2, '应发生一次去参重试（共两次调用）');
-  assert.equal(seen[0].reasoning_effort, 'high', '首次带思考参数');
-  assert.equal('reasoning_effort' in seen[1], false, '重试时剥掉思考参数');
-  assert.equal(
-    result.choices?.[0]?.message?.content,
-    'retried-ok',
-    '重试结果应作为最终结果上抛'
-  );
+  assert.equal(seen.length, 1, '未注入思考参数 → 不触发去参重试');
+  assert.equal('reasoning_effort' in seen[0], false, '首次即不带思考参数');
+  assert.equal(result.error, 'http_error');
 });
 
 test('非参数类 400（鉴权失败）→ 不去参重试，错误如实上抛', async () => {
