@@ -387,11 +387,6 @@ export const WorkspaceSummaryCard = React.memo(function WorkspaceSummaryCard({
           </section>
         )}
 
-        {/* BLOCK-97 — 任务清单节：agent todo_write 快照，位于任务循环与任务进度之间 */}
-        {todoList && todoList.length > 0 && <WorkspaceTodoSection items={todoList} />}
-
-        {/* BLOCK-94 — 知识溯源节：本轮自动召回注入的知识块，位于任务清单之后 */}
-        {citations && citations.length > 0 && <WorkspaceCitationsSection citations={citations} />}
 
         {workflow && (
           <section className={styles.workspacePinnedSummarySection}>
@@ -467,47 +462,11 @@ export const WorkspaceSummaryCard = React.memo(function WorkspaceSummaryCard({
           </section>
         )}
 
-        {historyJobs.length > 0 && (
-          <section className={styles.workspacePinnedSummarySection}>
-            <div className={styles.workspacePinnedSummarySectionHeading}>
-              <div className={styles.workspacePinnedSummarySectionTitle}>最近分析</div>
-              <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={onOpenScheduled}>查看全部</button>
-            </div>
-            <div className={styles.workspacePinnedSummaryHistory}>
-              {historyJobs.map((job) => {
-                const historyStatusLabel =
-                  job.status === 'done'
-                    ? '已完成'
-                    : job.status === 'failed'
-                      ? '失败'
-                      : job.status === 'running'
-                        ? '运行中'
-                        : '等待中';
-                return (
-                  <button
-                    key={job.id}
-                    type="button"
-                    className={styles.workspacePinnedSummaryHistoryItem}
-                    onClick={() => onSelectJob(job.id)}
-                  >
-                    <span
-                      className={styles.workspacePinnedSummaryActivityIcon}
-                      data-status={job.status}
-                    >
-                      <Icon name={job.status === 'failed' ? 'flag' : 'terminal'} size={13} />
-                    </span>
-                    <span className={styles.workspacePinnedSummaryActivityText}>
-                      <strong>{job.name || job.tool_id}</strong>
-                      <small>{historyStatusLabel} · {formatDate(job.created_at)}</small>
-                    </span>
-                    <Icon name="chevron-right" size={13} />
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
+        {/* item25 — 资产总览类折叠为单一次级抽屉，默认收起；运行监控主层常显 */}
+        <details className={styles.workspacePinnedSummarySection} aria-label="资产总览">
+          <summary className={styles.workspacePinnedSummarySectionHeading}>
+            <span className={styles.workspacePinnedSummarySectionTitle}>资产总览</span>
+          </summary>
         {visibility === 'expanded' && (
           <section className={styles.workspacePinnedSummarySection} aria-label="项目信息">
             <div className={styles.workspacePinnedSummarySectionHeading}>
@@ -584,7 +543,54 @@ export const WorkspaceSummaryCard = React.memo(function WorkspaceSummaryCard({
           </section>
         )}
 
-        <section className={styles.workspacePinnedSummaryEnvironment}>
+        {historyJobs.length > 0 && (
+          <section className={styles.workspacePinnedSummarySection}>
+            <div className={styles.workspacePinnedSummarySectionHeading}>
+              <div className={styles.workspacePinnedSummarySectionTitle}>最近分析</div>
+              <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={onOpenScheduled}>查看全部</button>
+            </div>
+            <div className={styles.workspacePinnedSummaryHistory}>
+              {historyJobs.map((job) => {
+                const historyStatusLabel =
+                  job.status === 'done'
+                    ? '已完成'
+                    : job.status === 'failed'
+                      ? '失败'
+                      : job.status === 'running'
+                        ? '运行中'
+                        : '等待中';
+                return (
+                  <button
+                    key={job.id}
+                    type="button"
+                    className={styles.workspacePinnedSummaryHistoryItem}
+                    onClick={() => onSelectJob(job.id)}
+                  >
+                    <span
+                      className={styles.workspacePinnedSummaryActivityIcon}
+                      data-status={job.status}
+                    >
+                      <Icon name={job.status === 'failed' ? 'flag' : 'terminal'} size={13} />
+                    </span>
+                    <span className={styles.workspacePinnedSummaryActivityText}>
+                      <strong>{job.name || job.tool_id}</strong>
+                      <small>{historyStatusLabel} · {formatDate(job.created_at)}</small>
+                    </span>
+                    <Icon name="chevron-right" size={13} />
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* BLOCK-97 — 任务清单节：agent todo_write 快照，位于任务循环与任务进度之间 */}
+        {todoList && todoList.length > 0 && <WorkspaceTodoSection items={todoList} />}
+
+        {/* BLOCK-94 — 知识溯源节：本轮自动召回注入的知识块，位于任务清单之后 */}
+        {citations && citations.length > 0 && <WorkspaceCitationsSection citations={citations} />}
+
+        <section className={styles.workspacePinnedSummaryEnvironment} aria-label="运行环境">
           <div className={styles.workspacePinnedSummarySectionHeading}>
             <div className={styles.workspacePinnedSummarySectionTitle}>运行环境</div>
           </div>
@@ -667,6 +673,7 @@ export const WorkspaceSummaryCard = React.memo(function WorkspaceSummaryCard({
             </div>
           </div>
         </section>
+        </details>
       </div>
     </aside>
   );

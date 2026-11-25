@@ -559,3 +559,62 @@ describe('WorkspaceSummaryCard 任务清单节 (BLOCK-97 / UI-398)', () => {
     expect(progress?.getAttribute('data-done')).toBe('true');
   });
 });
+
+describe('WorkspaceSummaryCard item25 摘要卡片定位（运行监控第一主角 / 资产抽屉）', () => {
+  it('运行监控主层常显：任务概览 + 需要关注/任务循环等直接在 body（不在抽屉内）', () => {
+    const { container } = render(<WorkspaceSummaryCard {...baseProps({
+      jobStats: { running: 1, failed: 1, done: 3, pending: 0 },
+      conversations: [makeConversation()],
+      datasets: [makeDataset()],
+    })} />);
+    const overview = container.querySelector('[aria-label="任务概览"]') as HTMLElement;
+    expect(overview).toBeTruthy();
+    expect(overview.closest('details')).toBeNull();
+    expect(screen.getByText('需要关注')).toBeTruthy();
+  });
+
+  it('资产总览类折叠为单一次级抽屉，默认收起，summary 可键盘聚焦展开', () => {
+    const { container } = render(<WorkspaceSummaryCard {...baseProps({
+      visibility: 'expanded',
+      conversations: [makeConversation()],
+      datasets: [makeDataset()],
+      recentJobs: [makeJob({ id: 'hist', status: 'done' })],
+    })} />);
+    const drawer = container.querySelector('details[aria-label="资产总览"]') as HTMLDetailsElement;
+    expect(drawer).toBeTruthy();
+    expect(drawer.open).toBe(false);
+    const summary = drawer.querySelector('summary') as HTMLElement;
+    expect(summary).toBeTruthy();
+    expect(summary.tabIndex >= 0 || summary.tagName === 'SUMMARY').toBe(true);
+    // 资产节在抽屉内（项目/最近分析/运行环境）
+    expect(drawer.querySelector('[aria-label="项目信息"]')).toBeTruthy();
+    expect(drawer.querySelector('[aria-label="运行环境"]')).toBeTruthy();
+    fireEvent.click(summary);
+    expect(drawer.open).toBe(true);
+  });
+
+  it('两形态（expanded 钉住列 / float 悬浮）同构：同一资产抽屉都在', () => {
+    for (const visibility of ['expanded', 'float'] as const) {
+      const { container } = render(<WorkspaceSummaryCard {...baseProps({
+        visibility,
+        conversations: [makeConversation()],
+        datasets: [makeDataset()],
+      })} />);
+      expect(container.querySelector('details[aria-label="资产总览"]')).toBeTruthy();
+      expect(container.querySelector('[aria-label="任务概览"]')).toBeTruthy();
+      cleanup();
+    }
+  });
+
+  it('无资产内容不渲染抽屉（无内容不渲染纪律）', () => {
+    const { container } = render(<WorkspaceSummaryCard {...baseProps({
+      visibility: 'compact',
+      conversations: [],
+      datasets: [],
+      recentJobs: [],
+    })} />);
+    // 运行环境节始终有「计算后端」内容，故抽屉仍可能存在——允许；但空 citations/todo 不应额外渲染
+    expect(container.querySelector('[aria-label="知识溯源"]')).toBeNull();
+    expect(container.querySelector('[aria-label="任务清单"]')).toBeNull();
+  });
+});

@@ -357,9 +357,9 @@
       "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1026,
-      "bytes": 48067,
-      "sha256": "fedba9cb19f00be9f0a0e1177965073c4bc0ee79984ccbe4c7e5a661319437a6"
+      "lines": 1033,
+      "bytes": 48507,
+      "sha256": "958dbe933f0eb9a4c746bb3d3df82866c003fb50e1cb209e90d21bbdb093814c"
     },
     {
       "path": "core/shared-backend/result-replay-service/cohort-package.js",
@@ -686,6 +686,16 @@
       "to": {
         "lines": 944,
         "bytes": 48340
+      }
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+      "reason": "item25 摘要卡片改版：资产类节归并 details 抽屉 + aria-label（结构重分组，+7 行）",
+      "date": "2026-11-25",
+      "from": null,
+      "to": {
+        "lines": 1033,
+        "bytes": 48507
       }
     }
   ]
