@@ -11,6 +11,7 @@
  */
 
 const express = require('express');
+const logger = require('../../shared-backend/logger');
 const dbMod = require('../db');
 
 const { logChatAudit } = require('../helpers/memory-privacy');
@@ -213,7 +214,7 @@ module.exports = function registerAiChatRoute(app) {
         }
       }
     } catch (e) {
-      console.log('[mem-vec-err]', e && e.message);
+      logger.info('[mem-vec-err]', e && e.message);
     }
     if (retrievalBlock) {
       systemPrompt +=
@@ -244,7 +245,7 @@ module.exports = function registerAiChatRoute(app) {
         }
       }
     } catch (e) {
-      console.log('[mem-vec-err]', e && e.message);
+      logger.info('[mem-vec-err]', e && e.message);
     }
 
     // Layer 2: inject saved summary if any
@@ -262,7 +263,7 @@ module.exports = function registerAiChatRoute(app) {
         }
       }
     } catch (e) {
-      console.log('[mem-vec-err]', e && e.message);
+      logger.info('[mem-vec-err]', e && e.message);
     }
 
     // Layer 2: keep only the last N messages from the user-supplied list
@@ -308,7 +309,7 @@ module.exports = function registerAiChatRoute(app) {
         resolveModelContextWindow(identityProfile, activeModel),
       ).catch((e) => {
         // BLOCK-102 P1 — silent 64k fallback disabled the context fuse without a trace
-        console.error('[ai-chat] context window probe failed:',
+        logger.error('[ai-chat] context window probe failed:',
           e && e.message ? e.message : e);
         return 0;
       }) || 0;
@@ -324,7 +325,7 @@ module.exports = function registerAiChatRoute(app) {
         trimmed: total > (ctxWindow || 64000),
       }) + '\n\n');
     } catch (e) {
-      console.log('[token-budget-estimation-error]', e && e.message);
+      logger.info('[token-budget-estimation-error]', e && e.message);
     }
 
     let ended = false;
@@ -371,18 +372,18 @@ module.exports = function registerAiChatRoute(app) {
                         content: turnText.slice(0, MAX_CONTENT_LEN),
                         vec: vecs[0],
                       });
-                      console.log(
+                      logger.info(
                         '[mem-vec] indexed turn user=' + userId + ' len=' + turnText.length
                       );
                     }
                   } catch (e) {
-                    console.log('[mem-vec-err]', e && e.message);
+                    logger.info('[mem-vec-err]', e && e.message);
                   }
                 })();
               }
             }
           } catch (e) {
-            console.log('[mem-vec-err]', e && e.message);
+            logger.info('[mem-vec-err]', e && e.message);
           }
           // Layer 3a: extract facts on shorter threads (every 4 turns)
           try {
@@ -397,7 +398,7 @@ module.exports = function registerAiChatRoute(app) {
               backgroundExtractFacts(userId, messages, projectId).catch(() => {});
             }
           } catch (e) {
-            console.log('[mem-vec-err]', e && e.message);
+            logger.info('[mem-vec-err]', e && e.message);
           }
           // Layer 2: fire-and-forget summarization if thread has grown
           try {
@@ -414,7 +415,7 @@ module.exports = function registerAiChatRoute(app) {
               }
             }
           } catch (e) {
-            console.log('[mem-vec-err]', e && e.message);
+            logger.info('[mem-vec-err]', e && e.message);
           }
     };
 

@@ -16,6 +16,7 @@
  */
 
 const crypto = require('crypto');
+const logger = require('../shared-backend/logger');
 const { getBackendPort } = require('../../src/main/env-coordinator');
 const { tryBindPort, PORT_IN_USE_EXIT_CODE } = require('./port-guard');
 
@@ -26,7 +27,7 @@ const PORT = getBackendPort('r');
   if (!handle) {
     // 单行、无堆栈：绑定失败是**预期内的永久失败**（已有后端在场），不是异常。
     // supervisor 以 exit 77 识别为 no-retry（BLOCK-457 P2），不再 30s 循环。
-    console.error(`[port-guard] :${PORT} already in use — single-instance guard, exit ${PORT_IN_USE_EXIT_CODE} (no module loaded, zero DB side effects)`);
+    logger.error(`[port-guard] :${PORT} already in use — single-instance guard, exit ${PORT_IN_USE_EXIT_CODE} (no module loaded, zero DB side effects)`);
     process.exit(PORT_IN_USE_EXIT_CODE);
   }
   // 每 boot 实例身份：/api/health 暴露（instanceId/pid/dataDir），
@@ -36,6 +37,6 @@ const PORT = getBackendPort('r');
   require('./server-main')(handle);
 })().catch((e) => {
   // bootstrap 自身不许有堆栈噪音：任何意外都单行诚实退出。
-  console.error('[port-guard] bootstrap failed:', e && e.message ? e.message : e);
+  logger.error('[port-guard] bootstrap failed:', e && e.message ? e.message : e);
   process.exit(PORT_IN_USE_EXIT_CODE);
 });

@@ -21,6 +21,14 @@
 
 module.exports = function startPetriServer(portHandle) {
 
+// BLOCK-520 P0 OB-004/007：进程级错误统一落盘（console.error 桥接 +
+// unhandledRejection/uncaughtException 必触 error-log，E-019）。装在最前以覆盖
+// 模块加载期错误；server.js 端口守卫路径刻意不装（需保持 dataDir 零副作用契约）。
+const { installConsoleErrorBridge, installProcessErrorHandlers } = require('../shared-backend/error-log');
+installConsoleErrorBridge();
+installProcessErrorHandlers();
+const logger = require('../shared-backend/logger');
+
 const express = require('express');
 
 const fs = require('fs');
@@ -38,7 +46,6 @@ const cacheManager = require('./cache-manager');
 const { db } = require('./db');
 require('./helpers/early-loop-guard').reportLoadBlock(); // BLOCK-328：db require 链（含 initSchema 同步 busy 等待）耗时告警
 const config = require('./config');
-const { logError } = require('./helpers/error-log');
 const { recordFunnelEvent } = require('./helpers/funnel-log');
 
 // BLOCK-202 W3 — 网络代理与自签 CA：把持久化配置写入进程 env（Node 只在启动时读取
@@ -46,7 +53,7 @@ const { recordFunnelEvent } = require('./helpers/funnel-log');
 try {
   require('./helpers/network-config').applyNetworkEnv();
 } catch (e) {
-  console.warn('[block202] network env apply skipped:', e && e.message);
+  logger.warn('[block202] network env apply skipped:', e && e.message);
 }
 
 // A-009: pull the petri-server port fallback from env-coordinator instead of
@@ -60,7 +67,7 @@ const { getBackendPort } = require('../../src/main/env-coordinator');
 try {
   require('../shared-backend/init').initSharedBackend();
 } catch (e) {
-  console.error('[server] shared-backend init FAILED — storage/executor adapters unavailable (BLOCK-102 P1):', e.message);
+  logger.error('[server] shared-backend init FAILED — storage/executor adapters unavailable (BLOCK-102 P1):', e.message);
 }
 
 // 断点1（分仓前置）：把 petri-server 自己的 config + ai-usage 实现注入 shared-backend。
@@ -75,7 +82,7 @@ try {
     recordAiUsage: require('./helpers/ai-usage').recordAiUsage,
   });
 } catch (e) {
-  console.error('[server] shared-backend configure FAILED — ai-usage/config injection broken (BLOCK-102 P1):', e.message);
+  logger.error('[server] shared-backend configure FAILED — ai-usage/config injection broken (BLOCK-102 P1):', e.message);
 }
 
 // petri-server 是独立子进程，不共享 Electron 主进程的插件 Map。使用与 MCP
@@ -97,19 +104,19 @@ try {
         // BLOCK-157 加映（UI-481）— 整包启停：停用包整体不接线（插件源与
         // tool-registry 注册都不生效 → run_tool/MCP/catalog 天然不出现；启用免重装）
         if (installedPack.enabled === false) {
-          console.log('[pack-registry] pack disabled by user, skipping: ' + installedPack.packId);
+          logger.info('[pack-registry] pack disabled by user, skipping: ' + installedPack.packId);
           continue;
         }
         const packPluginsDir = path.join(installedPack.packRoot, 'plugins');
         if (fs.existsSync(path.join(packPluginsDir, 'installed.json'))) {
-          console.log('[pack-registry] wiring installed pack: ' + installedPack.packId);
+          logger.info('[pack-registry] wiring installed pack: ' + installedPack.packId);
           packSourcesFromPacks.push({ type: 'installed', root: packPluginsDir, required: false });
         }
         toolRegistryModule.registerDomainToolsFile(path.join(installedPack.packRoot, 'registry', 'tool-registry.json'));
       }
     }
   } catch (e) {
-    console.warn('[pack-registry] pack wiring failed:', e.message);
+    logger.warn('[pack-registry] pack wiring failed:', e.message);
   }
 
   // BLOCK-84：三源 + 已装领域包源 = 单次多源装载（避免多次调用互相清除）
@@ -120,7 +127,7 @@ try {
     ...packSourcesFromPacks,
   ]);
 } catch (e) {
-  console.error('[server] plugin-loader init FAILED — plugins unavailable (BLOCK-102 P1):', e.message);
+  logger.error('[server] plugin-loader init FAILED — plugins unavailable (BLOCK-102 P1):', e.message);
 }
 
 const app = express();
@@ -139,16 +146,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Catch unhandled errors
-process.on('unhandledRejection', (reason, _promise) => {
-  logError('unhandledRejection', reason);
-});
-process.on('uncaughtException', (err) => {
-  logError('uncaughtException', err);
-  // L3-5（蓝图 L-22）：记录后主动退出（exit 1）——带不一致状态继续服务比受控重启
-  // 更危险；dev supervisor / pm2 均按退出信号拉起（受控重启语义）。
-  process.exit(1);
-});
+// 进程级错误处理器已由文件顶部的 installProcessErrorHandlers() 统一注册
+// （含 L3-5 exit(1) 受控重启语义）；此处不重复注册。
 
 // A desktop server restart interrupts any in-process analysis still marked active.
 try {
@@ -158,7 +157,7 @@ try {
     ? dbMod.markStalledToolJobsRecovery()
     : [];
   if (stalled.length > 0) {
-    console.log('[Recovery] Marking ' + stalled.length + ' stalled tasks as failed');
+    logger.info('[Recovery] Marking ' + stalled.length + ' stalled tasks as failed');
     const errMsg = '服务重启时此任务被中断，请重新提交';
     const finishedAt = new Date().toISOString();
     for (const a of stalled) {
@@ -166,17 +165,17 @@ try {
     }
   }
   if (stalledToolJobs.length > 0) {
-    console.log('[Recovery] Preserved ' + stalledToolJobs.length + ' interrupted tool jobs as recovery_required');
+    logger.info('[Recovery] Preserved ' + stalledToolJobs.length + ' interrupted tool jobs as recovery_required');
   }
   // HLE-C5: Recover running LoopRuns from previous session
   try {
     const runningLoopRuns = dbMod.listRunningLoopRuns();
     if (runningLoopRuns.length > 0) {
-      console.log('[Recovery] Found ' + runningLoopRuns.length + ' running LoopRun(s) from previous session');
+      logger.info('[Recovery] Found ' + runningLoopRuns.length + ' running LoopRun(s) from previous session');
       for (const run of runningLoopRuns) {
         // Update status to 'failed' with recovery_required since we can't safely resume mid-session
         // The LoopRun was interrupted by server restart — log it for manual review
-        console.log('[Recovery] LoopRun ' + run.loopRunId + ' (project=' + run.projectId + ') marked as recovery_required');
+        logger.info('[Recovery] LoopRun ' + run.loopRunId + ' (project=' + run.projectId + ') marked as recovery_required');
         try {
           const statusJson = run.loopStatusJson ? JSON.parse(run.loopStatusJson) : {};
           dbMod.updateLoopRunStatus(run.loopRunId, {
@@ -185,17 +184,17 @@ try {
             json: JSON.stringify({ ...statusJson, recovery_required: true, recovery_reason: 'server_restart_during_active_loop' }),
             updatedAt: new Date().toISOString(),
           });
-          console.log('[Recovery] LoopRun ' + run.loopRunId + ' → failed (recovery_required=true)');
+          logger.info('[Recovery] LoopRun ' + run.loopRunId + ' → failed (recovery_required=true)');
         } catch (err) {
-          console.error('[Recovery] Failed to update LoopRun ' + run.loopRunId + ':', err.message);
+          logger.error('[Recovery] Failed to update LoopRun ' + run.loopRunId + ':', err.message);
         }
       }
     }
   } catch (e) {
-    console.error('[Recovery] LoopRun recovery failed:', e.message);
+    logger.error('[Recovery] LoopRun recovery failed:', e.message);
   }
 } catch (e) {
-  console.error('[Recovery] Failed:', e.message);
+  logger.error('[Recovery] Failed:', e.message);
 }
 
 // A-009: single source of truth via env-coordinator.getBackendPort('r').
@@ -235,7 +234,7 @@ setupBootstrap(app, { db });
 // backend-proc-manager have their own lifecycle hooks; we do not touch them.
 // ============================================================
 let backendExitLifecycleInstalled = false;
-function installBackendExitLifecycle({ db, log = console.log, logWarn = console.warn } = {}) {
+function installBackendExitLifecycle({ db, log = logger.info, logWarn = logger.warn } = {}) {
   if (backendExitLifecycleInstalled) return;
   backendExitLifecycleInstalled = true;
 
@@ -323,7 +322,7 @@ try {
   const { scheduleStaleRunningReconciler } = require('./helpers/stale-running-reconciler');
   scheduleStaleRunningReconciler({ db });
 } catch (e) {
-  console.warn('[retention] scheduler not started:', e && e.message ? e.message : e);
+  logger.warn('[retention] scheduler not started:', e && e.message ? e.message : e);
 }
 
 // MODULES_PRECEDENCE_v1 — modular routes register here, BEFORE all legacy
@@ -332,7 +331,7 @@ try {
 try {
   require('./routes')(app);
 } catch (e) {
-  console.warn('[modules] route registry failed to load:', e && e.message);
+  logger.warn('[modules] route registry failed to load:', e && e.message);
 }
 
 app.get('/api/health', (req, res) => {
@@ -348,7 +347,7 @@ require('./helpers/async-handler').installErrorMiddleware(app);
 try {
   cacheManager.startScheduler();
 } catch (e) {
-  console.error('cache scheduler error:', e.message);
+  logger.error('cache scheduler error:', e.message);
 }
 
 // ============================================================
@@ -376,7 +375,7 @@ setupAiBridge({ tempDir: TEMP_DIR });
     const lag = now - last - TICK_MS;
     if (lag > 0) perfProbe.observeBlock(lag);
     if (lag > BLOCK_THRESHOLD_MS) {
-      console.warn(
+      logger.warn(
         `[event-loop] ⚠ blocked ~${lag}ms (recovered at ${new Date(now).toISOString()})`
       );
     }
@@ -390,9 +389,9 @@ setupAiBridge({ tempDir: TEMP_DIR });
 // 形态注意：server.listen(handle[, callback]) 的 handle 直接传 net.Server 实例
 // （Node 文档「handle can be a server or a socket」）；{ handle } 包装形态不接受。
 const httpServer = app.listen(portHandle, () => {
-  console.log(`🧬 Petri R Server running on port ${PORT}`);
-  console.log(`   POST http://localhost:${PORT}/api/run`);
-  console.log(`   GET  http://localhost:${PORT}/api/health`);
+  logger.info(`🧬 Petri R Server running on port ${PORT}`);
+  logger.info(`   POST http://localhost:${PORT}/api/run`);
+  logger.info(`   GET  http://localhost:${PORT}/api/health`);
   // L1-3（蓝图 L-52）：token 门激活时把每 boot 随机 token 落 0600 文件——
   // 供无 Origin 的本地脚本/dev-verify 流读取（同用户可读，跨用户不可读）。
   try {
@@ -402,7 +401,7 @@ const httpServer = app.listen(portHandle, () => {
       fs.writeFileSync(tokenFile, `${process.env.PETRI_LOCAL_REQUEST_TOKEN}\n`, { mode: 0o600 });
     }
   } catch (e) {
-    console.warn('[local-request-token] token 文件落盘失败（0600 best-effort）:', e && e.message ? e.message : e);
+    logger.warn('[local-request-token] token 文件落盘失败（0600 best-effort）:', e && e.message ? e.message : e);
   }
   // BLOCK-186：后端就绪即本机 app_started 落本地漏斗台账（best-effort，永不阻塞监听）。
   recordFunnelEvent('app_started');
@@ -411,7 +410,7 @@ const httpServer = app.listen(portHandle, () => {
     const { startScheduleRunner } = require('./helpers/automation-runner');
     startScheduleRunner({ baseUrl: `http://127.0.0.1:${PORT}` });
   } catch (e) {
-    console.warn('[automation-runner] not started:', e && e.message ? e.message : e);
+    logger.warn('[automation-runner] not started:', e && e.message ? e.message : e);
   }
 });
 
@@ -428,7 +427,7 @@ try {
       require('./routes/tools')(mobileApp);
     };
     const gateway = startMobileGateway({ dataDir: mobileDataDir, mountRoutes: gatewayRoutes });
-    if (!gateway.started) console.log('[mobile-gateway] disabled (default off)');
+    if (!gateway.started) logger.info('[mobile-gateway] disabled (default off)');
     // BLOCK-145 D1（BK-08 根因修复）：隧道引导移出冷启动关键路径——listen 注册后的
     // 下一轮 event loop 异步触发（管理器内部清场链亦已异步化）。引导失败只如实记
     // 日志，隧道是增强门而非关键路径，任何失败都不影响主后端服务。
@@ -436,16 +435,16 @@ try {
       try {
         const { getTunnelManager } = require('./mobile-gateway/tunnel');
         const tunnelStatus = getTunnelManager(mobileDataDir).startIfEnabled();
-        if (tunnelStatus.enabled) console.log(`[mobile-tunnel] ${tunnelStatus.state} → ${tunnelStatus.host}:${tunnelStatus.remotePort}`);
+        if (tunnelStatus.enabled) logger.info(`[mobile-tunnel] ${tunnelStatus.state} → ${tunnelStatus.host}:${tunnelStatus.remotePort}`);
       } catch (e) {
-        console.error('[mobile-tunnel] boot failed (non-fatal, tunnel stays down):', e && e.message);
+        logger.error('[mobile-tunnel] boot failed (non-fatal, tunnel stays down):', e && e.message);
       }
     });
   } else {
-    console.log('[mobile-gateway] skipped: PETRI_LOCAL_DATA_DIR not set');
+    logger.info('[mobile-gateway] skipped: PETRI_LOCAL_DATA_DIR not set');
   }
 } catch (e) {
-  console.error('[mobile-gateway] FAILED TO START — mobile/federation doors down (BLOCK-102 P1):', e && e.message);
+  logger.error('[mobile-gateway] FAILED TO START — mobile/federation doors down (BLOCK-102 P1):', e && e.message);
 }
 
 };

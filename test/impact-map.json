@@ -10044,6 +10044,21 @@
         "frontend/src/styles/CulturalWatermark.test.ts",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/watermarkImage.test.ts"
       ]
+    },
+    {
+      "id": "block520-p0-observability",
+      "note": "BLOCK-520 P0 让失败可见（2026-11-25）：console→logger 收敛 / error-log 静默吞+dedupe+console.error 桥接 / 进程错误处理器加固。HK-01 红绿先行，证据=acceptance/harness-observability/P0-EVIDENCE.md。",
+      "patterns": [
+        "core/shared-backend/error-log.js",
+        "core/petri-server/helpers/tools-executor.js",
+        "core/petri-server/server-main.js",
+        "core/petri-server/routes/ai-chat.js",
+        "core/petri-server/server.js",
+        "acceptance/harness-observability/**"
+      ],
+      "tests": [
+        "test/block520-p0-observability.test.mjs"
+      ]
     }
   ]
 }

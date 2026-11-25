@@ -1,4 +1,5 @@
 'use strict';
+const logger = require('../../shared-backend/logger');
 
 const { ARTIFACT_SCHEMA_VERSION } = require('../../shared-backend/schema-versions');
 const fs = require('fs');
@@ -197,7 +198,7 @@ function createToolsExecutor({
         jobDir = layout.jobRoot;
       }
     } catch (error) {
-      console.warn('[tools] Failed to resolve project layout for cleanup:', error.message);
+      logger.warn('[tools] Failed to resolve project layout for cleanup:', error.message);
     }
 
     // 回退到全局目录
@@ -237,7 +238,7 @@ function createToolsExecutor({
       const filename = String(req.params.filename || '');
       try {
         const stat = await sshReader.statFile(filename);
-        if (!stat) { if (process.env.PETRI_B76_DEBUG) console.error('[b76-reader] file stat null for', filename); return res.status(404).json({ error: 'file_not_found' }); }
+        if (!stat) { if (process.env.PETRI_B76_DEBUG) logger.error('[b76-reader] file stat null for', filename); return res.status(404).json({ error: 'file_not_found' }); }
         const buf = await sshReader.readFile(filename);
         const theme = normalizeReportTheme(req?.query?.theme);
         if (theme && isHtmlFile(filename)) {
@@ -267,7 +268,7 @@ function createToolsExecutor({
           ensureDirs: false,
         });
       } catch (error) {
-        console.warn('[tools] Project layout resolution failed for file read:', error.message);
+        logger.warn('[tools] Project layout resolution failed for file read:', error.message);
         return res.status(404).json({ error: 'file_not_found' });
       }
     }
@@ -347,7 +348,7 @@ function createToolsExecutor({
       }
       fs.writeFileSync(path.join(outputDir, 'report.html'), html);
     } catch (e) {
-      console.warn('[tools] Report regen failed:', e.message);
+      logger.warn('[tools] Report regen failed:', e.message);
     }
   }
 
@@ -373,7 +374,7 @@ function createToolsExecutor({
           outputDir = layout.outputDir;
           filePath = safeJoinUnder(outputDir, req.params.filename);
         } catch (error) {
-          console.warn('[tools] Project layout resolution failed for file write:', error.message);
+          logger.warn('[tools] Project layout resolution failed for file write:', error.message);
         }
       }
 
@@ -420,7 +421,7 @@ function createToolsExecutor({
           outputDir = layout.outputDir;
           projectExportsDir = layout.exportsDir;
         } catch (error) {
-          console.warn('[tools] Project layout resolution failed for report:', error.message);
+          logger.warn('[tools] Project layout resolution failed for report:', error.message);
         }
       }
 
@@ -501,7 +502,7 @@ function createToolsExecutor({
             exportRelPath = path.join('results', 'exports', exportName);
           }
         } catch (error) {
-          console.warn('[tools] Final report export copy failed:', error.message);
+          logger.warn('[tools] Final report export copy failed:', error.message);
         }
       }
 
@@ -531,7 +532,7 @@ function createToolsExecutor({
         excludeRemoteTargets: true,
       });
       if (result.changes > 0) {
-        console.log(`[tools] Recovered ${result.changes} unowned zombie job(s)`);
+        logger.info(`[tools] Recovered ${result.changes} unowned zombie job(s)`);
         try {
           notify.custom({
             title: `⚠️ ${startup ? '启动恢复' : '周期扫描'}：${result.changes} 个无主 zombie 任务标 failed`,
@@ -556,10 +557,10 @@ function createToolsExecutor({
           }
         }
       } catch (e) {
-        console.warn('[tools] remote re-adopt scan failed:', e.message);
+        logger.warn('[tools] remote re-adopt scan failed:', e.message);
       }
     } catch (e) {
-      console.warn(`[tools] recoverZombieJobs failed: ${e.message} — skipping startup scan`);
+      logger.warn(`[tools] recoverZombieJobs failed: ${e.message} — skipping startup scan`);
     }
   }
 
@@ -622,10 +623,10 @@ function createToolsExecutor({
       const staged = fs.readdirSync(jobRoot)
         .filter((name) => { try { return fs.statSync(path.join(jobRoot, name)).isFile(); } catch { return false; } })
         .map((name) => path.join(jobRoot, name));
-      console.log('[tools] Queue pump starting job ' + row.id + ' (user=' + row.user_id + ')');
+      logger.info('[tools] Queue pump starting job ' + row.id + ' (user=' + row.user_id + ')');
       void executeJob(row.id, row.tool_id, jobRoot, staged)
         .catch((error) => handleActiveToolJobSetupFailure({ activeToolJobs, jobId: row.id, error, markFailed: markJobFailed }))
-        .catch((error) => console.warn('[tools] Queue pump start failed for job ' + row.id + ':', error.message));
+        .catch((error) => logger.warn('[tools] Queue pump start failed for job ' + row.id + ':', error.message));
       return;
     }
   }
@@ -634,7 +635,7 @@ function createToolsExecutor({
     void pumpQueuedToolJobs().catch((error) => {
       // 泵故障不阻断终态收敛（下一终态再触发），但不许静默——漏 await 的
       // TypeError 长期假死正是被这里的空 catch 吞掉（BLOCK-135 复核发现）。
-      console.warn('[tools] queue pump failed:', error.message);
+      logger.warn('[tools] queue pump failed:', error.message);
     });
   });
 
@@ -653,7 +654,7 @@ function createToolsExecutor({
     }
     const failed = await transitionToolJobToFailed({ db, jobId, error: errStr });
     if (!failed || failed.changes < 1) {
-      console.log('[tools] Job ' + jobId + ' reached another terminal state; skip failure overwrite');
+      logger.info('[tools] Job ' + jobId + ' reached another terminal state; skip failure overwrite');
       return;
     }
     const translated = translateRError(errStr);
@@ -695,7 +696,7 @@ function createToolsExecutor({
         stage,
       });
     } catch (e) {
-      console.warn('[tools] notify on failure error:', e.message);
+      logger.warn('[tools] notify on failure error:', e.message);
     }
   }
 
@@ -720,7 +721,7 @@ function createToolsExecutor({
         }
       }
     } catch (e) {
-      console.warn('[tools] plugin-loader lookup failed for', toolId, ':', e.message);
+      logger.warn('[tools] plugin-loader lookup failed for', toolId, ':', e.message);
     }
 
     // Built-in registry is the local R-tool fallback. Python tools run locally via the executor registry.
@@ -734,7 +735,7 @@ function createToolsExecutor({
         };
       }
     } catch (e) {
-      console.warn('[tools] tool-registry lookup failed for', toolId, ':', e.message);
+      logger.warn('[tools] tool-registry lookup failed for', toolId, ':', e.message);
     }
 
     return null;
@@ -894,7 +895,7 @@ function createToolsExecutor({
       try {
         await settleConfirmedToolCancellation({ db, jobId, result: cancelledResult });
       } catch (error) {
-        console.warn('[tools] ssh-direct cancelled terminal persistence failed:', error.message);
+        logger.warn('[tools] ssh-direct cancelled terminal persistence failed:', error.message);
       }
       activeDirectJobs.delete(jobId);
       releaseActiveToolJob(activeToolJobs, jobId, owner);
@@ -917,7 +918,7 @@ function createToolsExecutor({
           .prepare('UPDATE tool_jobs SET result_json=? WHERE id=? AND status IN (?,?,?)')
           .run(JSON.stringify(failedResult), jobId, 'pending', 'running', 'failed');
       } catch (error) {
-        console.warn('[tools] ssh-direct failed terminal persistence failed:', error.message);
+        logger.warn('[tools] ssh-direct failed terminal persistence failed:', error.message);
       }
       await markFailed(jobId, `SSH 直跑脚本退出码 ${Number.isFinite(code) ? code : '未知'}（详见服务器 results/jobs/${jobId}/output/run.log）`, 'execute');
       activeDirectJobs.delete(jobId);
@@ -933,7 +934,7 @@ function createToolsExecutor({
         const rres = resolveWorkspaceBackend(sshContext.project);
         if (rres.backend) environment = await captureREnv(rres.backend, rres.root);
       } catch (e) {
-        console.warn('[tools] ssh-direct R env capture failed:', e.message);
+        logger.warn('[tools] ssh-direct R env capture failed:', e.message);
       }
     }
     const result = {
@@ -955,7 +956,7 @@ function createToolsExecutor({
     try {
       await transitionToolJobToCompleted({ db, jobId, result });
     } catch (error) {
-      console.warn('[tools] ssh-direct completed terminal persistence failed:', error.message);
+      logger.warn('[tools] ssh-direct completed terminal persistence failed:', error.message);
     }
     activeDirectJobs.delete(jobId);
       releaseActiveToolJob(activeToolJobs, jobId, owner);
@@ -1017,7 +1018,7 @@ function createToolsExecutor({
       await transitionToolJobToCompleted({ db, jobId, result: summary });
       releaseActiveToolJob(activeToolJobs, jobId, owner);
     } catch (e) {
-      console.warn('[tools] adoptSshDirectJob failed:', e.message);
+      logger.warn('[tools] adoptSshDirectJob failed:', e.message);
       releaseActiveToolJob(activeToolJobs, jobId, owner);
     }
   }
@@ -1088,9 +1089,9 @@ function createToolsExecutor({
           try {
             await settleConfirmedToolCancellation({ db, jobId, result: cancelledResult });
           } catch (error) {
-            console.warn('[tools] cancelled Job terminal persistence failed:', error.message);
+            logger.warn('[tools] cancelled Job terminal persistence failed:', error.message);
           }
-          console.log('[tools] Job ' + jobId + ' cancellation confirmed by process exit');
+          logger.info('[tools] Job ' + jobId + ' cancellation confirmed by process exit');
         };
         if (active && active.cancelRequested) {
           await finalizeCancellation();
@@ -1138,11 +1139,11 @@ function createToolsExecutor({
                   )
                   .run(jobId);
               } catch (error) {
-                console.warn('[tools] Job ' + jobId + ' retry requeue failed:', error.message);
+                logger.warn('[tools] Job ' + jobId + ' retry requeue failed:', error.message);
               }
             }
             if (retried && retried.changes >= 1) {
-              console.log('[tools] Job ' + jobId + ' 进入重试 (' + (retryCount + 1) + '/' + retryMax + ')：瞬态原因 ' + retryClassification.reason);
+              logger.info('[tools] Job ' + jobId + ' 进入重试 (' + (retryCount + 1) + '/' + retryMax + ')：瞬态原因 ' + retryClassification.reason);
               // owner 必须先于泵释放：notifyScheduler 同步直达 claimActiveToolJob，
               // 迟释放会让重跑被「already has an active execution owner」吞掉
               //（finally 的幂等 release 不受影响）。
@@ -1155,7 +1156,7 @@ function createToolsExecutor({
           try {
             failed = buildProvenance();
           } catch (error) {
-            console.warn('[tools] failed Job provenance persistence failed:', error.message);
+            logger.warn('[tools] failed Job provenance persistence failed:', error.message);
           }
           const failedResult = buildFailedToolResult({
             existingResult: parseStoredToolResult(currentJob),
@@ -1181,7 +1182,7 @@ function createToolsExecutor({
               .prepare('UPDATE tool_jobs SET result_json=? WHERE id=? AND status IN (?,?,?)')
               .run(JSON.stringify(failedResult), jobId, 'pending', 'running', 'failed');
           } catch (error) {
-            console.warn('[tools] failed Job resource summary persistence failed:', error.message);
+            logger.warn('[tools] failed Job resource summary persistence failed:', error.message);
           }
           if (active.cancelRequested) {
             await finalizeCancellation(failed);
@@ -1331,22 +1332,22 @@ function createToolsExecutor({
           if (active.cancelRequested) await finalizeCancellation(recorded);
           return;
         }
-        console.log('[tools] Job ' + jobId + ' completed');
+        logger.info('[tools] Job ' + jobId + ' completed');
 
         try {
           if (currentJob && currentJob.is_test_run) {
             fs.rmSync(jobDir, { recursive: true, force: true });
-            console.log('[tools] Cleaned up test job dir: ' + jobId);
+            logger.info('[tools] Cleaned up test job dir: ' + jobId);
           }
         } catch (e) {
-          console.warn('[tools] cleanup error:', e.message);
+          logger.warn('[tools] cleanup error:', e.message);
         }
         } catch (callbackError) {
-          console.warn('[tools] Job ' + jobId + ' finalization failed:', callbackError.message);
+          logger.warn('[tools] Job ' + jobId + ' finalization failed:', callbackError.message);
           try {
             await markJobFailed(jobId, `Job finalization failed: ${callbackError.message}`, 'finalize');
           } catch (persistenceError) {
-            console.warn('[tools] Job finalization failure persistence failed:', persistenceError.message);
+            logger.warn('[tools] Job finalization failure persistence failed:', persistenceError.message);
           }
         } finally {
           releaseActiveToolJob(activeToolJobs, jobId, owner);
@@ -1357,7 +1358,7 @@ function createToolsExecutor({
   async function executeJob(jobId, toolId, jobDir, stagedInputFiles = [], sshContext = null) {
     const owner = claimActiveToolJob(activeToolJobs, { jobId, toolId });
     if (!owner) {
-      console.warn('[tools] Job ' + jobId + ' already has an active execution owner');
+      logger.warn('[tools] Job ' + jobId + ' already has an active execution owner');
       return;
     }
     const started = await db
@@ -1365,7 +1366,7 @@ function createToolsExecutor({
       .run('running', jobId, 'pending');
     if (!started || started.changes < 1) {
       releaseActiveToolJob(activeToolJobs, jobId, owner);
-      console.log('[tools] Job ' + jobId + ' not started because it is no longer pending');
+      logger.info('[tools] Job ' + jobId + ' not started because it is no longer pending');
       return;
     }
     const job = hydrateExecutionJob(
@@ -1529,7 +1530,7 @@ function createToolsExecutor({
               return;
             }
             if (ensured && !ensured.ok) {
-              console.warn(
+              logger.warn(
                 '[tools] capability bundle(s) not ready for',
                 toolId,
                 '— failing the job:',
@@ -1556,7 +1557,7 @@ function createToolsExecutor({
 
     if (!await canLaunchOwnedToolJob({ activeToolJobs, db, jobId, owner })) {
       releaseActiveToolJob(activeToolJobs, jobId, owner);
-      console.log('[tools] Job ' + jobId + ' launch suppressed by durable cancellation state');
+      logger.info('[tools] Job ' + jobId + ' launch suppressed by durable cancellation state');
       // BLOCK-57：远程分派窗口长（探测+上传需数秒），durable cancel 抑制启动后
       // 必须行级收敛为 cancelled——与 cancel 路由的行级 UPDATE 同语义，防作业行滞留 running。
       try {
@@ -1570,7 +1571,7 @@ function createToolsExecutor({
           publishJobTerminalState(jobId, 'cancelled');
         }
       } catch (error) {
-        console.warn('[tools] suppressed-launch cancellation convergence failed:', error.message);
+        logger.warn('[tools] suppressed-launch cancellation convergence failed:', error.message);
       }
       return;
     }
@@ -1690,7 +1691,7 @@ function createToolsExecutor({
         try {
           await finalizeJobRun({ err, stdout: stdoutAll, stderr: stderrAll, sampledResources: await collectSampledResources() });
         } catch (finalizeError) {
-          console.warn('[tools] Job ' + jobId + ' finalize after spawn failed:', finalizeError.message);
+          logger.warn('[tools] Job ' + jobId + ' finalize after spawn failed:', finalizeError.message);
         } finally {
           clearJobLiveLog(jobId);
         }
@@ -1882,7 +1883,7 @@ function createToolsExecutor({
           }
         }
       } catch (e) {
-        console.warn('[tools] BLOCK-67 ssh default target resolution failed:', e.message);
+        logger.warn('[tools] BLOCK-67 ssh default target resolution failed:', e.message);
       }
       // BLOCK-76 P1：SSH 项目的作业执行链 = SSH 直跑（gateway 写编排面 + exec_bg 后台直跑，
       // 产物留服务器 results/jobs/<jobId>/），不再走 BLOCK-57 作业上传/拉回链。
@@ -1908,7 +1909,7 @@ function createToolsExecutor({
         });
         jobDir = layout.jobRoot;
       } catch (error) {
-        console.warn('[tools] Failed to resolve project layout:', error.message);
+        logger.warn('[tools] Failed to resolve project layout:', error.message);
         return res.status(400).json({
           error: 'project_layout_failed',
           message: error.message
@@ -1916,7 +1917,7 @@ function createToolsExecutor({
       }
     } else {
       // 兜底到全局目录（历史兼容，未来可移除）
-      console.warn('[tools] No projectId provided, using legacy global directory');
+      logger.warn('[tools] No projectId provided, using legacy global directory');
       jobDir = path.join(jobsDir, jobId);
       config.mkdirSandbox(jobDir);
     }
@@ -2013,7 +2014,7 @@ function createToolsExecutor({
         )
         .get(uid, Date.now());
       const queuePosition = (ahead && ahead.cnt ? ahead.cnt : 0) + 1;
-      console.log(
+      logger.info(
         `[tools] Job ${jobId} queued (tool=${toolId} rid=${req.requestId} user=${uid} position=${queuePosition})`
       );
       return res.json({ ok: true, jobId, status: 'pending', queued: true, queuePosition, isTestRun: isTest, requestId: req.requestId });
@@ -2026,9 +2027,9 @@ function createToolsExecutor({
         markFailed: markJobFailed,
       }))
       .catch((error) => {
-        console.warn('[tools] Job ' + jobId + ' setup failure handling failed:', error.message);
+        logger.warn('[tools] Job ' + jobId + ' setup failure handling failed:', error.message);
       });
-    console.log(
+    logger.info(
       `[tools] Job ${jobId} submitted (tool=${toolId} rid=${req.requestId} user=${uid} test=${isTest})`
     );
     res.json({ ok: true, jobId, status: 'pending', isTestRun: isTest, requestId: req.requestId });
