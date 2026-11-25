@@ -21,6 +21,12 @@ phase: G0
 
 **空**。代码待办清零（P6 全链 passed、🟡9 九项全收口、C-56 双链路已验）、状态归位已推完、串行槽位空。无新实现项可自推——不自造工作。
 
+## A2. 已排期未开工（BLOCK-520 harness 可观测性，2026-11-25 新增）
+
+| 项 | 排期 | 体量 | 证据 |
+|---|---|---|---|
+| BLOCK-520 OB-001/004/007 → OB-002/003/005 → OB-008/009 | P0 让失败可见 → P1 链路可追/状态可量 → P2 控制闭环；逐波发令、单工作包串行，第 9 项外部监督器单列 U 类待裁 | P0 S~M / P1 M / P2 M+待裁 | `docs/block520-harness-observability-plan.md`（含 §1 核码纠偏）；`acceptance/harness-observability/U-EXTERNAL-SUPERVISOR.md`（pending_user_ruling） |
+
 ## B. 等用户单一裁决（8 项）
 
 | 项 | 等什么 | 体量 | 证据 |
