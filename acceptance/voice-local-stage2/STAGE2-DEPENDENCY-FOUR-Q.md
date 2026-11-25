@@ -28,3 +28,15 @@ V 裁决材料 §三写「whisper.cpp 独立 CLI 二进制（官方 releases 含
 ## §4 不依赖裁决、可先行部分
 
 composer 麦克风入口（MediaRecorder → 分段 → 现有 `transcribe_audio` 链 → 文本进 composer）走**现有 local/deepseek provider 链**，不依赖 whisper 选型；可先 HK-01 红绿实现。whisper 落点待裁决后接线（作为 local 内部模型选择，回退链零变化）。
+
+## §5 owner 裁决（2026-11-25 · msg_0077c4847060，回复 msg_c8a42ec9cbd7）
+
+**裁决：行——采用 `@fugood/whisper.node@1.0.13` 作为 whisper 并列运行时（第 2 个新依赖）。** owner 依据：①V 材料前提（官方 macos-arm64 CLI）经核真不成立，属**材料事实偏差非方向偏差**——「本地 ASR、零编译器工具链、worker 隔离」的已批意图不变；②备选与阶段一 sherpa-onnx 同形态（npm binding/预编译/MIT），本机 `npm view` 确认存在无 404 风险；③owner 代拍授权覆盖「材料已齐的方案拍板」。
+
+**条件（逐条执行）**：
+1. 版本精确钉扎 `1.0.13`（不用 `^`/rc），package-lock 随批。
+2. 本四问 + 本裁决（含核真证据链：WebSearch `ggml-org/whisper.cpp` releases 无 macos-arm64 CLI + HF `ggerganov/whisper.cpp` ggml-*.bin SHA + 本机 `npm view @fugood/whisper.node` / `@fugood/node-whisper-darwin-arm64@1.0.13` 存在）一并入 acceptance 留痕 ✓（本文件即留痕）。
+3. 实测若发现包不可用/行为不符 → 停下回报，不硬换。
+4. 回退链零变化（whisper 作为 local 内部模型选择，不改 `asr-provider` 的 local→deepseek 链）。
+
+核真证据链：§1 WebSearch 来源 [1][2][3][6] + §2 本机 npm view 输出（version/dist-tags/platform dep）；裁决后实测腿结果另记入 EVIDENCE.md。

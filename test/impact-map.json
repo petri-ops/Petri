@@ -10128,6 +10128,25 @@
       "tests": [
         "test/block519-stage2-composer-mic.test.mjs"
       ]
+    },
+    {
+      "id": "block519-stage2-whisper",
+      "note": "BLOCK-519 阶段二 whisper 并列（owner 裁决 msg_0077c4847060，@fugood/whisper.node@1.0.13 第2新依赖）：独立模型管理/native worker 隔离/engine 分派（回退链零变化）/设置面二选一下载。",
+      "patterns": [
+        "core/petri-server/helpers/whisper-model.js",
+        "core/petri-server/helpers/whisper-asr.js",
+        "core/petri-server/helpers/whisper-asr-worker.js",
+        "core/petri-server/helpers/local-asr.js",
+        "core/petri-server/helpers/asr-provider.js",
+        "core/petri-server/routes/runtime-config.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ChannelPreferencePanel.tsx",
+        "package.json",
+        "package-lock.json",
+        "acceptance/voice-local-stage2/**"
+      ],
+      "tests": [
+        "test/block519-stage2-whisper.test.mjs"
+      ]
     }
   ]
 }

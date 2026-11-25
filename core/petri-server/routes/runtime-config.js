@@ -161,6 +161,38 @@ module.exports = function mountRuntimeConfig(app) {
     }
   });
 
+  // BLOCK-519 阶段二 — whisper 并列模型管理（与 SenseVoice local-models 并存，二选一下载）。
+  app.get('/api/speech/whisper-models', (_req, res) => {
+    try {
+      const whisperModel = require('../helpers/whisper-model');
+      return res.json({ status: 'ok', models: whisperModel.listWhisperModels() });
+    } catch (error) {
+      return res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
+  app.post('/api/speech/whisper-models/:id/download', async (req, res) => {
+    try {
+      const whisperModel = require('../helpers/whisper-model');
+      const result = await whisperModel.downloadWhisperModel(req.params.id);
+      if (!result.ok) return res.status(400).json({ status: 'error', error: result.code, message: result.message });
+      return res.json({ status: 'ok', ...result });
+    } catch (error) {
+      return res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
+  app.delete('/api/speech/whisper-models/:id', (req, res) => {
+    try {
+      const whisperModel = require('../helpers/whisper-model');
+      const result = whisperModel.deleteWhisperModel(req.params.id);
+      if (!result.ok) return res.status(400).json({ status: 'error', error: result.code });
+      return res.json({ status: 'ok', ...result });
+    } catch (error) {
+      return res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
   // BLOCK-519 阶段二 — composer 麦克风：音频 → 文本（复用 asr-provider 链，零新识别逻辑）。
   // 默认关不发请求（付费知情）；失败诚实 400 + 结构化 code，不伪造文本。
   app.post('/api/speech/transcribe', express.raw({ type: 'audio/*', limit: '8mb' }), async (req, res) => {

@@ -77,6 +77,23 @@ async function transcribeWithLocalAsr(input = {}) {
   if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
     return { ok: false, code: 'asr_file_missing', message: '缺少待转写音频内容', provider: 'local' };
   }
+  // BLOCK-519 阶段二 — 按 engine 分派：whisper 走独立 native worker（模型单 .bin），
+  // 默认（未声明 engine）= SenseVoice 原路径逐字保留，回退链零变化。
+  const engine = String(model.engine || input.engine || 'sensevoice');
+  if (engine === 'whisper') {
+    const tmpDir = input.tmpDir || os.tmpdir();
+    fs.mkdirSync(path.join(tmpDir, 'petri-whisper-asr'), { recursive: true });
+    const wavPath = path.join(tmpDir, 'petri-whisper-asr', `asr-${process.pid}-${Date.now()}.wav`);
+    fs.writeFileSync(wavPath, buffer);
+    try {
+      const { transcribeWithWhisper } = require('./whisper-asr');
+      const result = await transcribeWithWhisper({ ...input, model, wavPath, language });
+      if (!result || !result.ok) return { ...(result || {}), ok: false, provider: 'local' };
+      return { ...result, ok: true, provider: 'local', engine: 'whisper', cost: { requests: 0, bytes: buffer.length } };
+    } finally {
+      try { fs.rmSync(wavPath, { force: true }); } catch { /* 临时 wav 清理失败不影响结果回报 */ }
+    }
+  }
   const modelDir = String(model.modelDir || '');
   if (!modelDir || !fs.existsSync(path.join(modelDir, MODEL_FILE)) || !fs.existsSync(path.join(modelDir, TOKENS_FILE))) {
     return {

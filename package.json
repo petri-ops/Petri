@@ -278,6 +278,7 @@
   },
   "dependencies": {
     "@electron/notarize": "^2.5.0",
+    "@fugood/whisper.node": "1.0.13",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "archiver": "^8.0.0",
     "better-sqlite3": "^12.11.1",

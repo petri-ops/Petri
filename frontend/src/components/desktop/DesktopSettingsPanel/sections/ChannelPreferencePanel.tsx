@@ -41,6 +41,16 @@ interface LocalAsrModel {
   sha256?: string | null;
 }
 
+// BLOCK-519 阶段二 — whisper 并列模型（与 SenseVoice 同形，二选一下载）
+interface WhisperAsrModel {
+  id: string;
+  label: string;
+  installed: boolean;
+  language: string;
+  bytes?: number;
+  sha256?: string | null;
+}
+
 const LOCAL_MODEL_ID = 'sensevoice-small-int8-2024-07-17';
 const LOCAL_LANGUAGES = [
   { value: 'auto', label: '自动检测（SenseVoice 原生多语）' },
@@ -69,23 +79,30 @@ export function ChannelPreferencePanel(): React.ReactElement {
   const [ocr, setOcr] = useState<OcrEffective>({ ...EMPTY_OCR });
   const [speech, setSpeech] = useState<SpeechEffective>({ ...EMPTY_SPEECH });
   const [localModels, setLocalModels] = useState<LocalAsrModel[]>([]);
+  const [whisperModels, setWhisperModels] = useState<WhisperAsrModel[]>([]);
   const [busyModel, setBusyModel] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
   const loadModels = useCallback(async () => {
-    const response = await fetch(`${getPlatformApiPrefix()}/speech/local-models`, { headers: authHeader() });
-    const data = await response.json().catch(() => ({})) as { status?: string; models?: LocalAsrModel[] };
-    if (response.ok && data.status === 'ok' && Array.isArray(data.models)) setLocalModels(data.models);
+    const [res, wRes] = await Promise.all([
+      fetch(`${getPlatformApiPrefix()}/speech/local-models`, { headers: authHeader() }),
+      fetch(`${getPlatformApiPrefix()}/speech/whisper-models`, { headers: authHeader() }),
+    ]);
+    const data = await res.json().catch(() => ({})) as { status?: string; models?: LocalAsrModel[] };
+    const wData = await wRes.json().catch(() => ({})) as { status?: string; models?: WhisperAsrModel[] };
+    if (res.ok && data.status === 'ok' && Array.isArray(data.models)) setLocalModels(data.models);
+    if (wRes.ok && wData.status === 'ok' && Array.isArray(wData.models)) setWhisperModels(wData.models);
   }, []);
 
   const load = useCallback(async () => {
     try {
-      const [webRes, ocrRes, speechRes, modelRes] = await Promise.all([
+      const [webRes, ocrRes, speechRes, modelRes, wRes] = await Promise.all([
         fetch(`${getPlatformApiPrefix()}/web-access`, { headers: authHeader() }),
         fetch(`${getPlatformApiPrefix()}/ocr-access`, { headers: authHeader() }),
         fetch(`${getPlatformApiPrefix()}/speech-access`, { headers: authHeader() }),
         fetch(`${getPlatformApiPrefix()}/speech/local-models`, { headers: authHeader() }),
+        fetch(`${getPlatformApiPrefix()}/speech/whisper-models`, { headers: authHeader() }),
       ]);
       const webData = await webRes.json().catch(() => ({})) as { webAccess?: { effective?: { provider?: string } } };
       const ocrData = await ocrRes.json().catch(() => ({})) as { ocrAccess?: { effective?: OcrEffective } };
@@ -94,7 +111,9 @@ export function ChannelPreferencePanel(): React.ReactElement {
       if (webData.webAccess?.effective?.provider !== undefined) setSearchProvider(webData.webAccess.effective.provider);
       if (ocrData.ocrAccess?.effective) setOcr({ ...EMPTY_OCR, ...ocrData.ocrAccess.effective });
       if (speechData.speechAccess?.effective) setSpeech({ ...EMPTY_SPEECH, ...speechData.speechAccess.effective });
+      const wData = await wRes.json().catch(() => ({})) as { status?: string; models?: WhisperAsrModel[] };
       if (modelRes.ok && modelData.status === 'ok' && Array.isArray(modelData.models)) setLocalModels(modelData.models);
+      if (wRes.ok && wData.status === 'ok' && Array.isArray(wData.models)) setWhisperModels(wData.models);
     } catch {
       setNotice('加载失败');
     }
@@ -173,6 +192,29 @@ export function ChannelPreferencePanel(): React.ReactElement {
     setSpeech({ ...speech, local_model: localModel });
     const ok = await put('/speech-access', { local_model: localModel });
     if (!ok) setSpeech(prev);
+  }
+
+  // BLOCK-519 阶段二 — whisper 模型下载/删除（独立 REST 面，与 SenseVoice 并存）
+  async function handleWhisperAction(id: string, method: 'POST' | 'DELETE') {
+    setBusyModel(id);
+    setNotice(null);
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/speech/whisper-models/${encodeURIComponent(id)}${method === 'POST' ? '/download' : ''}`, {
+        method,
+        headers: authHeader(),
+      });
+      const data = await response.json().catch(() => ({})) as { status?: string; message?: string };
+      if (!response.ok || data.status !== 'ok') {
+        setNotice(data.message || 'whisper 模型操作失败');
+      } else {
+        setNotice(method === 'POST' ? '下载完成（以落盘状态为准）' : '已删除 whisper 模型');
+        await loadModels();
+      }
+    } catch {
+      setNotice('whisper 模型操作失败');
+    } finally {
+      setBusyModel(null);
+    }
   }
 
   async function handleModelAction(id: string, method: 'POST' | 'DELETE') {
@@ -318,8 +360,38 @@ export function ChannelPreferencePanel(): React.ReactElement {
                   </div>
                 ))}
               </div>
+              <div className={styles.field} data-testid="channel-whisper-models">
+                <span>Whisper 并列模型（可选，与 SenseVoice 二选一）</span>
+                {whisperModels.length === 0 && <p className="petri-field__hint">暂无可下载的 whisper 模型。</p>}
+                {whisperModels.map((model) => (
+                  <div key={model.id} className={styles.field} data-testid={`whisper-model-row-${model.id}`}>
+                    <span>{model.label} · {model.installed ? '已下载（真实落盘）' : '未下载'}</span>
+                    {model.installed ? (
+                      <>
+                        <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm"
+                          data-testid={`whisper-model-use-${model.id}`}
+                          disabled={speech.local_model?.modelId === model.id || busyModel === model.id}
+                          onClick={() => void handleModelUse(model.id)}>
+                          {speech.local_model?.modelId === model.id ? '使用中' : '设为使用中'}
+                        </button>
+                        <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm"
+                          data-testid={`whisper-model-delete-${model.id}`}
+                          disabled={busyModel === model.id}
+                          onClick={() => void handleWhisperAction(model.id, 'DELETE')}>删除</button>
+                      </>
+                    ) : (
+                      <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm"
+                        data-testid={`whisper-model-download-${model.id}`}
+                        disabled={busyModel === model.id}
+                        onClick={() => void handleWhisperAction(model.id, 'POST')}>
+                        {busyModel === model.id ? '下载中…' : '下载'}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
               <p className="petri-field__hint">
-                模型未落盘前不会标记为「使用中」；auto = SenseVoice 原生多语自动识别（配置透传，不写 native 参数）。
+                模型未落盘前不会标记为「使用中」；auto = 原生多语自动识别（配置透传，不写 native 参数）。whisper 与 SenseVoice 同为本地引擎，二选一下载。
               </p>
             </>
           )}

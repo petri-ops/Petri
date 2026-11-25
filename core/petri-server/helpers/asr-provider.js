@@ -54,7 +54,19 @@ async function invokeLocal(input) {
   try {
     const { resolveLocalAsrModel, DEFAULT_LOCAL_MODEL_ID } = require('./local-asr-model');
     const configuredId = input.config && input.config.local_model && input.config.local_model.modelId;
-    const model = resolveLocalAsrModel(configuredId || DEFAULT_LOCAL_MODEL_ID);
+    let model = resolveLocalAsrModel(configuredId || DEFAULT_LOCAL_MODEL_ID);
+    // BLOCK-519 阶段二 — whisper 选项：engine=whisper 时从独立 catalog 解析（单 .bin），
+    // 不改变 PROVIDERS 链与默认 SenseVoice 解析（回退链零变化）。
+    const localModelCfg = input.config && input.config.local_model;
+    // modelId 前缀 `whisper-` 即表达引擎选择（设置面只存 modelId/language，零 schema 改动）
+    const whisperSelected = (localModelCfg && localModelCfg.engine === 'whisper')
+      || String(configuredId || '').startsWith('whisper-');
+    if (whisperSelected) {
+      const whisperModel = require('./whisper-model');
+      const resolved = whisperModel.resolveWhisperModel(configuredId || 'whisper-small');
+      if (resolved) model = { ...resolved, id: resolved.id, language: resolved.language, engine: 'whisper' };
+      else model = null;
+    }
     if (!model) {
       return {
         ok: false,
