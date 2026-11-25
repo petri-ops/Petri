@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>摘要卡片定位改版 · 视觉稿</title>
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --panel: #ffffff;
+    --ink: #1f2a44;
+    --muted: #6b7690;
+    --line: #e2e7f0;
+    --accent: #2f5aa8;
+    --accent-soft: #eaf0fb;
+    --warn: #b5473b;
+    --ok: #2f7a5a;
+    --shadow: 0 10px 30px rgba(31, 42, 68, .08);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  header { padding: 28px 32px 12px; }
+  h1 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: .2px; }
+  header p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 20px 32px 48px; align-items: start; }
+  .col-label { font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin: 0 0 10px 2px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow); overflow: hidden; max-width: 420px; }
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .top strong { font-size: 15px; }
+  .top .tag { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 20px; padding: 2px 8px; }
+  .status { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .status .lead { display: flex; align-items: baseline; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: inline-block; }
+  .dot.run { background: var(--accent); }
+  .dot.warn { background: var(--warn); }
+  .counts { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+  .counts b { color: var(--ink); font-weight: 600; }
+  .sec { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .sec:last-child { border-bottom: 0; }
+  .sec h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .4px; }
+  .row { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; }
+  .row:last-child { margin-bottom: 0; }
+  .row .t { font-size: 13px; }
+  .row .m { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .alert { border-left: 3px solid var(--warn); background: #fdf3f2; }
+  .run-row { border-left: 3px solid var(--accent); }
+  details.sec > summary { cursor: pointer; list-style: none; padding: 12px 16px; font-size: 12px; color: var(--muted);
+    font-weight: 600; letter-spacing: .4px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; }
+  details.sec > summary::-webkit-details-marker { display: none; }
+  details.sec[open] > summary { border-bottom: 1px solid var(--line); }
+  details.sec > summary::after { content: "+"; color: var(--accent); font-size: 14px; }
+  details.sec[open] > summary::after { content: "−"; }
+  .drawer-body { padding: 0 16px 12px; }
+  .note { margin: 12px 2px 0; font-size: 12px; color: var(--muted); max-width: 420px; }
+  .pill { display:inline-block; font-size: 11px; padding: 1px 7px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); margin-left: 6px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>摘要卡片定位改版 · 视觉稿</h1>
+  <p>左：现状（资产类节穿插运行态） · 右：改版（运行监控常显，资产类折叠为抽屉） · 只供 owner 过目，未实现</p>
+</header>
+
+<div class="grid">
+  <section>
+    <p class="col-label">现状 · 节序平铺</p>
+    <div class="card">
+      <div class="top"><strong>项目运行摘要</strong><span class="tag">钉住列 / 悬浮</span></div>
+      <div class="status"><div class="lead"><span class="dot run"></span><b>运行中</b></div>
+        <div class="counts"><span>运行 <b>2</b></span><span>失败 <b>1</b></span><span>完成 <b>8</b></span></div></div>
+      <div class="sec"><h3>需要关注</h3><div class="row alert"><div class="t">1 个失败任务</div><div class="m">最近：差异分析 · 3 分钟前</div></div></div>
+      <div class="sec"><h3>任务</h3><div class="row run-row"><div class="t">测序质控</div><div class="m">运行中 · 本机</div></div></div>
+      <div class="sec"><h3>任务循环</h3><div class="row"><div class="t">本轮迭代 3 / 5</div><div class="m">证据校验中</div></div></div>
+      <div class="sec"><h3>任务进度</h3><div class="row"><div class="t">3 项待办</div><div class="m">当前会话</div></div></div>
+      <div class="sec"><h3>智能体</h3><div class="row"><div class="t">生信分析员</div><div class="m">工作中</div></div></div>
+      <div class="sec"><h3>最近分析</h3><div class="row"><div class="t">DESeq2 差异表达</div><div class="m">昨天</div></div></div>
+      <div class="sec"><h3>项目</h3><div class="row"><div class="t">项目信息 / SSH 主机 / 基线</div><div class="m">资产类</div></div></div>
+      <div class="sec"><h3>运行环境</h3><div class="row"><div class="t">后端 · R / Python · 终端</div><div class="m">资产类</div></div></div>
+    </div>
+    <p class="note">问题：运行态信号被「最近分析 / 项目 / 运行环境」等资产类节稀释，扫读成本高。</p>
+  </section>
+
+  <section>
+    <p class="col-label">改版 · 两态分层 <span class="pill">待 owner 过目</span></p>
+    <div class="card">
+      <div class="top"><strong>项目运行摘要</strong><span class="tag">运行监控优先</span></div>
+      <div class="status"><div class="lead"><span class="dot run"></span><b>运行中</b></div>
+        <div class="counts"><span>运行 <b>2</b></span><span>失败 <b>1</b></span><span>完成 <b>8</b></span></div></div>
+      <div class="sec"><h3>需要关注</h3><div class="row alert"><div class="t">1 个失败任务</div><div class="m">最近：差异分析 · 3 分钟前 · 点击查看</div></div></div>
+      <div class="sec"><h3>实时任务</h3>
+        <div class="row run-row"><div class="t">测序质控</div><div class="m">运行中 · 本机 · 12 分钟</div></div>
+        <div class="row"><div class="t">本轮迭代 3 / 5</div><div class="m">等待执行 · 证据校验</div></div></div>
+      <div class="sec"><h3>任务进度 / 智能体</h3><div class="row"><div class="t">3 项待办 · 生信分析员工作中</div><div class="m">当前会话</div></div></div>
+      <details class="sec" open><summary>资产总览</summary>
+        <div class="drawer-body">
+          <div class="row"><div class="t">会话与数据</div><div class="m">6 个会话 · 3 个数据集 · 1.2 GB</div></div>
+          <div class="row"><div class="t">项目信息</div><div class="m">本地 / SSH · 基线状态</div></div>
+          <div class="row"><div class="t">最近分析</div><div class="m">DESeq2 差异表达 · 昨天</div></div>
+          <div class="row"><div class="t">知识溯源</div><div class="m">本轮 4 个知识块</div></div>
+          <div class="row"><div class="t">运行环境</div><div class="m">后端 · R / Python · 终端会话</div></div>
+        </div>
+      </details>
+    </div>
+    <p class="note">主层仅运行监控；资产类默认折叠为单一抽屉（此处展开仅为展示内容）。两形态（悬浮 / 右轨）共用同一分层，不复制两套。</p>
+  </section>
+</div>
+</body>
+</html>
