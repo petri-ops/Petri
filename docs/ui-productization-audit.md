@@ -18,6 +18,8 @@
 - **验证（代码）**：HK-01 `test/harness-b1-zindex-contract.test.mjs` 红 6 测试中 4 失败 → 绿 6/6；`gate:ui-visual` 绿；theme-token-contract 裸 z 棘轮归零（本机缺 `frontend/node_modules`，vitest 未能执行，静态层级契约由 Node 侧 B1 与 BLOCK-413 复核）。
 - **状态边界**：in_progress（静态契约绿，dev Electron 实机未跑）；视觉层级观感项 `pending_human_eye` 一律不代签、不翻 verified，待主人过目；不碰 owner dev 实例、主线 WIP 零触碰、G0 开发期常态。证据=`acceptance/harness-invisible-issues/A3-B1-EVIDENCE.md`。
 
+**UI-728 增量 · 内联 var() 引号 hotfix（item 41，2026-11-25）**：B1 分支把 JSX `style` 对象的 `zIndex` 值写成裸表达式 `zIndex: var(--petri-z-xxx)`（JSX style 是 JS 对象，CSS 变量必须写成字符串字面量）；CI 干净环境报 9 处 `Parsing error: Expression expected`（全仓实为 10 处 / 9 文件，本地缺 `frontend/node_modules` 时 eslint 跳过 TSX 解析误判全绿）。逐处加单引号，层级值、其它属性与逻辑零改动。零新增 UI-###，UI-728 状态维持 in_progress（观感零代签、不翻 verified）。判据=`test/b1-inline-var-quoting.test.mjs` 红 10→绿 2/2 + `test/b1-inline-var-syntax.test.mjs` 红 9 文件→绿 2/2（`ts.transpileModule` reportDiagnostics 0 error）；docs:check / quality:secret / git diff --check 绿，`quality:lint` 本机缺 `frontend/node_modules` 无法验 TSX 如实标注、不强装依赖。证据=`acceptance/harness-invisible-issues/HOTFIX-INLINE-VAR-EVIDENCE.md`。G0 永久 maintained · G1 进行中（六序按令推进）。
+
 ## UI-725: 背景水印可替换设置（2026-11-25 **in_progress**；独立 worktree `petri-ops/watermark-swap`）
 
 - **变化面**：设置页「外观」新增「背景水印」项（三态 无/内置水墨/自定义图片 + 本地图片导入/路径 + 浅底转透明 + 透明度 0–30%）；`GlobalWatermarkAI` 改为读偏好动态注入背景图，暗色反相沿用既有 CSS 规则。

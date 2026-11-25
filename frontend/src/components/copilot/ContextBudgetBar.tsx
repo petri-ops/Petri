@@ -173,7 +173,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             color: 'var(--petri-text)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
             whiteSpace: 'nowrap',
-            zIndex: var(--petri-z-dropdown),
+            zIndex: 'var(--petri-z-dropdown)',
             minWidth: '260px',
           }}
         >

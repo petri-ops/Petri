@@ -397,7 +397,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
               data-testid="pack-uninstall-confirm"
               style={{
                 position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: var(--petri-z-overlay),
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 'var(--petri-z-overlay)',
               }}
             >
               <div style={{

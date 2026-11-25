@@ -307,7 +307,7 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
       {/* 图片放大灯箱 */}
       {zoomedImage && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: var(--petri-z-lightbox) }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 'var(--petri-z-lightbox)' }}
           onClick={() => setZoomedImage(null)}
         >
           <img src={zoomedImage} alt="放大预览" style={{ maxWidth: '90%', maxHeight: '90%' }} />
