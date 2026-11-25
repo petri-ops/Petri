@@ -93,7 +93,7 @@ E-01 树测试、E-02 IA v2 delegated-walk、UI-720 pack sandbox B1、UI-721 审
 | A1 静默吞错扩面（harness 队列1） | 规划外·待发令 | 主人发令（A1 本体已 Done `721dc1edc`，扩面未开） | S | harness 文档 §5 队列1 |
 | A3 D1 落地 / 队列7 第一/二波 | ✅ 已集成入 `origin/main=4536aebed`（七支串行合并 `petri-ops/item39-harness7`） | 无（已合主线；CI lint 陈旧 suppressions 归 harness 线处理） | — | harness 文档 §5 队列5.5/队列7；集成链 1bcfa205f / 4d537b7b0 / 8b6129e88 / 43983eef2 / 38513bc09 |
 | A1 静默吞错分级治理（扩面） | ✅ 已集成入主线（队列1 本体 `721dc1edc`） | 扩面待发令（本体已合入） | S | harness 文档 §5 队列1；集成链 ff269491a |
-| A5 外部监督器 C 先行 → A-会话级 L2 | ✅ C 形态已集成入主线（队列4 `450483bc3`）；**主人 2026-11-25 裁决「做 A-会话级」直达 L2**（口令 msg_7cf0a3957a41），本包落地豁免清单+L2 resume 续跑 | L3 进程级 kill/restart 永久挂账单列裁决；L2 阈值上线后用 C 形态 metrics/incidents 校准 | M | `acceptance/harness-observability/U-EXTERNAL-SUPERVISOR.md` + `A-EXTERNAL-SUPERVISOR-BOUNDARY.md`；集成链 fc738bb20 |
+| A5 外部监督器 C 先行 → A-会话级 L2 | ✅ C 形态已集成入主线（队列4 `450483bc3`）；**主人 2026-11-25 裁决「做 A-会话级」直达 L2**（口令 msg_7cf0a3957a41），本包落地豁免清单+L2 resume 续跑 | **L3 进程级 kill/restart 已终裁撤销、永久不做**（item46 e426 选 B：L2 即终态；本地 92d2366f3 搁置不 push、材料 status=已撤包）；L2 阈值上线后用 C 形态 metrics/incidents 校准 | M | `acceptance/harness-observability/U-EXTERNAL-SUPERVISOR.md` + `A-EXTERNAL-SUPERVISOR-BOUNDARY.md`；集成链 fc738bb20 |
 | B4 focus + B5 死代码 | ✅ 已集成入主线（队列2 `6a3fa87ff`，UI-727 in_progress） | 观感过目（pending_human_eye 零代签） | S | harness 文档 §5 队列2；集成链 008f57e3a |
 | B1 z-index 语义 token | ✅ 已集成入主线（队列3 `6120456e6`，UI-728 in_progress） | 观感过目（pending_human_eye 零代签） | S | harness 文档 §5 队列3；集成链 4c266fb1b |
 | A5 外部监督器 U 类 | 待 owner 裁决 | 主人判 C 先行之外是否升级（U 材料 pending_user_ruling） | M | `acceptance/harness-observability/U-EXTERNAL-SUPERVISOR.md` |
