@@ -10101,7 +10101,6 @@
         "frontend/src/components/desktop/AppRail.tsx",
         "frontend/src/components/workspace-panels/LeftPanel.tsx",
         "frontend/src/components/workspace-panels/LeftPanel.test.tsx",
-        "frontend/src/components/workspace-panels/LeftSshCreatePanel.tsx",
         "frontend/src/components/workspace-panels/CreateEntryRefactor.test.tsx",
         "frontend/src/pages/home.tsx",
         "frontend/src/styles/theme-token-contract.test.ts",
