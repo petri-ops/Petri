@@ -22,9 +22,12 @@
 
 回归：`result-edit-intent` + `result-edit-controls` + W1 契约 30/30 绿。
 
-## §4 heatmap 挂账（按裁决）
+## §4 heatmap 归属（owner 裁决更新：「跟包走」，非内核 G1）
 
-- manual→Agent heatmap 子项**挂账**：本仓无 heatmap 工具，插件在兄弟仓 `../petri-pack-bio/plugins.dormant/gene-correlation`（休眠态）；历史 P5 证据引用的本仓路径已随 BLOCK-83 迁包删除（正是「历史证据不冒充资格」实证）。依赖兄弟仓激活，到位后另立子包，本包不伪造本仓 heatmap 契约。兄弟仓激活裁决由 owner 另向兴奋提示（不在本包范围）。
+- owner 原话「b heatmap 跟包走」（派令 msg_ef23501c425e）：heatmap 子项**从 G1 内核资格矩阵移除**——不再写「等兄弟仓激活另立子包」（决定权留在错误的地方）；新归属=heatmap 证据归 **bio 领域包 `petri-pack-bio` 自己激活时的验收**，非内核 G1 要求。
+- 依据=领域包架构原则（领域能力是放大器不是身份）+ 历史 P4R-5 已 4/4 验过该链（不冒充资格、不阻塞内核 G1）。
+- 执行边界：**不激活兄弟仓、不动 petri-pack-bio**；何时做 heatmap 验收归包自己的计划。W2 的 affected-subgraph 契约照常成立；heatmap 不再是本包「挂账未决」，而是「归包走」的清晰归属（G1 首包零挂账未决的成分）。
+- 历史事实保留：本仓无 heatmap 工具、插件在兄弟仓 `plugins.dormant/gene-correlation`（休眠态）、P5 引用路径随 BLOCK-83 迁包删除（「历史证据不冒充资格」实证）——以上为归属裁决的背景，不构成阻塞。
 
 ## §5 边界
 

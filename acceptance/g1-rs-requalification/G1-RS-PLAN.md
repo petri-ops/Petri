@@ -7,7 +7,7 @@
 ## §1 核码真源（C-32/C-43 先核真源）
 
 - G1-READINESS §一.1 五项差距 + §一.3 序列 4「RS 重资格 P0–P4 差距补齐（G1 首包）」，体量 L。
-- g0-result-studio-plan §P7 重开条件（line1826-1830）：①五个独立 primary operation + task-bound replay + 真实截图/重算不变量；②**selection→enrichment、manual→Agent heatmap、affected-subgraph lifecycle、historical alternative 成真实产品契约**；③双真实 Provider + packaged macOS arm64 + 六格 + literal OS reboot 连续验收窗口。
+- g0-result-studio-plan §P7 重开条件（line1826-1830，原文引用）：①五个独立 primary operation + task-bound replay + 真实截图/重算不变量；②**selection→enrichment、manual→Agent heatmap、affected-subgraph lifecycle、historical alternative 成真实产品契约**；③双真实 Provider + packaged macOS arm64 + 六格 + literal OS reboot 连续验收窗口。**注（owner 裁决「b heatmap 跟包走」）**：本包执行时 heatmap 已从内核 G1 矩阵移除、归 bio 包激活验收；此处保留 g0-plan 原文引用仅为可追溯，不描述本包现行任务归属。
 - P7 延期根因（line1824）真源：`result_enrichment_from_context` 真跑 GO/KEGG 后**自动采用 parentless baseline**，P7 要求每条任务 candidate → compare → adopt/revert → replay；既有 family/parent/adopt 不变量禁止在验收层伪造该链。
 - 核码（`result-selection-tools.js:303-408`）：`tool_result_enrichment_from_revision` 走 `runTool` 真跑 + 写 lineage/workflowGraph，但**返回 executed 直接落 current，无 candidate cohort**（grep `derived-result|candidate.*cohort|parentless.*baseline` 零命中）。
 - 四项卡外部真值/成本：双 Provider 真实调用（需真实 API Key/模型）、packaged 六格 + literal OS reboot（需签名/公证/真机）、Git consent UI（后端已有 opt-in，前端 trace 需评估）、历史证据不冒充（纪律项非实现项）。
@@ -17,12 +17,13 @@
 | 波次 | 范围 | 性质 | 本机可验证 | 外部依赖 |
 |---|---|---|---|---|
 | **W1（本包首个可开工）** | selection→enrichment **derived-result candidate cohort**：enrichment 真跑后登记为**非 current 候选**（candidate），提供 compare → adopt/revert → replay 产品链（单一 ChangeSet/Revision Truth，不新增第二套 enrichment 工具、不放宽 cohort 安全门） | **产品语义 refactor** | ✅ HK-01 纯函数/状态机 + fixture 集成 + dev Electron 边界内 trace | 无（不跑真实 Provider） |
-| W2 | manual→Agent heatmap 与 affected-subgraph lifecycle 同构为真实契约 | 产品语义 refactor | ✅ | 无 |
+| W2 | affected-subgraph lifecycle 同构为真实契约（**heatmap 按 owner 裁决「跟包走」已从内核 G1 移除**——证据归 bio 领域包 `petri-pack-bio` 激活验收，非内核 G1 要求） | 产品语义 refactor | ✅（affected-subgraph） | 无（heatmap 归 bio 包计划，不在本包） |
 | W3 | Git consent UI（五条独立 task trace）+ historical alternative 产品契约 | 前端 + trace | ✅ 前端可测 | 真实 Git 仓库样本（本机可造） |
 | W4 | 双 Provider 矩阵真实 tool calling（≥1 OpenAI-compatible） | 资格证据 | 部分 | **真实 Provider Key/模型（外部）** |
 | W5 | packaged macOS arm64 六格 + literal OS reboot + 发布流水 | 资格证据 | 否 | **签名/公证/证书/真机（外部）** |
 | 纪律 | 历史 RS9/P4R/P6 证据继续作 G0 开发态证据，**不冒充 G1 资格证据** | 纪律 | ✅ | 无 |
 
+- **heatmap 归属裁决（owner 原话「b heatmap 跟包走」）**：heatmap 子项**从 G1 内核资格矩阵移除**，不再写「等兄弟仓激活另立子包」（那把决定权留在错误的地方）。新归属=**heatmap 证据归 bio 领域包 `petri-pack-bio` 自己激活时的验收**，非内核 G1 要求；依据=领域包架构原则（领域能力是放大器不是身份）+ 历史 P4R-5 已 4/4 验过该链（不冒充资格、不阻塞内核 G1）。本包**不激活兄弟仓、不动 petri-pack-bio**，那边何时做 heatmap 验收归包自己的计划。
 - W4/W5 按发令「packaged/证书相关子项若卡外部真值，如实挂账不硬凑」——**挂账不启动**，待外部到位再说。
 - 波次串行：W1 收口后开 W2，不并行。
 

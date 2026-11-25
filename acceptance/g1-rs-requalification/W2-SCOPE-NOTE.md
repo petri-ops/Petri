@@ -17,7 +17,9 @@
 - **heatmap manual→Agent**：插件在**兄弟仓休眠态**，本仓无 heatmap 工具（grep 零命中）。要成真实产品契约须激活/迁移领域包——属**跨仓外部依赖**，按发令「卡外部真值如实挂账不硬凑」+ governance 检查单未勾选项不就绪，**不擅自改兄弟仓**。
 - 这是**范围裁决点**（非判据决策点）：请 owner 只回「行/不行」。
 
-**最合理建议**：W2 先做本仓可独立验证的 affected-subgraph lifecycle 契约（HK-01 红绿 + 既有门零放宽）；heatmap 子项如实挂账，标注「依赖兄弟仓 petri-pack-bio 的 gene-correlation 从 plugins.dormant 激活，属跨仓外部真值，到位后另立子包」，不伪造本仓已有 heatmap 契约。理由=W2 目的本体之一（affected-subgraph）本机可完成且与 W1 同构，heatmap 跨仓需 owner 授权才能动兄弟仓。
+**最合理建议（原方案，已被 owner 裁决更新）**：W2 先做本仓可独立验证的 affected-subgraph lifecycle 契约（HK-01 红绿 + 既有门零放宽）；heatmap 子项如实挂账，标注「依赖兄弟仓 petri-pack-bio 的 gene-correlation 从 plugins.dormant 激活，属跨仓外部真值，到位后另立子包」，不伪造本仓已有 heatmap 契约。理由=W2 目的本体之一（affected-subgraph）本机可完成且与 W1 同构，heatmap 跨仓需 owner 授权才能动兄弟仓。
+
+> **owner 裁决更新（2026-11-25 · 原话「b heatmap 跟包走」· 派令 msg_ef23501c425e）**：上述「等兄弟仓激活另立子包」表述**作废**——那把决定权留在了错误的地方。新归属：heatmap 子项**从 G1 内核资格矩阵移除**，heatmap 证据归 **bio 领域包 `petri-pack-bio` 自己激活时的验收**，非内核 G1 要求；依据=领域包架构原则（领域能力是放大器不是身份）+ 历史 P4R-5 已 4/4 验过该链（不冒充资格，也不阻塞内核 G1）。执行边界：**不激活兄弟仓、不动 petri-pack-bio**，何时做 heatmap 验收归包自己的计划。W2 的 affected-subgraph 契约照常成立，heatmap 子项不再是本包「挂账未决」，而是「归包走」的清晰归属。
 
 ## §3 边界
 
