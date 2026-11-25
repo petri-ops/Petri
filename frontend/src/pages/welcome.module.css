@@ -382,3 +382,18 @@
 .chatMount {
   width: 100%;
 }
+
+/* B4/HK-01 — 首屏交互件键盘焦点环：token 化、零动效（不触碰 reduced-motion 兜底）。
+   projectSearch/actionInput 的 outline:none 只应抑制鼠标态，键盘由 :focus-visible 还原。 */
+.chip:focus-visible,
+.pickerTrigger:focus-visible,
+.projectSearch:focus-visible,
+.projectRow:focus-visible,
+.panelAction:focus-visible,
+.actionInput:focus-visible,
+.actionBack:focus-visible,
+.actionPrimary:focus-visible,
+.dirSuggestion:focus-visible {
+  outline: 2px solid var(--petri-accent);
+  outline-offset: 2px;
+}

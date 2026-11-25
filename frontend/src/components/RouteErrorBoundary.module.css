@@ -55,3 +55,9 @@
 /* BLOCK-167 加映：primaryBtn/secondaryBtn 已单源到 ui/controls/button.module.css
    （primary/ghost 变体；hover 态随共享变体）。 */
 
+/* B4/HK-01 — 回退页两个按钮的键盘焦点环：作用域限 .actions，token 化、零动效。 */
+.actions button:focus-visible {
+  outline: 2px solid var(--petri-accent);
+  outline-offset: 2px;
+}
+

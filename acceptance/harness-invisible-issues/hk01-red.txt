@@ -1,0 +1,180 @@
+▶ B4 keyboard focus-visible (HK-01 static contract)
+  ✖ welcome 首屏实际使用的交互类全部有 :focus-visible (1.0665ms)
+  ✖ welcome 两处 outline:none 输入框用 :focus-visible 还原焦点环 (0.193084ms)
+  ✖ RouteErrorBoundary 两个按钮有作用域内 :focus-visible (0.868916ms)
+  ✖ 焦点环走主题 token、无动效（reduced-motion 兜底不被破坏） (0.186792ms)
+✖ B4 keyboard focus-visible (HK-01 static contract) (3.126333ms)
+▶ B5 dead CSS cleanup (HK-01 static contract)
+  ✖ custom.css 零 .run-modal / .navbar 死选择器 (0.307583ms)
+  ✔ 已删 CSS 文件零复生；WorkbenchEmpty.module.css 因 token 契约引用保留 (0.122458ms)
+✖ B5 dead CSS cleanup (HK-01 static contract) (0.536333ms)
+ℹ tests 6
+ℹ suites 2
+ℹ pass 1
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 150.41325
+
+✖ failing tests:
+
+test at test/harness-b4b5-contract.test.mjs:32:3
+✖ welcome 首屏实际使用的交互类全部有 :focus-visible (1.0665ms)
+  AssertionError [ERR_ASSERTION]: .chip:focus-visible missing
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/triggerfish/test/harness-b4b5-contract.test.mjs:36:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at node:internal/test_runner/test:1769:71
+      at node:internal/per_context/primordials:466:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:435:3)
+      at node:internal/per_context/primordials:466:9
+      at Array.map (<anonymous>) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: "/* BLOCK-80 — 欢迎页（ZCode 形态、本项目内容） */\n\n.welcome {\n  position: relative;\n  min-height: 100%;\n  display: grid;\n  place-items: center;\n  padding: var(--petri-space-8) var(--petri-space-6);\n  overflow-y: auto;\n}\n\n.welcomeInner {\n  width: min(720px, 94%);\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 18px;\n}\n\n.greeting {\n  margin: 0;\n  font-size: var(--petri-font-size-2xl);\n  font-weight: 700;\n  /* A3 东方排版：标题宽字距承载竖排标题的重量（横排转译，不引新字族/依赖）。 */\n  letter-spacing: 0.04em;\n  /* S5/P1-3 身份 token 组件面消费：问候字 = 宣纸上的墨字（骨架 token 随档联切，\n     celadon 档为青瓷墨）。落印点 = A0 朱砂点睛 <5%（品牌落印位，不随 accent）。 */\n  color: var(--petri-ink-base);\n  text-align: center;\n}\n\n.greeting::after {\n  content: '';\n  display: inline-block;\n  width: 7px;\n  height: 7px;\n  margin-left: 0.35em;\n  vertical-align: 0.12em;\n  border-radius: var(--petri-radius-seal);\n  background: var(--petri-accent-vermilion);\n}\n\n.welcomeSub {\n  margin: -10px 0 6px;\n  color: var(--petri-text-secondary);\n  font-size: var(--petri-font-size-body);\n  /* A3：英文/技术标签作横排小字注脚，微量字距与标题同族。 */\n  letter-spacing: 0.02em;\n  text-align: center;\n}\n\n.composerCard {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  /* UI-341 加映 — 用户裁决继续弱化包裹感：外壳全去（背景/投影/圆角/内边距），\n     composer 自身卡片成为唯一视觉框，项目切换浮在页面上 */\n  padding: 0;\n  background: transparent;\n  border: none;\n  border-radius: 0;\n  box-shadow: none;\n}\n\n.pickerRow,\n.composerTopRow {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-4);\n  flex-wrap: wrap;\n}\n\n.pickerLabel {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-2);\n  color: var(--petri-text-secondary);\n}\n\n.projectSelect {\n  max-width: 260px;\n  padding: var(--petri-space-1) var(--petri-space-2);\n  border: 1px solid var(--petri-border-card);\n  border-radius: var(--petri-radius-md);\n  background: transparent;\n  color: var(--petri-text);\n  font-size: var(--petri-font-size-body);\n}\n\n.pickerEmpty {\n  color: var(--petri-text-secondary);\n}\n\n.branchChip {\n  display: inline-flex;\n  align-items: center;\n  gap: var(--petri-space-1);\n  padding: 3px var(--petri-space-3);\n  border-radius: var(--petri-radius-pill);\n  background: var(--petri-hover);\n  color: var(--petri-text-secondary);\n  font-size: var(--petri-font-size-sm);\n}\n\n.manageLink {\n  margin-left: auto;\n  border: none;\n  background: transparent;\n  color: var(--petri-text-secondary);\n  cursor: pointer;\n  text-decoration: underline;\n  text-underline-offset: 3px;\n}\n\n.manageLink:hover { background: var(--petri-hover);\n    color: var(--petri-text);\n}\n\n.errorText {\n  color: var(--petri-danger, #c0392b);\n}\n\n.chips {\n  display: flex;\n  flex-wrap: wrap;\n  justify-content: center;\n  gap: 10px;\n}\n\n.chip {\n  padding: var(--petri-space-2) 14px;\n  border: 1px solid var(--petri-border-card);\n  border-radius: var(--petri-radius-pill);\n  background: var(--petri-bg-surface);\n  color: var(--petri-text-secondary);\n  font-size: var(--petri-font-size-sm);\n  cursor: pointer;\n  transition: color var(--petri-duration-fast), border-color var(--petri-duration-fast);\n}\n\n.chip:hover { color: var(--petri-text);\n  border-color: var(--petri-accent);\n}\n\n/* UI-337 — ZCode 式项目下拉面板（搜索 + 清单✓ + 打开文件夹 + 远程连接） */\n\n.pickerWrap {\n  position: relative;\n  display: inline-block;\n}\n\n.pickerTrigger {\n  display: inline-flex;\n  align-items: center;\n  gap: var(--petri-space-2);\n  padding: 5px 10px;\n  border: 1px solid transparent;\n  border-radius: var(--petri-radius-lg);\n  background: var(--petri-hover);\n  color: var(--petri-text);\n  font-size: var(--petri-font-size-body);\n  font-weight: 600;\n  cursor: pointer;\n}\n\n.pickerTrigger:hover {\n  border-color: var(--petri-border-color, var(--petri-text-secondary));\n}\n\n.pickerOverlay {\n  position: fixed;\n  inset: 0;\n  border: none;\n  background: transparent;\n  cursor: default;\n  z-index: 30;\n}\n\n.projectPanel {\n  position: absolute;\n  top: calc(100% + 6px);\n  left: 0;\n  width: 340px;\n  max-width: 80vw;\n  border-radius: var(--petri-radius-lg);\n  background: var(--petri-bg-surface);\n  border: 1px solid var(--petri-border-card);\n  box-shadow: var(--petri-shadow-float);\n  z-index: 31;\n  overflow: hidden;\n}\n\n.projectSearch {\n  width: 100%;\n  box-sizing: border-box;\n  padding: 10px var(--petri-space-4);\n  border: none;\n  border-bottom: 1px solid var(--petri-divider);\n  background: transparent;\n  color: var(--petri-text);\n  font: inherit;\n  font-size: var(--petri-font-size-body);\n  outline: none;\n}\n\n.projectList {\n  max-height: 220px;\n  overflow-y: auto;\n  padding: var(--petri-space-1);\n}\n\n.projectRow {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-3);\n  width: 100%;\n  padding: var(--petri-space-3) 10px;\n  border: none;\n  border-radius: var(--petri-radius-lg);\n  background: transparent;\n  color: var(--petri-text);\n  font-size: var(--petri-font-size-body);\n  text-align: left;\n  cursor: pointer;\n}\n\n.projectRow:hover {\n  background: var(--petri-hover);\n}\n\n.projectRowActive {\n  background: var(--petri-accent-bg, var(--petri-hover));\n}\n\n.projectRowName {\n  flex: 1;\n  min-width: 0;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.projectRowTag {\n  font-size: var(--petri-font-size-xs);\n  padding: 1px 5px;\n  border-radius: var(--petri-radius-sm);\n  background: var(--petri-hover);\n  color: var(--petri-text-secondary);\n}\n\n.projectRowEmpty {\n  padding: 10px var(--petri-space-4);\n  color: var(--petri-text-secondary);\n}\n\n.panelActions {\n  display: flex;\n  flex-direction: column;\n  border-top: 1px solid var(--petri-divider);\n  padding: var(--petri-space-1);\n}\n\n.panelAction {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-3);\n  padding: 9px 10px;\n  border: none;\n  border-radius: var(--petri-radius-lg);\n  background: transparent;\n  color: var(--petri-text);\n  font-size: var(--petri-font-size-body);\n  text-align: left;\n  cursor: pointer;\n}\n\n.panelAction:hover {\n  background: var(--petri-hover);\n}\n\n.actionForm {\n  display: flex;\n  flex-direction: column;\n  gap: var(--petri-space-3);\n  padding: var(--petri-space-2) var(--petri-space-1);\n}\n\n.actionInput {\n  padding: 7px 9px;\n  border: 1px solid var(--petri-border-card);\n  border-radius: var(--petri-radius-lg);\n  background: var(--petri-bg);\n  color: var(--petri-text);\n  font: inherit;\n  font-size: var(--petri-font-size-body);\n  outline: none;\n}\n\n.actionPath {\n  color: var(--petri-text-secondary);\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.actionBtnRow {\n  display: flex;\n  justify-content: flex-end;\n  gap: var(--petri-space-3);\n}\n\n.actionBack {\n  border: none;\n  background: transparent;\n  color: var(--petri-text-secondary);\n  cursor: pointer;\n}\n\n.actionPrimary {\n  padding: var(--petri-space-2) 14px;\n  border: none;\n  border-radius: var(--petri-radius-lg);\n  background: var(--petri-accent);\n  color: #fff;\n  font-weight: 600;\n  cursor: pointer;\n}\n\n.actionPrimary:disabled {\n  opacity: 0.45;\n  cursor: not-allowed;\n}\n\n.actionHint {\n  font-size: var(--petri-font-size-sm);\n  color: var(--petri-text-secondary);\n}\n\n/* UI-424 — 顶部「← 返回」按钮退役（用户裁决），exitRow/exitBtn 样式随组件删除\n（普通 CSS 死类无门禁抓，删组件必同步删样式——a4663652 家法） */\n\n/* UI-338 加映 — SSH「先连接再补全」 */\n.sshAliasRow {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-3);\n}\n\n.sshAliasRow .actionInput {\n  flex: 1;\n  min-width: 0;\n}\n\n.dirSuggestions {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n  max-height: 150px;\n  overflow-y: auto;\n}\n\n.dirSuggestion {\n  border: none;\n  background: transparent;\n  color: var(--petri-text-secondary);\n  text-align: left;\n  padding: 5px var(--petri-space-3);\n  border-radius: var(--petri-radius-md);\n  cursor: pointer;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.dirSuggestion:hover {\n  background: var(--petri-hover); color: var(--petri-text);\n}\n\n/* UI-341 加映 — 内嵌聊天（composer-only 变体）：壳由 composerCard 对话框\n   容器提供，挂载层自身无壳、高度随 composer 自适应 */\n.chatMount {\n  width: 100%;\n}\n",
+    expected: /\.chip:focus-visible/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/harness-b4b5-contract.test.mjs:40:3
+✖ welcome 两处 outline:none 输入框用 :focus-visible 还原焦点环 (0.193084ms)
+  AssertionError [ERR_ASSERTION]: .projectSearch:focus-visible missing
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/triggerfish/test/harness-b4b5-contract.test.mjs:43:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1771:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: "/* BLOCK-80 — 欢迎页（ZCode 形态、本项目内容） */\n\n.welcome {\n  position: relative;\n  min-height: 100%;\n  display: grid;\n  place-items: center;\n  padding: var(--petri-space-8) var(--petri-space-6);\n  overflow-y: auto;\n}\n\n.welcomeInner {\n  width: min(720px, 94%);\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 18px;\n}\n\n.greeting {\n  margin: 0;\n  font-size: var(--petri-font-size-2xl);\n  font-weight: 700;\n  /* A3 东方排版：标题宽字距承载竖排标题的重量（横排转译，不引新字族/依赖）。 */\n  letter-spacing: 0.04em;\n  /* S5/P1-3 身份 token 组件面消费：问候字 = 宣纸上的墨字（骨架 token 随档联切，\n     celadon 档为青瓷墨）。落印点 = A0 朱砂点睛 <5%（品牌落印位，不随 accent）。 */\n  color: var(--petri-ink-base);\n  text-align: center;\n}\n\n.greeting::after {\n  content: '';\n  display: inline-block;\n  width: 7px;\n  height: 7px;\n  margin-left: 0.35em;\n  vertical-align: 0.12em;\n  border-radius: var(--petri-radius-seal);\n  background: var(--petri-accent-vermilion);\n}\n\n.welcomeSub {\n  margin: -10px 0 6px;\n  color: var(--petri-text-secondary);\n  font-size: var(--petri-font-size-body);\n  /* A3：英文/技术标签作横排小字注脚，微量字距与标题同族。 */\n  letter-spacing: 0.02em;\n  text-align: center;\n}\n\n.composerCard {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n  /* UI-341 加映 — 用户裁决继续弱化包裹感：外壳全去（背景/投影/圆角/内边距），\n     composer 自身卡片成为唯一视觉框，项目切换浮在页面上 */\n  padding: 0;\n  background: transparent;\n  border: none;\n  border-radius: 0;\n  box-shadow: none;\n}\n\n.pickerRow,\n.composerTopRow {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-4);\n  flex-wrap: wrap;\n}\n\n.pickerLabel {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-2);\n  color: var(--petri-text-secondary);\n}\n\n.projectSelect {\n  max-width: 260px;\n  padding: var(--petri-space-1) var(--petri-space-2);\n  border: 1px solid var(--petri-border-card);\n  border-radius: var(--petri-radius-md);\n  background: transparent;\n  color: var(--petri-text);\n  font-size: var(--petri-font-size-body);\n}\n\n.pickerEmpty {\n  color: var(--petri-text-secondary);\n}\n\n.branchChip {\n  display: inline-flex;\n  align-items: center;\n  gap: var(--petri-space-1);\n  padding: 3px var(--petri-space-3);\n  border-radius: var(--petri-radius-pill);\n  background: var(--petri-hover);\n  color: var(--petri-text-secondary);\n  font-size: var(--petri-font-size-sm);\n}\n\n.manageLink {\n  margin-left: auto;\n  border: none;\n  background: transparent;\n  color: var(--petri-text-secondary);\n  cursor: pointer;\n  text-decoration: underline;\n  text-underline-offset: 3px;\n}\n\n.manageLink:hover { background: var(--petri-hover);\n    color: var(--petri-text);\n}\n\n.errorText {\n  color: var(--petri-danger, #c0392b);\n}\n\n.chips {\n  display: flex;\n  flex-wrap: wrap;\n  justify-content: center;\n  gap: 10px;\n}\n\n.chip {\n  padding: var(--petri-space-2) 14px;\n  border: 1px solid var(--petri-border-card);\n  border-radius: var(--petri-radius-pill);\n  background: var(--petri-bg-surface);\n  color: var(--petri-text-secondary);\n  font-size: var(--petri-font-size-sm);\n  cursor: pointer;\n  transition: color var(--petri-duration-fast), border-color var(--petri-duration-fast);\n}\n\n.chip:hover { color: var(--petri-text);\n  border-color: var(--petri-accent);\n}\n\n/* UI-337 — ZCode 式项目下拉面板（搜索 + 清单✓ + 打开文件夹 + 远程连接） */\n\n.pickerWrap {\n  position: relative;\n  display: inline-block;\n}\n\n.pickerTrigger {\n  display: inline-flex;\n  align-items: center;\n  gap: var(--petri-space-2);\n  padding: 5px 10px;\n  border: 1px solid transparent;\n  border-radius: var(--petri-radius-lg);\n  background: var(--petri-hover);\n  color: var(--petri-text);\n  font-size: var(--petri-font-size-body);\n  font-weight: 600;\n  cursor: pointer;\n}\n\n.pickerTrigger:hover {\n  border-color: var(--petri-border-color, var(--petri-text-secondary));\n}\n\n.pickerOverlay {\n  position: fixed;\n  inset: 0;\n  border: none;\n  background: transparent;\n  cursor: default;\n  z-index: 30;\n}\n\n.projectPanel {\n  position: absolute;\n  top: calc(100% + 6px);\n  left: 0;\n  width: 340px;\n  max-width: 80vw;\n  border-radius: var(--petri-radius-lg);\n  background: var(--petri-bg-surface);\n  border: 1px solid var(--petri-border-card);\n  box-shadow: var(--petri-shadow-float);\n  z-index: 31;\n  overflow: hidden;\n}\n\n.projectSearch {\n  width: 100%;\n  box-sizing: border-box;\n  padding: 10px var(--petri-space-4);\n  border: none;\n  border-bottom: 1px solid var(--petri-divider);\n  background: transparent;\n  color: var(--petri-text);\n  font: inherit;\n  font-size: var(--petri-font-size-body);\n  outline: none;\n}\n\n.projectList {\n  max-height: 220px;\n  overflow-y: auto;\n  padding: var(--petri-space-1);\n}\n\n.projectRow {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-3);\n  width: 100%;\n  padding: var(--petri-space-3) 10px;\n  border: none;\n  border-radius: var(--petri-radius-lg);\n  background: transparent;\n  color: var(--petri-text);\n  font-size: var(--petri-font-size-body);\n  text-align: left;\n  cursor: pointer;\n}\n\n.projectRow:hover {\n  background: var(--petri-hover);\n}\n\n.projectRowActive {\n  background: var(--petri-accent-bg, var(--petri-hover));\n}\n\n.projectRowName {\n  flex: 1;\n  min-width: 0;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.projectRowTag {\n  font-size: var(--petri-font-size-xs);\n  padding: 1px 5px;\n  border-radius: var(--petri-radius-sm);\n  background: var(--petri-hover);\n  color: var(--petri-text-secondary);\n}\n\n.projectRowEmpty {\n  padding: 10px var(--petri-space-4);\n  color: var(--petri-text-secondary);\n}\n\n.panelActions {\n  display: flex;\n  flex-direction: column;\n  border-top: 1px solid var(--petri-divider);\n  padding: var(--petri-space-1);\n}\n\n.panelAction {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-3);\n  padding: 9px 10px;\n  border: none;\n  border-radius: var(--petri-radius-lg);\n  background: transparent;\n  color: var(--petri-text);\n  font-size: var(--petri-font-size-body);\n  text-align: left;\n  cursor: pointer;\n}\n\n.panelAction:hover {\n  background: var(--petri-hover);\n}\n\n.actionForm {\n  display: flex;\n  flex-direction: column;\n  gap: var(--petri-space-3);\n  padding: var(--petri-space-2) var(--petri-space-1);\n}\n\n.actionInput {\n  padding: 7px 9px;\n  border: 1px solid var(--petri-border-card);\n  border-radius: var(--petri-radius-lg);\n  background: var(--petri-bg);\n  color: var(--petri-text);\n  font: inherit;\n  font-size: var(--petri-font-size-body);\n  outline: none;\n}\n\n.actionPath {\n  color: var(--petri-text-secondary);\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.actionBtnRow {\n  display: flex;\n  justify-content: flex-end;\n  gap: var(--petri-space-3);\n}\n\n.actionBack {\n  border: none;\n  background: transparent;\n  color: var(--petri-text-secondary);\n  cursor: pointer;\n}\n\n.actionPrimary {\n  padding: var(--petri-space-2) 14px;\n  border: none;\n  border-radius: var(--petri-radius-lg);\n  background: var(--petri-accent);\n  color: #fff;\n  font-weight: 600;\n  cursor: pointer;\n}\n\n.actionPrimary:disabled {\n  opacity: 0.45;\n  cursor: not-allowed;\n}\n\n.actionHint {\n  font-size: var(--petri-font-size-sm);\n  color: var(--petri-text-secondary);\n}\n\n/* UI-424 — 顶部「← 返回」按钮退役（用户裁决），exitRow/exitBtn 样式随组件删除\n（普通 CSS 死类无门禁抓，删组件必同步删样式——a4663652 家法） */\n\n/* UI-338 加映 — SSH「先连接再补全」 */\n.sshAliasRow {\n  display: flex;\n  align-items: center;\n  gap: var(--petri-space-3);\n}\n\n.sshAliasRow .actionInput {\n  flex: 1;\n  min-width: 0;\n}\n\n.dirSuggestions {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n  max-height: 150px;\n  overflow-y: auto;\n}\n\n.dirSuggestion {\n  border: none;\n  background: transparent;\n  color: var(--petri-text-secondary);\n  text-align: left;\n  padding: 5px var(--petri-space-3);\n  border-radius: var(--petri-radius-md);\n  cursor: pointer;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.dirSuggestion:hover {\n  background: var(--petri-hover); color: var(--petri-text);\n}\n\n/* UI-341 加映 — 内嵌聊天（composer-only 变体）：壳由 composerCard 对话框\n   容器提供，挂载层自身无壳、高度随 composer 自适应 */\n.chatMount {\n  width: 100%;\n}\n",
+    expected: /\.projectSearch:focus-visible/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/harness-b4b5-contract.test.mjs:47:3
+✖ RouteErrorBoundary 两个按钮有作用域内 :focus-visible (0.868916ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /\.actions\s+button:focus-visible/. Input:
+  
+  '/* RouteErrorBoundary — 路由级错误边界回退 UI（token 阶梯：页面 surface 上浮 subtle 卡） */\n' +
+    '\n' +
+    '.wrap {\n' +
+    '  display: flex;\n' +
+    '  align-items: center;\n' +
+    '  justify-content: center;\n' +
+    '  min-height: 60vh;\n' +
+    '  padding: var(--petri-space-6);\n' +
+    '  background: var(--petri-bg-surface);\n' +
+    '}\n' +
+    '\n' +
+    '.card {\n' +
+    '  max-width: 520px;\n' +
+    '  width: 100%;\n' +
+    '  padding: var(--petri-space-6);\n' +
+    '  border: 1px solid var(--petri-border-card);\n' +
+    '  border-radius: var(--petri-radius-lg);\n' +
+    '  background: var(--petri-bg-subtle);\n' +
+    '}\n' +
+    '\n' +
+    '.title {\n' +
+    '  font-size: var(--petri-font-size-lg);\n' +
+    '  font-weight: 600;\n' +
+    '  color: var(--petri-text);\n' +
+    '}\n' +
+    '\n' +
+    '.message {\n' +
+    '  margin-top: var(--petri-space-3);\n' +
+    '  font-size: var(--petri-font-size-body);\n' +
+    '  line-height: 1.6;\n' +
+    '  color: var(--petri-text-secondary);\n' +
+    '}\n' +
+    '\n' +
+    '.detail {\n' +
+    '  margin: var(--petri-space-4) 0 0;\n' +
+    '  padding: 10px var(--petri-space-4);\n' +
+    '  max-height: 160px;\n' +
+    '  overflow: auto;\n' +
+    '  border: 1px solid var(--petri-border-card);\n' +
+    '  border-radius: var(--petri-radius-md);\n' +
+    '  background: var(--petri-bg-canvas);\n' +
+    '  font-family: var(--petri-font-mono, monospace);\n' +
+    '  line-height: 1.5;\n' +
+    '  color: var(--petri-text-tertiary);\n' +
+    '  white-space: pre-wrap;\n' +
+    '  word-break: break-all;\n' +
+    '}\n' +
+    '\n' +
+    '.actions {\n' +
+    '  margin-top: var(--petri-space-5);\n' +
+    '  display: flex;\n' +
+    '  gap: 10px;\n' +
+    '}\n' +
+    '\n' +
+    '/* BLOCK-167 加映：primaryBtn/secondaryBtn 已单源到 ui/controls/button.module.css\n' +
+    '   （primary/ghost 变体；hover 态随共享变体）。 */\n' +
+    '\n'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/triggerfish/test/harness-b4b5-contract.test.mjs:48:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/* RouteErrorBoundary — 路由级错误边界回退 UI（token 阶梯：页面 surface 上浮 subtle 卡） */\n\n.wrap {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 60vh;\n  padding: var(--petri-space-6);\n  background: var(--petri-bg-surface);\n}\n\n.card {\n  max-width: 520px;\n  width: 100%;\n  padding: var(--petri-space-6);\n  border: 1px solid var(--petri-border-card);\n  border-radius: var(--petri-radius-lg);\n  background: var(--petri-bg-subtle);\n}\n\n.title {\n  font-size: var(--petri-font-size-lg);\n  font-weight: 600;\n  color: var(--petri-text);\n}\n\n.message {\n  margin-top: var(--petri-space-3);\n  font-size: var(--petri-font-size-body);\n  line-height: 1.6;\n  color: var(--petri-text-secondary);\n}\n\n.detail {\n  margin: var(--petri-space-4) 0 0;\n  padding: 10px var(--petri-space-4);\n  max-height: 160px;\n  overflow: auto;\n  border: 1px solid var(--petri-border-card);\n  border-radius: var(--petri-radius-md);\n  background: var(--petri-bg-canvas);\n  font-family: var(--petri-font-mono, monospace);\n  line-height: 1.5;\n  color: var(--petri-text-tertiary);\n  white-space: pre-wrap;\n  word-break: break-all;\n}\n\n.actions {\n  margin-top: var(--petri-space-5);\n  display: flex;\n  gap: 10px;\n}\n\n/* BLOCK-167 加映：primaryBtn/secondaryBtn 已单源到 ui/controls/button.module.css\n   （primary/ghost 变体；hover 态随共享变体）。 */\n\n',
+    expected: /\.actions\s+button:focus-visible/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/harness-b4b5-contract.test.mjs:52:3
+✖ 焦点环走主题 token、无动效（reduced-motion 兜底不被破坏） (0.186792ms)
+  AssertionError [ERR_ASSERTION]: at least one focus-visible rule body
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/triggerfish/test/harness-b4b5-contract.test.mjs:57:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/harness-b4b5-contract.test.mjs:67:3
+✖ custom.css 零 .run-modal / .navbar 死选择器 (0.307583ms)
+  AssertionError [ERR_ASSERTION]: .navbar__items--right still present
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/orca/workspaces/Petri/triggerfish/test/harness-b4b5-contract.test.mjs:77:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at node:internal/test_runner/test:1769:71
+      at node:internal/per_context/primordials:466:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:435:3)
+      at node:internal/per_context/primordials:466:9
+      at Array.map (<anonymous>) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

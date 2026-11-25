@@ -1015,95 +1015,16 @@ html[data-theme='dark'],
   transform: translateX(4px);
 }
 
-/* ==========================================================
-   Navbar customization — search bar flows in the right cluster
-   ----------------------------------------------------------
-   历史：原来搜索框用 position:absolute + left:50% 绝对居中。导航项一多
-   就会和左侧菜单（如"关于"）重叠，且为遮挡重叠给右侧区域加了不透明白底，
-   反过来引发移动端侧边栏展开时登录按钮"白色悬浮块"的问题。
-   现改为：搜索框留在正常 flex 流里、靠右排布，宽度可伸缩。无论导航项
-   增加多少都由 flexbox 自动让位，永不覆盖内容；白底 hack 一并移除。
-   ========================================================== */
-
-/* 右侧簇贴右边缘；搜索框作为其中一员自然排在颜色切换/用户菜单左侧。 */
-.navbar__items--right {
-  margin-left: auto;
-  gap: var(--petri-space-1);
-}
-
-/* 搜索框：弹性宽度，窄屏自动收窄，聚焦时略微展开。 */
-.navbar .navbar__search-input {
-  width: 200px;
-  max-width: 22vw;
-  transition: width var(--petri-duration-fast) ease;
-}
-.navbar .navbar__search-input:focus {
-  width: 240px;
-  max-width: 30vw;
-}
-
-@media (max-width: 1200px) {
-  .navbar .navbar__search-input {
-    width: 150px;
-  }
-}
-
-@media (max-width: 960px) and (min-width: 520px) {
-  /* ≤960px 左侧导航折叠成汉堡菜单；搜索框继续靠右、更紧凑。
-     ≤520px 不覆盖，交给搜索插件自带的"失焦收成图标"逻辑。 */
-  .navbar .navbar__search-input {
-    width: 140px;
-    max-width: 40vw;
-  }
-}
-
-@media (max-width: 960px) {
-  /* 限制左侧 brand 宽度，避免标题过长挤压右侧（全部移动宽度生效）。 */
-  .navbar__brand {
-    max-width: 45%;
-    overflow: hidden;
-  }
-  .navbar__title {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-@media (max-width: 768px) and (min-width: 520px) {
-  /* 中小屏：搜索框收到较小宽度，仍保持可输入。
-     ≤520px 交给搜索插件自带逻辑（失焦收成放大镜图标），这里不覆盖。 */
-  .navbar .navbar__search-input {
-    width: 110px;
-    max-width: 44vw;
-  }
-}
+/* B5 — Navbar customization 已清退：桌面壳无 navbar（global.css:3/12 + preload.js:8），
+   上述 .navbar__* 选择器零 DOM/字符串消费者，2026-11-25 删除。 */
 
 /* Hide the ⌘K keyboard shortcut hint in search bar */
 .DocSearch-Button-Keys,
-.navbar__search .search-bar__keyboard-hint,
 .aa-DetachedSearchButtonKeys,
 button.DocSearch-Button .DocSearch-Button-Keys,
 [class*='searchHintContainer'],
 [class*='searchHint'] {
   display: none !important;
-}
-
-/* ---- Navbar 分组分隔符 ---- */
-.navbar-separator {
-  display: inline-block;
-  width: 1px;
-  height: 18px;
-  margin: 0 var(--petri-space-2);
-  vertical-align: middle;
-  background: var(--petri-border);
-  opacity: 0.6;
-}
-
-@media (max-width: 960px) {
-  .navbar-separator {
-    display: none;
-  }
 }
 
 /* ── FigCode 卡片灰显（未安装插件）────────────────────────── */
@@ -1140,11 +1061,6 @@ html.petri-desktop {
 /* 文档页保持全宽 */
 html.petri-desktop .theme-doc-sidebar-container {
   margin-left: 0 !important;
-}
-
-/* navbar 内容也右移对齐 */
-html.petri-desktop .navbar__inner {
-  padding-left: 0;
 }
 
 /* 非文档页的主内容 wrapper 保持全宽 */
