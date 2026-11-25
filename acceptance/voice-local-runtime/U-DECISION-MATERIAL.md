@@ -3,6 +3,8 @@
 > 授权：owner 经 Orca 转达主人试用反馈「语音优先使用本地模型，没有可以提供配置选项」——先出选型裁决材料，不开工。
 > 现状核码（BLOCK-454 P6 `speech-config.js`/`asr-provider.js`/`tts-provider.js`）：语音默认关（enabled=false 防云花费）；**唯一 provider=deepseek 云渠道**（TTS `api.deepseek.com/v1/tools/tts`、ASR 云转写，key 与对话共用）；无本地模型运行时、无优先级/回退链、provider 单选 none/deepseek。
 
+> **2026-11-25 吸收注记**：本材料的选型内容已被正式裁决材料 `../voice-local-model/V-DECISION-MATERIAL-2026-11-25.md` 细化吸收（含 harness 错层判定/配置面按截图形态/composer 麦克风单列）——后续拍板以正式材料为准，本文件保留作选型过程存档。
+
 ## 一、裁决点
 
 语音（ASR 转写 + TTS 朗读）是否引入**本地运行时**、用哪个选型、优先级/回退链怎么排。
