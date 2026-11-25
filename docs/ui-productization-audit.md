@@ -6942,3 +6942,10 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **实机断言（dev Electron 可见窗，2026-11-19）**：`acceptance/ui-713/live-2026-11-19/live-assertion.json` 四断言全绿——C1 默认仅摘要「已生成 2 个产物 · summary.png」且无详情；C2 点击后产物明细在场；C3 可收起回摘要；C4 点「返回对话」后 `rightOpen=false / backCalls=1 / activeJobId=job_ui713 / conversationId=conv_ui713 / inputFocused=true`。截图 `01-summary.png`/`02-expanded.png`/`03-back-to-chat.png`。边界=真实 ChatArtifactCard/ResultsSurface 组件 + 受控 fixture/ctx；产品回调接线由 HK-01/邻域测试覆盖；观感签字仍归用户。
 - **观感确认**：用户口令 `UI-713：verified`（2026-11-19，逐字）——来自用户，Agent 零代签；据此由 `in_progress` 升 `verified`。
 - **状态边界**：dev Electron 边界内 verified；不外推 packaged/Provider/GA。
+
+## UI-726: 重操作确认提交失败留痕（2026-11-26 **in_progress**；代码完成，实机未验）
+
+- **变化面**：`frontend/src/components/copilot/copilotClient/agentTaskApi.ts` 的 `ackRunTool` 网络/HTTP 失败分支补 `console.error` 带 `reasonCode=A1_ACK_SUBMIT_FAILED`（复用 renderer 既有 console 链，零新依赖）；四处响应体解析空 catch 补 A1 A 类降级理由注释。
+- **为什么这样设计**：审批确认按钮点了没反应、无提示无留痕，是 A1 静默吞错分级治理首批的用户可感知路径；只加诊断留痕，不改返回 false 的 fail-soft 契约与调用方语义。
+- **验证**：A1 HK-01 5/5 绿（含前端 reasonCode 断言）；无呈现面/交互契约改动，观感零代签；未跑实机腿，状态保持 in_progress，待实机证据后翻 verified。
+- **边界**：G0 开发期常态 · 不外推 packaged/Provider/GA。

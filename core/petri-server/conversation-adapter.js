@@ -1,5 +1,8 @@
 'use strict';
 
+// A1 静默吞错分级治理：用户可见失败走既有 error-log（BLOCK-520 OB-004 单源），零新依赖。
+const { logError } = require('./helpers/error-log');
+
 /**
  * conversation-adapter.js
  *
@@ -202,7 +205,7 @@ function appendAssistantMessage({
     // Auto-title conversation
     try {
       _maybeAutoTitleConversation(conversationId, userId);
-    } catch {}
+    } catch { /* A1 A 类：自动标题是增强项，失败保留既有标题不打断回合 */ }
 
     // Detect topic shift (async, fire-and-forget)
     _maybeDetectTopicShift(conversationId, userId)
@@ -215,10 +218,10 @@ function appendAssistantMessage({
               reason: r.reason,
             });
             shifted = true;
-          } catch {}
+          } catch { /* A1 A 类：topic_shift 事件消费端失败不影响已落库的消息 */ }
         }
       })
-      .catch(() => {});
+      .catch(() => { /* A1 A 类：话题检测是后台增强，失败不改回合结果 */ });
   } catch (e) {
     // Best-effort: never break the turn on conversation persistence failure —
     // but BLOCK-102 P1: silent history loss was undiscoverable. Make it LOUD:
@@ -231,7 +234,7 @@ function appendAssistantMessage({
       if (typeof emitFn === 'function') {
         emitFn({ event: 'message_persist_failed', conversationId, role: 'assistant' });
       }
-    } catch {}
+    } catch { /* A1 A 类：失败上报自身的 emit 兜底，避免上报器反过来炸回合 */ }
   }
 
   return { persisted, shifted };
@@ -316,7 +319,7 @@ async function saveChatTurnToMemory({
         conversationId,
       });
     }
-  } catch {}
+  } catch { /* A1 A 类：向量记忆写入是后台增强，embedding/写盘失败不改持久化消息 */ }
 }
 
 /**
@@ -346,9 +349,9 @@ function triggerBackgroundFactExtraction({
       const threadForExtract = Array.isArray(messages)
         ? messages.slice(-12).concat([{ role: 'assistant', content: (assistantAcc || '').trim() }])
         : [];
-      backgroundExtractFacts(userId, threadForExtract, projectId).catch(() => {});
+      backgroundExtractFacts(userId, threadForExtract, projectId).catch(() => { /* A1 A 类：后台抽取 fire-and-forget */ });
     }
-  } catch {}
+  } catch { /* A1 A 类：触发后台抽取的同步段失败不影响回合结果 */ }
 }
 
 /**
@@ -381,10 +384,10 @@ async function triggerChatSummary({
           projectId,
           oldMsgs,
           existing && existing.summary
-        ).catch(() => {});
+        ).catch(() => { /* A1 A 类：后台会话摘要 fire-and-forget */ });
       }
     }
-  } catch {}
+  } catch { /* A1 A 类：触发摘要的同步段失败不影响回合结果 */ }
 }
 
 /**
@@ -401,7 +404,13 @@ function logAudit({ userId, context, messages }) {
     const page = (context && context.page) || null;
     const msgCount = Array.isArray(messages) ? messages.length : 0;
     logChatAudit(userId, page, msgCount);
-  } catch {}
+  } catch (error) {
+    // A1 B 类：审计留痕自身失败不会再有第二条证据——写既有 error-log 留痕，
+    // 保持 fail-soft 不打断回合（审计是 best-effort 台账，不是主链）。
+    logError('a1.conversation.audit_write_failed', error, {
+      reasonCode: 'A1_CHAT_AUDIT_WRITE_FAILED',
+    });
+  }
 }
 
 /**
@@ -431,7 +440,7 @@ function announceActiveConversation(emitFn, _activeConv) {
   if (!_activeConv) return;
   try {
     emitFn({ event: 'conversation', conversationId: _activeConv.id, title: _activeConv.title });
-  } catch {}
+  } catch { /* A1 A 类：会话广播的消费端失败不影响会话对象本身 */ }
 }
 
 module.exports = {

@@ -10115,6 +10115,27 @@
       ]
     },
     {
+      "id": "a1-silent-error-grading",
+      "note": "A1 静默吞错分级治理（Petri harness 隐形体验优化队列 1；2026-11-25）：首批四文件逐个判语义——fail-soft 保留并写明理由，真正吞掉用户可见失败的路径走既有 error-log(logError+reasonCode)；前端 ack 复用 renderer console 带 reasonCode。HK-01 红绿先行、零新依赖、silent-catch 棘轮下调 402→362。证据=acceptance/harness-invisible-issues/A1-EVIDENCE.md。扩面（其余文件）未发令前不动。",
+      "patterns": [
+        "frontend/src/components/copilot/copilotClient/agentTaskApi.ts",
+        "core/petri-server/helpers/tools-executor.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/conversation-adapter.js",
+        "test/silent-catch-baseline.json",
+        "test/a1-silent-error-grading.test.mjs",
+        "acceptance/harness-invisible-issues/**"
+      ],
+      "tests": [
+        "test/a1-silent-error-grading.test.mjs",
+        "test/block520-p0-observability.test.mjs",
+        "test/block387-silent-catch-ratchet.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
       "id": "block519-stage2-composer-mic",
       "note": "BLOCK-519 阶段二 composer 麦克风入口（2026-11-25）：转写 helper/REST 口/前端 hook+按钮/接 SimpleChat。whisper 并列依赖真值偏差与四问见 acceptance/voice-local-stage2/。HK-01 红绿先行。",
       "patterns": [
