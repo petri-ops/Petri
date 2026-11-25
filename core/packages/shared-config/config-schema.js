@@ -559,6 +559,25 @@ const CONFIG_KEYS = Object.freeze([
     key: 'userPrefs.crashNotice', family: 'user-prefs', path: 'crashNotice',
     type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'none',
   },
+  // —— 背景水印可替换（2026-11-25 水印可替换能力）——
+  // 域值与前端 `themes/watermarkPrefs.ts` 逐项相等（prefCache.drift.test.ts 双向钉）。
+  // 默认值 builtin/0.1 维持现状；图片本体是资产不是偏好标量（PUT 4kb 上限），
+  // watermarkCustomPath 只存来源标签/应用内路径，data URI 走前端 localStorage 缓存。
+  {
+    key: 'userPrefs.watermarkMode', family: 'user-prefs', path: 'watermarkMode',
+    type: 'string', domain: { oneOf: ['none', 'builtin', 'custom'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    key: 'userPrefs.watermarkOpacity', family: 'user-prefs', path: 'watermarkOpacity',
+    type: 'number', domain: { min: 0, max: 0.3 }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    key: 'userPrefs.watermarkCustomPath', family: 'user-prefs', path: 'watermarkCustomPath',
+    type: 'string', domain: { pattern: '^.{0,1024}$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
   // —— 技能治理账本（BLOCK-203 W4a P3；原 `shared-backend/skill-prefs.js` 无任何形状校验）——
   // `disabled.<id>` 不是布尔映射而是对象 `{ at, reason? }`，`uninstalledSources.<id>` 并存
   // `{ sourceDir, at }`。`findEntryByPath` 只寻址标量 ⇒ 按**点路径**逐字段登记，

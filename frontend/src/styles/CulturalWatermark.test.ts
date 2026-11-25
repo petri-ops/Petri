@@ -35,14 +35,28 @@ describe('国风水印（AI 专业出图·原封不动）', () => {
     expect(main).toMatch(/<GlobalWatermarkAI\s*\/>/);
   });
 
-  it('CSS uses the image verbatim, bounded opacity, theme-adaptive', () => {
+  it('CSS is presentation-only: no hardcoded image, bounded opacity, theme-adaptive', () => {
     const css = read(CSS);
-    expect(css).toMatch(/background-image:\s*url\(['"]?\.\.\/assets\/cultural-watermark\.png/);
+    expect(css).not.toMatch(/background-image:\s*url\(/);
     expect(css).toMatch(/pointer-events:\s*none/);
+    expect(css).toMatch(/--wm-opacity/);
     const opacities = [...css.matchAll(/opacity:\s*([\d.]+)/g)].map((m) => Number(m[1]));
-    expect(opacities.length).toBeGreaterThan(0);
-    expect(Math.max(...opacities), '水印不得抢内容：opacity ≤ 0.2').toBeLessThanOrEqual(0.2);
+    expect(Math.max(...opacities, 0), '静态 opacity ≤ 0.2').toBeLessThanOrEqual(0.2);
     expect(css).toMatch(/\[data-theme='dark'\]/);
+  });
+
+  it('可替换渲染契约：mode 三态 / 自定义 data URI / 透明度变量 / 暗色反相', () => {
+    const comp = read(COMPONENT);
+    expect(comp, '内置图改由组件 import，交给 Vite 处理指纹').toMatch(/cultural-watermark\.png/);
+    expect(comp).toMatch(/useTheme/);
+    expect(comp).toMatch(/watermarkMode/);
+    expect(comp).toMatch(/watermarkOpacity/);
+    expect(comp).toMatch(/backgroundImage/);
+    expect(comp).toMatch(/--wm-opacity/);
+    expect(comp).toMatch(/none/);
+    const css = read(CSS);
+    expect(css).toMatch(/data-watermark-mode[^\n]*none/);
+    expect(css).toMatch(/filter:\s*invert\(1\)/);
   });
 
   it('non-interactive, no raw z-index, no new dependency', () => {

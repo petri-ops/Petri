@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-725: 背景水印可替换设置（2026-11-25 **in_progress**；独立 worktree `petri-ops/watermark-swap`）
+
+- **变化面**：设置页「外观」新增「背景水印」项（三态 无/内置水墨/自定义图片 + 本地图片导入/路径 + 浅底转透明 + 透明度 0–30%）；`GlobalWatermarkAI` 改为读偏好动态注入背景图，暗色反相沿用既有 CSS 规则。
+- **为什么这样设计**：偏好走 ThemeProvider / user-prefs 同源，不另立真相源；图片本体（data URI）因 prefs PUT 4kb 上限只落本地缓存，prefs 只存来源标签/同源路径；浅底转透明为纯前端 canvas level，不强依赖后端，也不做应用内生图（Provider 预算另裁决）。
+- **验证（代码）**：HK-01 红 3 文件失败 → 绿 24/24；邻域 ThemeProvider 15/15、server 16/16、theme-token 19/19；secret/arch/types/lint/docs/ui 六门绿；隔离栈 9223 HMR 源核对通过（跑完即 kill）。
+- **状态边界**：**in_progress（代码级完成，观感零代签）**——实机/观感待 owner 在 HMR 窗口过目，不写 verified、不外推 packaged/Provider/GA。证据=`acceptance/watermark-swap-configurable/HK-01.md`。
+
 > **BLOCK-519 同批登记（2026-11-25 · owner 批准 SenseVoice 阶段一）**：`ChannelPreferencePanel` 语音段按 WorkBuddy 截图形态增补——本地/云端/本地优先三态切换、ASR 语言自动检测选择、本地模型列表（未下载=下载钮；真实落盘=使用中/删除钮，未落盘绝不标使用中）。零新增 UI-###、不翻任何条目状态词、观感 `pending_human_eye` 零代签；判据=HK-01 红→绿 + 前端 6/6 + 真机 arm64 转写实证。证据=`acceptance/voice-local-stage1/EVIDENCE.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 > **BLOCK-518 同批登记（2026-11-25 · owner 批准能力渠道简化阶段一+二）**：本包改呈现面但不新增 UI-###、不翻任何条目状态——①UI-614 图片入口门（composer 贴图/拖图始终放行，原 visionConfigured+chatVisionCapable 双位门退役）；②UI-476 识图模型选择器（撤 vision 能力过滤，槽位保留列全部模型）；③UI-706 渠道行详情（隐藏视觉/思考列，保留向量列与思考探测钮，探测只展示证据）。行为判据=HK-01 11 红→绿 + 前端定向 31/31 + 后端契约 52/52 + types 0；HMR 只读核对 Vite 新源 + owner 窗口无旧 UI 标记。观感项维持 `in_progress`/`pending_human_eye` 零代签，不重打 debt 棘轮。证据=`acceptance/model-capability-simplification/SIMPLIFICATION-PLAN-2026-11-25.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。

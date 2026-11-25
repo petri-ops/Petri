@@ -14,6 +14,7 @@ import { ThemeControl } from '../../ThemeControl';
 import { AccentControl } from '../../AccentControl';
 import { SettingsField } from '../SettingsField';
 import { MotionControl } from './MotionControl';
+import { WatermarkControl } from './WatermarkControl';
 
 export function AppearanceSection(): React.ReactElement {
   const { preference: themePreference, fontScale, setFontScale } = useTheme();
@@ -56,6 +57,15 @@ export function AppearanceSection(): React.ReactElement {
 
       <SettingsField icon="sparkles" label="主题色" hint="按钮与高亮的强调色">
         <AccentControl />
+      </SettingsField>
+
+      <SettingsField
+        icon="image"
+        label="背景水印"
+        htmlFor="watermark-mode-input"
+        hint="无 / 内置水墨 / 自定义图片；透明度 0–30%"
+      >
+        <WatermarkControl />
       </SettingsField>
 
       <MotionControl />

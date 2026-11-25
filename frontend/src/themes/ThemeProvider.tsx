@@ -26,7 +26,18 @@ import {
   type ThemePreference,
 } from './prefCache';
 
+import {
+  isWatermarkMode,
+  clampWatermarkOpacity,
+  readCachedWatermarkMode,
+  readCachedWatermarkOpacity,
+  writeCachedWatermarkMode,
+  writeCachedWatermarkOpacity,
+  type WatermarkMode,
+} from './watermarkPrefs';
+
 export type { ThemePreference } from './prefCache';
+export type { WatermarkMode } from './watermarkPrefs';
 export { FONT_SCALE_MIN, FONT_SCALE_MAX };
 export type ResolvedTheme = 'light' | 'dark';
 const THEME_CHANGE_EVENT = 'petri:theme-change';
@@ -65,6 +76,13 @@ interface ThemeContextValue {
   /** BLOCK-208 — 动效开关（system=跟随系统 prefers-reduced-motion）。 */
   motion: MotionMode;
   setMotion: (mode: MotionMode) => void;
+  /** 背景水印：三态 / 透明度 / 自定义图来源标签（与主题同源，服务端 user-prefs 为真值）。 */
+  watermarkMode: WatermarkMode;
+  setWatermarkMode: (mode: WatermarkMode) => void;
+  watermarkOpacity: number;
+  setWatermarkOpacity: (opacity: number) => void;
+  watermarkCustomPath: string;
+  setWatermarkCustomPath: (path: string) => void;
   /** 服务端偏好同步状态（设置面据此提示"本机已生效但没存到服务端"）。 */
   prefsSync: PrefsSyncState;
 }
@@ -82,6 +100,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   const [fontScale, setFontScaleState] = useState<number>(readFontScale);
   const [accent, setAccentState] = useState<AccentId>(readAccent);
   const [motion, setMotionState] = useState<MotionMode>(readCachedMotion);
+  const [watermarkMode, setWatermarkModeState] = useState<WatermarkMode>(readCachedWatermarkMode);
+  const [watermarkOpacity, setWatermarkOpacityState] = useState<number>(readCachedWatermarkOpacity);
+  const [watermarkCustomPath, setWatermarkCustomPathState] = useState<string>('');
 
   // BLOCK-86 L1 — 多端偏好同步：服务端 /api/user/prefs 为权威源，
   // localStorage 仅作启动缓存。任何端修改，其余端（桌面/手机投影）
@@ -96,7 +117,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     return headers;
   }, []);
 
-  const applyRemotePrefs = useCallback((prefs: { theme?: string; fontScale?: number; accent?: string; motion?: string }) => {
+  const applyRemotePrefs = useCallback((prefs: {
+    theme?: string; fontScale?: number; accent?: string; motion?: string;
+    watermarkMode?: string; watermarkOpacity?: number; watermarkCustomPath?: string;
+  }) => {
     if (prefs.theme === 'light' || prefs.theme === 'dark' || prefs.theme === 'system') {
       setPreferenceState(prefs.theme);
       writeCachedTheme(prefs.theme);
@@ -114,6 +138,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     if (typeof prefs.motion === 'string' && ['system', 'full', 'reduced'].includes(prefs.motion)) {
       setMotionState(prefs.motion as MotionMode);
       writeCachedMotion(prefs.motion as MotionMode);
+    }
+    // 背景水印：与主题/字号同一条跨端链（不另立真相源）
+    if (isWatermarkMode(prefs.watermarkMode)) {
+      setWatermarkModeState(prefs.watermarkMode);
+      writeCachedWatermarkMode(prefs.watermarkMode);
+    }
+    if (typeof prefs.watermarkOpacity === 'number') {
+      const clamped = clampWatermarkOpacity(prefs.watermarkOpacity);
+      setWatermarkOpacityState(clamped);
+      writeCachedWatermarkOpacity(clamped);
+    }
+    if (typeof prefs.watermarkCustomPath === 'string') {
+      setWatermarkCustomPathState(prefs.watermarkCustomPath);
     }
   }, []);
 
@@ -179,7 +216,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
       if (retryPending) return;
       try {
         const response = await fetch(prefsApi(), { headers: prefsHeaders() });
-        const data = (await response.json()) as { ok?: unknown; prefs?: { theme?: string; fontScale?: number; accent?: string } };
+        const data = (await response.json()) as {
+          ok?: unknown;
+          prefs?: { theme?: string; fontScale?: number; accent?: string; watermarkMode?: string; watermarkOpacity?: number; watermarkCustomPath?: string };
+        };
         if (data?.ok && data.prefs) {
           const signature = JSON.stringify(data.prefs);
           if (signature !== last) {
@@ -239,6 +279,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     pushPrefs({ fontScale: clamped });
   }, [pushPrefs]);
 
+  const setWatermarkMode = useCallback((next: WatermarkMode) => {
+    setWatermarkModeState(next);
+    writeCachedWatermarkMode(next);
+    pushPrefs({ watermarkMode: next });
+  }, [pushPrefs]);
+
+  const setWatermarkOpacity = useCallback((next: number) => {
+    const clamped = clampWatermarkOpacity(next);
+    setWatermarkOpacityState(clamped);
+    writeCachedWatermarkOpacity(clamped);
+    pushPrefs({ watermarkOpacity: clamped });
+  }, [pushPrefs]);
+
+  const setWatermarkCustomPath = useCallback((next: string) => {
+    setWatermarkCustomPathState(next);
+    pushPrefs({ watermarkCustomPath: next });
+  }, [pushPrefs]);
+
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-color-scheme: dark)');
     if (!media) return;
@@ -265,6 +323,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   useEffect(() => {
     document.documentElement.setAttribute('data-motion', motion);
   }, [motion]);
+
+  // 背景水印：根节点显式标态，CSS 与实机探针都能读到（mode=none 隐藏由 CSS 负责）
+  useEffect(() => {
+    document.documentElement.setAttribute('data-watermark-mode', watermarkMode);
+  }, [watermarkMode]);
 
   // BLOCK-49 加映三 — 主题色注入（data-accent；teal 默认不设属性）
   useEffect(() => {
@@ -311,8 +374,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   }, [setPreference]);
 
   const value = useMemo(
-    () => ({ preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent, motion, setMotion, prefsSync }),
-    [preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent, motion, setMotion, prefsSync],
+    () => ({
+      preference, resolvedTheme, setPreference,
+      fontScale, setFontScale, accent, setAccent, motion, setMotion,
+      watermarkMode, setWatermarkMode, watermarkOpacity, setWatermarkOpacity,
+      watermarkCustomPath, setWatermarkCustomPath,
+      prefsSync,
+    }),
+    [
+      preference, resolvedTheme, setPreference,
+      fontScale, setFontScale, accent, setAccent, motion, setMotion,
+      watermarkMode, setWatermarkMode, watermarkOpacity, setWatermarkOpacity,
+      watermarkCustomPath, setWatermarkCustomPath,
+      prefsSync,
+    ],
   );
 
   return (

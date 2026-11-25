@@ -1,8 +1,30 @@
-// 国风背景水印 · AI 专业出图版（原封不动落地）。
-// 图案来自 image_gen 钢笔白描；颜色由 watermark-ai.css 主题派生。
-// 独立文件：原 GlobalWatermark.tsx 在本会话被并发进程反复覆盖，故不触碰。
+// 国风背景水印 · 可替换版（2026-11-25）。
+// 偏好真值走 ThemeProvider / user-prefs（与主题同源）；内置图交给 Vite 处理指纹，
+// 自定义图取自本地图片缓存或同源路径；暗色反相沿用 watermark-ai.css 的既有规则。
 import React from 'react';
+import builtinWatermarkUrl from '@/assets/cultural-watermark.png';
+import { useTheme } from '@/themes/ThemeProvider';
+import { readCachedWatermarkCustom } from '@/themes/watermarkPrefs';
 
 export function GlobalWatermarkAI(): React.ReactElement {
-  return <div className="petri-watermark-global" aria-hidden="true" />;
+  const { watermarkMode, watermarkOpacity, watermarkCustomPath } = useTheme();
+
+  const customData = watermarkMode === 'custom' ? readCachedWatermarkCustom() : '';
+  const source = watermarkMode === 'custom'
+    ? (customData || watermarkCustomPath)
+    : builtinWatermarkUrl;
+
+  const style = {
+    backgroundImage: source ? `url("${source}")` : 'none',
+    '--wm-opacity': watermarkOpacity,
+  } as React.CSSProperties;
+
+  return (
+    <div
+      className="petri-watermark-global"
+      data-watermark-mode={watermarkMode}
+      style={style}
+      aria-hidden="true"
+    />
+  );
 }

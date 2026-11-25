@@ -1,8 +1,7 @@
 /* ============================================================
-   国风背景水印 — AI 钢笔白描（专业工具出图·原封不动落地）
-   图案=image_gen 四原型白描（方印/月洞门/开环/卵石），仅抠白底为 alpha；
-   笔锋像素不动；颜色由主题派生，亮暗自适应。
-   注：watermark.css 在本会话被并发进程反复覆盖，故用独立新文件避免冲突。
+   国风背景水印 — 可替换版（2026-11-25）
+   图片来源由 GlobalWatermarkAI 按偏好注入（内置 asset / 自定义 data URI /
+   同源路径）；本文件只管呈现：不抢交互、透明度有界、亮暗自适应。
    ============================================================ */
 
 .petri-watermark-global {
@@ -10,13 +9,17 @@
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  background-image: url('../assets/cultural-watermark.png');
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
-  opacity: 0.10;
+  opacity: var(--wm-opacity, 0.10);
 }
+
+[data-watermark-mode='none'] .petri-watermark-global {
+  display: none;
+}
+
 [data-theme='dark'] .petri-watermark-global {
   filter: invert(1);
-  opacity: 0.08;
+  opacity: calc(var(--wm-opacity, 0.10) * 0.8);
 }

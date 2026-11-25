@@ -10009,6 +10009,30 @@
       "tests": [
         "test/block519-local-asr.test.mjs"
       ]
+    },
+    {
+      "id": "watermark-swap-configurable",
+      "note": "水印可替换能力（2026-11-25）：偏好层/设置面/动态渲染/图片处理与方向文档的机械认领；HK-01 红绿先行靠前端定向测试，观感零代签。",
+      "patterns": [
+        "frontend/src/themes/watermarkPrefs.ts",
+        "frontend/src/themes/ThemeProvider.tsx",
+        "frontend/src/themes/prefCache.ts",
+        "frontend/src/themes/prefCache.drift.test.ts",
+        "frontend/src/components/common/GlobalWatermarkAI.tsx",
+        "frontend/src/styles/watermark-ai.css",
+        "frontend/src/styles/CulturalWatermark.test.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/AppearanceSection.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/WatermarkControl.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/watermarkImage.ts",
+        "core/packages/shared-config/config-schema.js",
+        "acceptance/visual-refresh-2026-11-25/**"
+      ],
+      "tests": [
+        "frontend/src/themes/watermarkPrefs.test.ts",
+        "frontend/src/themes/prefCache.drift.test.ts",
+        "frontend/src/styles/CulturalWatermark.test.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/watermarkImage.test.ts"
+      ]
     }
   ]
 }

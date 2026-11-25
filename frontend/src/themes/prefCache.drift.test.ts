@@ -33,6 +33,13 @@ import {
   MOTION_STORAGE_KEY,
   MOTION_VALUES,
 } from './prefCache';
+import {
+  WATERMARK_MODE_VALUES,
+  WATERMARK_MODE_STORAGE_KEY,
+  WATERMARK_OPACITY_STORAGE_KEY,
+  WATERMARK_OPACITY_MIN,
+  WATERMARK_OPACITY_MAX,
+} from './watermarkPrefs';
 
 const schema = rawSchema as {
   findKeyEntry: (key: string) => { domain?: { oneOf?: string[]; min?: number; max?: number } } | null;
@@ -69,6 +76,18 @@ describe('prefCache ↔ user-prefs 注册表', () => {
     expect(FONT_SCALE_MAX).toBe(fontScale?.domain?.max);
     expect(clampFontScale(5)).toBe(FONT_SCALE_MAX);
     expect(clampFontScale(0)).toBe(FONT_SCALE_MIN);
+  });
+
+  it('背景水印三态/透明度与服务端注册表逐项相等（2026-11-25 可替换能力）', () => {
+    const mode = schema.findKeyEntry('userPrefs.watermarkMode');
+    const opacity = schema.findKeyEntry('userPrefs.watermarkOpacity');
+    const custom = schema.findKeyEntry('userPrefs.watermarkCustomPath');
+    expect([...WATERMARK_MODE_VALUES]).toEqual(mode?.domain?.oneOf);
+    expect(WATERMARK_OPACITY_MIN).toBe(opacity?.domain?.min);
+    expect(WATERMARK_OPACITY_MAX).toBe(opacity?.domain?.max);
+    expect(custom).not.toBeNull();
+    expect(WATERMARK_MODE_STORAGE_KEY).toBe('petri-watermark-mode');
+    expect(WATERMARK_OPACITY_STORAGE_KEY).toBe('petri-watermark-opacity');
   });
 
   it('谓词与服务端接受的取值一致（缓存里的非法值一律不认）', () => {
