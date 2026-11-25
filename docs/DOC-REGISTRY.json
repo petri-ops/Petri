@@ -10,9 +10,9 @@
    "docs/post-h9-optimization-blueprint-2026-11-10.md"
   ],
   "requireRegistration": true,
-  "documentCount": 673,
+  "documentCount": 674,
   "lastUpdated": "2026-11-25",
-  "managedMarkdown": 656
+  "managedMarkdown": 657
  },
  "documents": [
   {
@@ -14044,6 +14044,28 @@
    ],
    "sharedBaselines": [],
    "notes": "2026-11-25 立项排期（主人经 Orca 授权按建议推进）：harness 稳定性/可观测性整改，P0（OB-001/004/007）→P1（OB-002/003/005）→P2（OB-008/009）逐波发令；第 9 项会话级外部监督器单列 U 类材料 pending_user_ruling 不开工。开工前核码纠偏方案稿路径/计数/既有实现漂移（§1）。HK-01 红绿先行、零新依赖、提交本地 push 待口令。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+  {
+   "id": "HARNESS-INVISIBLE-ISSUES-OPTIMIZATION-2026-11-25",
+   "path": "docs/harness-invisible-issues-optimization-2026-11-25.md",
+   "kind": "work-package",
+   "status": "active",
+   "canonical": false,
+   "truthDomain": "harness-invisible-issues",
+   "entrypoint": "docs/README.md",
+   "archivePolicy": "retain_stable_path",
+   "touchSurface": [
+    "docs/harness-invisible-issues-optimization-2026-11-25.md"
+   ],
+   "sharedBaselines": [],
+   "tags": [
+    "harness-observability",
+    "A4-decisionVerifier",
+    "queue-6",
+    "G0"
+   ],
+   "registeredAt": "2026-11-25",
+   "notes": "2026-11-25 并行派工队列6 A4 decisionVerifier 裁决留档（msg_39e08fd3c346）：维持 null 不改、与 BLOCK-520 P2 goal-verifier 仅观测钩子边界对齐；纯文档零产品代码。"
   }
  ],
  "lastUpdated": "2026-11-25"
