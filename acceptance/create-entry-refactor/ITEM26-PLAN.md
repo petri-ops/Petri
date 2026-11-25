@@ -30,7 +30,7 @@
 
 ## §4 纪律
 
-- 功能语义重构，非纯观感；观感零代签（新呈现不翻 verified，owner 过目）。
+- 功能语义重构，非纯观感；**观感已由 owner 追认过目 → owner-accepted**（owner 2026-11-25 裁决「追认保留」，含观感过目——新交互形态 owner 实际使用后认可；引用 Orca bb8dddaf status msg_22e0132ccadc）。
 - 单工作包串行、HK-01 红绿先行、定向测试 + closeout 门禁、证据落本目录、六件套回写、本地提交 push 待口令。
 - 19 项未跟踪 WIP 与 frogfish 零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
@@ -42,3 +42,9 @@
 - home 工作台区标题「创建新项目」→「新建项目」。
 - HK-01（`CreateEntryRefactor.test.tsx`）+ 既有 LeftPanel/home/theme-token 测试 45/45 PASS；types/lint 0 error。UI-327 旧行内向导测试 5 项随组件退役改跳转契约（终端式 Tab 补全属被撤销组件交互，非建项目能力）。
 - code-size 基线仅更新本包 4 文件指纹/留因；WorkspaceFilePreview.tsx（他方 WIP）漂移如实归属、零触碰。
+
+## §6 owner 追认留痕（2026-11-25）
+
+- owner 裁决原话：「追认保留」——item26 创建入口重构（提交 `6bc5112ac`）正式获 owner 追认，**含观感过目**（新交互形态 owner 实际使用后认可）。
+- 裁决来源：Orca `bb8dddaf` status msg_22e0132ccadc（兴奋转达）。观感状态由 `pending_human_eye` 翻为 **owner-accepted**（引用本裁决），零代签问题因 owner 明确口令已消解。
+- 范围：仅翻观感/台账状态留痕，不改产品代码、不改功能语义；本件 §1–§5 实现与验证结论不变。
