@@ -1,0 +1,18 @@
+▶ B4 keyboard focus-visible (HK-01 static contract)
+  ✔ welcome 首屏实际使用的交互类全部有 :focus-visible (0.639209ms)
+  ✔ welcome 两处 outline:none 输入框用 :focus-visible 还原焦点环 (0.132875ms)
+  ✔ RouteErrorBoundary 两个按钮有作用域内 :focus-visible (0.097542ms)
+  ✔ 焦点环走主题 token、无动效（reduced-motion 兜底不被破坏） (0.218166ms)
+✔ B4 keyboard focus-visible (HK-01 static contract) (1.831333ms)
+▶ B5 dead CSS cleanup (HK-01 static contract)
+  ✔ custom.css 零 .run-modal / .navbar 死选择器 (0.171792ms)
+  ✔ 已删 CSS 文件零复生；WorkbenchEmpty.module.css 因 token 契约引用保留 (0.143583ms)
+✔ B5 dead CSS cleanup (HK-01 static contract) (0.380166ms)
+ℹ tests 6
+ℹ suites 2
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 126.009
