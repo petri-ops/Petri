@@ -293,9 +293,9 @@
       "path": "core/packages/shared-config/config-schema.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1187,
-      "bytes": 62371,
-      "sha256": "7126e0e3f5670314383ce1b76b3ea1b9f66f615a653cadc3a5d4e4897a95cb3f"
+      "lines": 1191,
+      "bytes": 62710,
+      "sha256": "41342a4fc9de14dc8d806680eb4e100169daf736c3570a6b4e56617ee017f8d6"
     },
     {
       "path": "core/petri-server/agent-runner.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86726,
+  "total": 86730,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -633,6 +633,19 @@
       "to": {
         "lines": 1187,
         "bytes": 62371
+      }
+    },
+    {
+      "path": "core/packages/shared-config/config-schema.js",
+      "reason": "内置水墨六候选：watermarkMode oneOf 由 none/builtin/custom 扩为 8 值（复用既有字段，不新增 schema 键），前后端域值由 prefCache.drift 双向钉",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 1187,
+        "bytes": 62371
+      },
+      "to": {
+        "lines": 1191,
+        "bytes": 62710
       }
     }
   ]

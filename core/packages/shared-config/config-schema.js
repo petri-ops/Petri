@@ -561,11 +561,15 @@ const CONFIG_KEYS = Object.freeze([
   },
   // —— 背景水印可替换（2026-11-25 水印可替换能力）——
   // 域值与前端 `themes/watermarkPrefs.ts` 逐项相等（prefCache.drift.test.ts 双向钉）。
-  // 默认值 builtin/0.1 维持现状；图片本体是资产不是偏好标量（PUT 4kb 上限），
-  // watermarkCustomPath 只存来源标签/应用内路径，data URI 走前端 localStorage 缓存。
+  // 默认值 builtin:mountain/0.1 维持现状（原 'builtin' 即远山）；图片本体是资产不是偏好标量
+  // （PUT 4kb 上限），watermarkCustomPath 只存来源标签/应用内路径，data URI 走前端 localStorage 缓存。
+  // 内置六图样复用本字段，以 `builtin:<id>` 作 mode 值——不新增 schema 键；
+  // 域值与前端 `themes/watermarkPrefs.ts` 逐项相等（prefCache.drift.test.ts 双向钉）。
   {
     key: 'userPrefs.watermarkMode', family: 'user-prefs', path: 'watermarkMode',
-    type: 'string', domain: { oneOf: ['none', 'builtin', 'custom'] }, envKeys: [], aliases: [],
+    type: 'string',
+    domain: { oneOf: ['none', 'builtin:mountain', 'builtin:bamboo', 'builtin:plum', 'builtin:koi', 'builtin:pine', 'builtin:lotus', 'custom'] },
+    envKeys: [], aliases: [],
     mutable: true, ui: 'settings',
   },
   {

@@ -10019,6 +10019,13 @@
         "frontend/src/themes/prefCache.ts",
         "frontend/src/themes/prefCache.drift.test.ts",
         "frontend/src/components/common/GlobalWatermarkAI.tsx",
+        "frontend/src/components/common/GlobalWatermarkAI.test.ts",
+        "frontend/src/assets/cultural-watermark.png",
+        "frontend/src/assets/watermark-bamboo.png",
+        "frontend/src/assets/watermark-plum.png",
+        "frontend/src/assets/watermark-koi.png",
+        "frontend/src/assets/watermark-pine.png",
+        "frontend/src/assets/watermark-lotus.png",
         "frontend/src/styles/watermark-ai.css",
         "frontend/src/styles/CulturalWatermark.test.ts",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/AppearanceSection.tsx",
@@ -10028,6 +10035,7 @@
         "acceptance/visual-refresh-2026-11-25/**"
       ],
       "tests": [
+        "frontend/src/components/common/GlobalWatermarkAI.test.ts",
         "frontend/src/themes/watermarkPrefs.test.ts",
         "frontend/src/themes/prefCache.drift.test.ts",
         "frontend/src/styles/CulturalWatermark.test.ts",

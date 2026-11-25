@@ -1,14 +1,22 @@
 /**
  * WatermarkControl — 背景水印设置项（2026-11-25 水印可替换能力）。
  *
- * 三态（无 / 内置水墨 / 自定义图片）+ 自定义图导入/路径 + 透明度 0–30%。
+ * 三态（无 / 内置水墨 / 自定义图片）+ 内置图样六选一（远山/竹/梅/鲤/松/莲，默认远山）
+ * + 自定义图导入/路径 + 透明度 0–30%。内置图样直接写 `builtin:<id>` mode，不新增 schema 键。
  * 偏好全部经 useTheme() 写，与主题/字号同源（服务端 user-prefs 为真值）；
  * 图片本体是资产不是偏好标量（PUT 4kb 上限），data URI 只落本地缓存，
  * prefs 里只存来源标签/应用内路径。观感零代签。
  */
 import React, { useRef, useState } from 'react';
 import { useTheme, type WatermarkMode } from '@/themes/ThemeProvider';
-import { writeCachedWatermarkCustom } from '@/themes/watermarkPrefs';
+import {
+  BUILTIN_WATERMARK_IDS,
+  DEFAULT_WATERMARK_MODE,
+  builtinWatermarkId,
+  toBuiltinWatermarkMode,
+  writeCachedWatermarkCustom,
+  type BuiltinWatermarkId,
+} from '@/themes/watermarkPrefs';
 import {
   parseWatermarkInput,
   readFileAsDataUri,
@@ -18,9 +26,18 @@ import {
 
 const MODES: ReadonlyArray<{ value: WatermarkMode; label: string }> = [
   { value: 'none', label: '无' },
-  { value: 'builtin', label: '内置水墨' },
+  { value: DEFAULT_WATERMARK_MODE, label: '内置水墨' },
   { value: 'custom', label: '自定义图片' },
 ];
+
+const BUILTIN_LABELS: Readonly<Record<BuiltinWatermarkId, string>> = {
+  mountain: '远山',
+  bamboo: '竹',
+  plum: '梅',
+  koi: '鲤',
+  pine: '松',
+  lotus: '莲',
+};
 
 const controlStyle: React.CSSProperties = {
   height: 32,
@@ -93,7 +110,7 @@ export function WatermarkControl(): React.ReactElement {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <select
           id="watermark-mode-input"
-          value={watermarkMode}
+          value={builtinWatermarkId(watermarkMode) ? DEFAULT_WATERMARK_MODE : watermarkMode}
           onChange={(event) => setWatermarkMode(event.target.value as WatermarkMode)}
           style={controlStyle}
         >
@@ -101,6 +118,22 @@ export function WatermarkControl(): React.ReactElement {
             <option key={mode.value} value={mode.value}>{mode.label}</option>
           ))}
         </select>
+        {builtinWatermarkId(watermarkMode) && (
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4,
+            color: 'var(--petri-text-secondary)', fontSize: 'var(--petri-font-size-sm, 12px)' }}>
+            内置图样
+            <select
+              id="watermark-builtin-input"
+              value={builtinWatermarkId(watermarkMode) ?? 'mountain'}
+              onChange={(event) => setWatermarkMode(toBuiltinWatermarkMode(event.target.value as BuiltinWatermarkId))}
+              style={controlStyle}
+            >
+              {BUILTIN_WATERMARK_IDS.map((id) => (
+                <option key={id} value={id}>{BUILTIN_LABELS[id]}</option>
+              ))}
+            </select>
+          </label>
+        )}
         {watermarkMode === 'custom' && (
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4,
             color: 'var(--petri-text-secondary)', fontSize: 'var(--petri-font-size-sm, 12px)' }}>

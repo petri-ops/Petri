@@ -8,8 +8,29 @@
  * 键名/枚举/钳位边界由 prefCache.drift.test.ts 与注册表双向钉住（生产代码不 import core/**）。
  */
 
-export type WatermarkMode = 'none' | 'builtin' | 'custom';
-export const WATERMARK_MODE_VALUES: ReadonlyArray<WatermarkMode> = ['none', 'builtin', 'custom'];
+/** 内置六图样；远山沿用原 cultural-watermark.png，其余按 id 对应同名 asset。 */
+export type BuiltinWatermarkId = 'mountain' | 'bamboo' | 'plum' | 'koi' | 'pine' | 'lotus';
+export const BUILTIN_WATERMARK_IDS: ReadonlyArray<BuiltinWatermarkId> = [
+  'mountain', 'bamboo', 'plum', 'koi', 'pine', 'lotus',
+];
+const BUILTIN_MODE_PREFIX = 'builtin:';
+/** 复用 mode 字段本身表达图样选择，不新增 schema 键；默认远山=现状观感。 */
+export type WatermarkMode = 'none' | `builtin:${BuiltinWatermarkId}` | 'custom';
+export const DEFAULT_WATERMARK_MODE: WatermarkMode = 'builtin:mountain';
+export const WATERMARK_MODE_VALUES: ReadonlyArray<WatermarkMode> = [
+  'none', ...BUILTIN_WATERMARK_IDS.map((id) => `builtin:${id}` as WatermarkMode), 'custom',
+];
+
+export function toBuiltinWatermarkMode(id: BuiltinWatermarkId): WatermarkMode {
+  return `${BUILTIN_MODE_PREFIX}${id}`;
+}
+
+/** 只认已登记的六个 id；旧值 'builtin' 与未知 builtin:* 一律不认。 */
+export function builtinWatermarkId(mode: string): BuiltinWatermarkId | null {
+  if (!mode.startsWith(BUILTIN_MODE_PREFIX)) return null;
+  const id = mode.slice(BUILTIN_MODE_PREFIX.length);
+  return (BUILTIN_WATERMARK_IDS as ReadonlyArray<string>).includes(id) ? id as BuiltinWatermarkId : null;
+}
 
 export const WATERMARK_MODE_STORAGE_KEY = 'petri-watermark-mode';
 export const WATERMARK_OPACITY_STORAGE_KEY = 'petri-watermark-opacity';
@@ -50,7 +71,7 @@ function write(key: string, value: string): void {
 
 export function readCachedWatermarkMode(): WatermarkMode {
   const saved = read(WATERMARK_MODE_STORAGE_KEY);
-  return isWatermarkMode(saved) ? saved : 'builtin';
+  return isWatermarkMode(saved) ? saved : DEFAULT_WATERMARK_MODE;
 }
 
 export function readCachedWatermarkOpacity(): number {

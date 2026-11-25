@@ -30,12 +30,17 @@ describe('背景水印偏好缓存', () => {
     });
   });
 
-  it('三态枚举冻结，默认维持现状（内置水墨）', () => {
-    expect([...WATERMARK_MODE_VALUES]).toEqual(['none', 'builtin', 'custom']);
+  it('模式枚举冻结：none + 六个内置图样 + custom，默认维持现状（内置远山）', () => {
+    expect([...WATERMARK_MODE_VALUES]).toEqual([
+      'none', 'builtin:mountain', 'builtin:bamboo', 'builtin:plum',
+      'builtin:koi', 'builtin:pine', 'builtin:lotus', 'custom',
+    ]);
     expect(isWatermarkMode('none')).toBe(true);
+    expect(isWatermarkMode('builtin:koi')).toBe(true);
     expect(isWatermarkMode('custom')).toBe(true);
+    expect(isWatermarkMode('builtin')).toBe(false);
     expect(isWatermarkMode('whenever')).toBe(false);
-    expect(readCachedWatermarkMode()).toBe('builtin');
+    expect(readCachedWatermarkMode()).toBe('builtin:mountain');
   });
 
   it('透明度钳位到 0–30%，默认 0.10', () => {
@@ -60,7 +65,7 @@ describe('背景水印偏好缓存', () => {
     expect(readCachedWatermarkOpacity()).toBe(0.25);
     localStorage.setItem(WATERMARK_MODE_STORAGE_KEY, 'bogus');
     localStorage.setItem(WATERMARK_OPACITY_STORAGE_KEY, 'nope');
-    expect(readCachedWatermarkMode()).toBe('builtin');
+    expect(readCachedWatermarkMode()).toBe('builtin:mountain');
     expect(readCachedWatermarkOpacity()).toBe(0.1);
   });
 
