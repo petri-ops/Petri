@@ -12,6 +12,7 @@ import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { KnowledgeSpacePanel } from '@/components/workspace-panels/KnowledgeSpacePanel';
+import { EmbeddingRoleBindingPanel } from '@/components/workspace-panels/EmbeddingRoleBindingPanel';
 import { KnowledgeConsoleDock } from '@/components/knowledge/KnowledgeConsoleDock';
 import styles from '../global-page.module.css';
 import consoleStyles from '@/components/knowledge/KnowledgeConsoleChat.module.css';
@@ -46,6 +47,8 @@ export default function KnowledgePage(): React.ReactElement {
       </header>
       <div className={`${styles.body} ${consoleStyles.pageBody}`}>
         <div className={consoleStyles.panelCol}>
+          {/* 试用反馈②（owner msg_5526ae23113c）：向量模型配置迁到知识空间设置区 */}
+          <EmbeddingRoleBindingPanel />
           <KnowledgeSpacePanel />
         </div>
         <KnowledgeConsoleDock />

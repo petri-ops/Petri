@@ -23,7 +23,7 @@ const presets = [
 ];
 
 describe('resolveAutoPreset', () => {
-  it('有图：显式 vision 绑定优先于视觉能力', () => {
+  it('试用反馈②：识图角色退役——有图也不走 vision 绑定，旧绑定被忽略走通用路由', () => {
     const decision = resolveAutoPreset({
       presets,
       catalog,
@@ -31,14 +31,14 @@ describe('resolveAutoPreset', () => {
       hasImages: true,
       fallbackId: 'p1::m1',
     });
-    expect(decision?.preset.endpointProfileId).toBe('p3');
-    expect(decision?.role).toBe('vision');
+    expect(decision?.role).not.toBe('vision');
+    expect(decision?.preset.endpointProfileId).not.toBe('p3');
   });
 
-  it('有图且无绑定：选带 vision 能力的可用模型', () => {
+  it('试用反馈②：有图无绑定不再按 vision 能力选模型（该能力位已退役）', () => {
     const decision = resolveAutoPreset({ presets, catalog, hasImages: true });
-    expect(decision?.preset.endpointProfileId).toBe('p2');
-    expect(decision?.reason).toBe('视觉能力');
+    expect(decision?.preset.endpointProfileId).not.toBe('p2');
+    expect(decision?.reason).not.toBe('视觉能力');
   });
 
   it('无图：agent 绑定优先，其次 tools 能力', () => {
@@ -95,10 +95,10 @@ describe('resolveAutoPreset', () => {
 });
 
 describe('BLOCK-455 渠道::模型 对绑定', () => {
-  it('vision 绑定精确命中绑定模型（不再拿渠道默认模型顶替）', () => {
+  it('试用反馈②：旧 vision 对绑定不再参与路由（存储兼容但 UI/路由已退役）', () => {
     const candidates = [
-      preset({ id: 'ep::a', endpointProfileId: 'ep', model: 'a', defaultModel: 'a', capabilities: ['chat', 'vision'] }),
-      preset({ id: 'ep::b', endpointProfileId: 'ep', model: 'b', defaultModel: 'a', capabilities: ['chat', 'vision'] }),
+      preset({ id: 'ep::a', endpointProfileId: 'ep', model: 'a', defaultModel: 'a', capabilities: ['chat', 'tools'] }),
+      preset({ id: 'ep::b', endpointProfileId: 'ep', model: 'b', defaultModel: 'a', capabilities: ['chat', 'tools'] }),
     ];
     const decision = resolveAutoPreset({
       presets: candidates,
@@ -106,7 +106,7 @@ describe('BLOCK-455 渠道::模型 对绑定', () => {
       roleBindings: { vision: 'ep::b' },
       hasImages: true,
     });
-    expect(decision?.preset.model).toBe('b');
-    expect(decision?.role).toBe('vision');
+    expect(decision?.preset.model).not.toBe('b');
+    expect(decision?.role).not.toBe('vision');
   });
 });

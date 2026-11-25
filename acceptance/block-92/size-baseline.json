@@ -22,8 +22,8 @@
       "wave": "A",
       "module": "W-03",
       "lines": 1921,
-      "bytes": 94379,
-      "sha256": "d3b45a63572e493752537e332e47ca4ca4a3c157b32f1a8d7878a8386b75259e"
+      "bytes": 94385,
+      "sha256": "37950c1605db84141536e24b879e48ba34e8b9f1db9cb9f485e6fab171ee5afb"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -69,9 +69,9 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 622,
-      "bytes": 32069,
-      "sha256": "2558492ec9ac1f22fd01045cdd4a1942f22a45b7285b8cf4bb8a6290ef65b7d0"
+      "lines": 609,
+      "bytes": 31586,
+      "sha256": "6eb035e46917fa532c285c06c8f19d0dc62208c8d48d80c22bfd73cf03d30d23"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -298,14 +298,6 @@
       "sha256": "41342a4fc9de14dc8d806680eb4e100169daf736c3570a6b4e56617ee017f8d6"
     },
     {
-      "path": "core/petri-server/agent-runner.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1038,
-      "bytes": 58012,
-      "sha256": "83f672c450c7fa30813e4f2a112dd947358221aa634e85da474dd364fefcfac9"
-    },
-    {
       "path": "core/shared-backend/skill-runtime.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -352,6 +344,14 @@
       "lines": 1051,
       "bytes": 48776,
       "sha256": "feb595a7d8d64928d6911336fe75d03e9be37c161d88e96e0a491d0596119761"
+    },
+    {
+      "path": "core/petri-server/agent-runner.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1038,
+      "bytes": 58012,
+      "sha256": "83f672c450c7fa30813e4f2a112dd947358221aa634e85da474dd364fefcfac9"
     },
     {
       "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
@@ -402,6 +402,14 @@
       "sha256": "fff1394f35f3c9b15271b9b53d45014d853ce148beb35299c1bdf1ea76c900e4"
     },
     {
+      "path": "src/main.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 944,
+      "bytes": 48340,
+      "sha256": "80c110c2544fd48c25a5a766f539fbc591c3b81ce957a33d789a53ffd2cc4e8d"
+    },
+    {
       "path": "core/shared-backend/scientific-replay-package.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -424,14 +432,6 @@
       "lines": 921,
       "bytes": 45118,
       "sha256": "29be358e264635fabe08d3939b033c31c8f8a7a06bcebbe8614db033a4a8d8a0"
-    },
-    {
-      "path": "src/main.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 944,
-      "bytes": 48340,
-      "sha256": "80c110c2544fd48c25a5a766f539fbc591c3b81ce957a33d789a53ffd2cc4e8d"
     },
     {
       "path": "frontend/src/pages/extensions/styles.module.css",
@@ -522,14 +522,6 @@
       "sha256": "0b5bb0053bd6cc65405c89f2347638e08babdda4693965e32829a57f7885bc1f"
     },
     {
-      "path": "frontend/src/components/annotations/AnnotationOverlay.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 786,
-      "bytes": 32898,
-      "sha256": "1282d1ce146060b24f87bf63ad8a4356981359d6b799eebd2d07bac73de4de58"
-    },
-    {
       "path": "frontend/src/components/icons/Icon.tsx",
       "wave": "L0",
       "module": "auto-discovered",
@@ -538,12 +530,28 @@
       "sha256": "e1c9e2fdd8a96e4f21a844798f3027d2c29574a0b9e4441d112cba3b0f165525"
     },
     {
+      "path": "frontend/src/components/annotations/AnnotationOverlay.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 786,
+      "bytes": 32898,
+      "sha256": "1282d1ce146060b24f87bf63ad8a4356981359d6b799eebd2d07bac73de4de58"
+    },
+    {
       "path": "frontend/src/components/svg-editor/SvgEditorCanvas.tsx",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 747,
       "bytes": 31682,
       "sha256": "8b4f78e5eedbd0448eba86316cdc5822ecf75d2a8c33f1e7875e981208197fae"
+    },
+    {
+      "path": "core/petri-server/agent-tools/result-selection-tools.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 742,
+      "bytes": 34462,
+      "sha256": "e6ce19c9bdfd040f137f434a6b08f20540dbd681a2801e20191e5c40d54b9edc"
     },
     {
       "path": "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
@@ -578,14 +586,6 @@
       "sha256": "5c02d801453c7bb063eb77588cf684b20dba1c7fff3b8afa37e16a1953a47532"
     },
     {
-      "path": "core/petri-server/agent-tools/result-selection-tools.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 742,
-      "bytes": 34462,
-      "sha256": "e6ce19c9bdfd040f137f434a6b08f20540dbd681a2801e20191e5c40d54b9edc"
-    },
-    {
       "path": "core/petri-server/helpers/methods-export.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86730,
+  "total": 86638,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",

@@ -6976,3 +6976,11 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **验证**：HK-01 `AppRailNewTask.test.ts` 红 3/3→绿 3/3（多项目/有当前/零项目均去 welcome、silentProjectId=null）；邻域 `CreateEntryRefactor 5/5 + AppRailContext 4/4`；types/lint/arch/frontend-deps/ts-syntax/arch-cycles/code-size/docs 全绿。
 - **观感确认（owner 实机原话，2026-11-25）**：「试了 现在出来的是项目选择页 顺手 多了」——来自 owner、经兴奋 msg_7a37bf022d94 转达，**观感由 pending_human_eye 翻为 owner-accepted**（引用该反馈，Agent 零代签）。
 - **状态边界**：dev Electron 边界内 verified（owner 实机认可）；不外推 packaged/Provider/GA。G0 永久 maintained · G1 进行中。
+
+## UI-730: 模型接口面板清理——识图角色退役 + 向量配置迁知识空间（2026-11-26 **in_progress**；代码完成，实机待 owner 重试）
+
+- **来源**：owner 实机试用反馈②原话（2026-11-25，msg_5526ae23113c）：「模型接口中的这个 识图模型不需要了吧 向量模型是不是要换到知识空间中 毕竟其它地方用不到 规划一下 开整」。
+- **核真消费面**：识图 role 在 BLOCK-518 vision 双位门退役后唯一消费=`auto-model.ts` hasImages 特判（capabilities 已收窄 ['tools','embedding']，视觉能力候选恒空）→ 撤；向量 role 消费=知识空间语义检索 + 对话记忆召回（KnowledgeSpacePanel/SimpleChat 提示 + memory-policy embeddingModel readonly）→ 迁 UI 归属、底层链零改。
+- **变化面**：①`DesktopSettingsPanel.tsx` 撤 VisionRoleBinding/EmbeddingRoleBinding 挂载（识图退役、向量迁出）；②`auto-model.ts` 撤 hasImages→vision 特判，旧 `bindings.vision` 留存储兼容不读；③新增 `EmbeddingRoleBindingPanel`（挂载于 /knowledge 页顶部）+ `embeddingBindingMigration.ts` 纯函数（applyEmbeddingBinding 只改 model_role_bindings.embedding + 派生 embed_provider，其它字段逐字保留；readEmbeddingBinding 老配置兼容读取）；④提示文案改指向知识空间页。
+- **验证**：HK-01 纯函数 3/3 + 容器 2/2（老配置读取不丢、保存只改两字段）+ auto-model 6/6 + 邻域 KnowledgeSpacePanel 9/9 + global-pages/EmbeddingRoleBinding 全绿；types/lint(0 error)/arch/frontend-deps/ts-syntax/arch-cycles/code-size/docs/ui 全绿。
+- **诚实边界**：只动配置 UI 归属——embedding provider/回退链/DB schema 零变化、BLOCK-518 语义不回退、老用户配置不丢（同一 `model_role_bindings` 键 + 原样透传其它字段）。观感零代签 pending_human_eye，待 owner 实机重试确认。G0 永久 maintained · G1 进行中。

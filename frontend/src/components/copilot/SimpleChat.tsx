@@ -1727,7 +1727,7 @@ export function SimpleChat({
                   disabled={knowledgeSpace.busy || !knowledgeSpace.embeddingAvailable}
                   title={
                     !knowledgeSpace.embeddingAvailable
-                      ? '知识空间不可用：请先在设置中绑定向量模型'
+                      ? '知识空间不可用：请先在知识空间页绑定向量模型'
                       : knowledgeSpace.enabled
                         ? '知识空间已启用：对话自动检索知识库（点击关闭）'
                         : '启用知识空间：对话自动检索知识库'

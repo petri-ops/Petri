@@ -31,8 +31,6 @@ import {
 import { ModelPreferenceTabs } from './DesktopSettingsPanel/ModelPreferenceTabs';
 import prefStyles from '@/components/copilot/SimpleChat/ModelPreferenceControls.module.css';
 import { getBridge } from '@/lib/desktopBridge';
-import { VisionRoleBinding } from './DesktopSettingsPanel/VisionRoleBinding';
-import { EmbeddingRoleBinding } from './DesktopSettingsPanel/EmbeddingRoleBinding';
 // UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位：检索后端/OCR 渠道）
 import { ChannelPreferencePanel } from './DesktopSettingsPanel/sections/ChannelPreferencePanel';
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
@@ -101,7 +99,6 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
     saved,
     modelProfiles,
     roleBindings,
-    setRoleBindings,
     fallbackEnabled,
     setFallbackEnabled,
     fallbackBindings,
@@ -240,18 +237,8 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
                 {credentialBackend === 'keychain' ? ' macOS Keychain' : ' 本地凭据存储'}，默认隐藏。
               </p>
             </div>
-            <VisionRoleBinding
-              profiles={userModelProfiles}
-              availableModels={availableModels}
-              value={roleBindings.vision}
-              onChange={(binding) => setRoleBindings((prev) => ({ ...prev, vision: binding }))}
-            />
-            <EmbeddingRoleBinding
-              profiles={modelProfiles}
-              availableModels={availableModels}
-              value={roleBindings.embedding}
-              onChange={(binding) => setRoleBindings((prev) => ({ ...prev, embedding: binding }))}
-            />
+            {/* 试用反馈②（owner msg_5526ae23113c）：识图角色选择器退役（BLOCK-518 vision 门已撤），
+                向量模型配置迁至 /knowledge 知识空间设置区；设置页只留通用渠道/模型能力管理。 */}
             <div className="petri-model-list">
               {userModelProfiles.length > 0 && (
                 <div className="petri-endpoint-list-header" aria-hidden="true">

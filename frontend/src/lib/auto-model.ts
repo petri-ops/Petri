@@ -2,9 +2,10 @@
  * auto-model — BLOCK-225 D4 自动选模型的纯解析层。
  *
  * 只在「发送时」决定本轮用哪个模型，不写回 active_chat_model_id：
- *   1. 有图片：显式 vision 角色绑定 > 带 vision 能力的可用模型；
- *   2. 无图片：显式 agent 角色绑定 > 带 tools 能力的可用模型；
- *   3. 都没有：当前模型 > 第一个可用模型。
+ *   1. 显式 agent 角色绑定 > 带 tools 能力的可用模型；
+ *   2. 都没有：当前模型 > 第一个可用模型。
+ * 试用反馈②（owner msg_5526ae23113c）：识图角色退役——BLOCK-518 vision 双位门已撤，
+ * hasImages 不再走独立 vision 角色；多模态由模型自身能力支持，非独立角色。
  * 候选必须过 BLOCK-224 可用性门（隐藏/缺密钥不选）。
  */
 
@@ -44,7 +45,7 @@ function byBinding(
   return matches.find((preset) => preset.model === preset.defaultModel) || matches[0];
 }
 
-function byCapability(candidates: ChatModelPreset[], capability: 'vision' | 'tools'): ChatModelPreset | undefined {
+function byCapability(candidates: ChatModelPreset[], capability: 'tools'): ChatModelPreset | undefined {
   return candidates.find((preset) => (preset.capabilities || []).includes(capability));
 }
 
@@ -53,12 +54,10 @@ export function resolveAutoPreset(input: AutoModelInput): AutoModelDecision | un
   if (available.length === 0) return undefined;
   const bindings = input.roleBindings || {};
 
-  if (input.hasImages) {
-    const bound = byBinding(available, bindings.vision);
-    if (bound) return { preset: bound, reason: '识图角色绑定', role: 'vision' };
-    const capable = byCapability(available, 'vision');
-    if (capable) return { preset: capable, reason: '视觉能力', role: 'vision' };
-  } else {
+  // 试用反馈②（owner msg_5526ae23113c）：识图角色退役——BLOCK-518 vision 双位门已撤、
+  // capabilities 收窄 ['tools','embedding']，hasImages 不再走独立识图角色，统一按通用 Agent/工具
+  // 角色选模型（多模态由模型自身支持，非独立角色）。bindings.vision 旧值留存储兼容、不读。
+  {
     const bound = byBinding(available, bindings.agent);
     if (bound) return { preset: bound, reason: 'Agent 角色绑定', role: 'agent' };
     const capable = byCapability(available, 'tools');

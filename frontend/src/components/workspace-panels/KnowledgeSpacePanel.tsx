@@ -94,7 +94,7 @@ export function KnowledgeSpacePanel() {
           {state && !embeddingAvailable && (
             <div className={styles.noticeRow} data-testid="knowledge-embed-unavailable">
               <span className={styles.noticeText}>
-                绑定向量模型（设置 → 模型 → 向量模型）后可启用知识空间的语义检索。当前无法启用。
+                在本页顶部绑定向量模型（语义检索）后可启用知识空间的语义检索。当前无法启用。
               </span>
               <button
                 type="button"
