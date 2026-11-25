@@ -373,11 +373,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/workspace-panels/LeftPanel.test.tsx": {
-    "@typescript-eslint/unbound-method": {
-      "count": 4
-    }
-  },
   "frontend/src/components/workspace-panels/LeftPanel.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 2

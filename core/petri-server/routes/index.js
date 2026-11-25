@@ -20,8 +20,11 @@ module.exports = async function registerRoutes(app) {
         // dataDir）/spawn（异源或旧版缺字段）。旧版后端无这三字段 → 身份无法核实
         // → 一律不 attach（宁 spawn 不误认领）。
         const { buildHealthShape } = require('../../shared-backend/health');
+        // A5 C 先行：supervisor 观测细节只读取值（零控制面），additive 字段。
+        const { supervisorHealthShape } = require('../helpers/external-supervisor');
         res.json({
           ...buildHealthShape({ service: 'petri-r', readiness: dbOk, details: { db_ok: dbOk } }),
+          supervisorSnapshot: supervisorHealthShape().details,
           version,
           db_ok: dbOk,
           instanceId: process.env.PETRI_INSTANCE_ID || null,

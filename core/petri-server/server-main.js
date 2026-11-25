@@ -26,6 +26,10 @@ module.exports = function startPetriServer(portHandle) {
 // 模块加载期错误；server.js 端口守卫路径刻意不装（需保持 dataDir 零副作用契约）。
 const { installConsoleErrorBridge, installProcessErrorHandlers } = require('../shared-backend/error-log');
 installConsoleErrorBridge();
+// A5 C 先行：外部监督器只观测不动作。先装留痕钩子，确保异常退出在 error-log
+// 的 exit(1) 之前已写 incident + metrics + 告警；不改 error-log 退出语义。
+const { installSupervisorProcessHooks } = require('./helpers/external-supervisor');
+installSupervisorProcessHooks();
 installProcessErrorHandlers();
 const logger = require('../shared-backend/logger');
 
@@ -320,7 +324,12 @@ try {
   // PL-6a — stale-running 兜底对账器：进程内无 owner 且心跳超时的 running 行
   // 标 failed（兜死终态持久化失败的滞留路径）；owner 在场一律不动（防误杀长跑）。
   const { scheduleStaleRunningReconciler } = require('./helpers/stale-running-reconciler');
-  scheduleStaleRunningReconciler({ db });
+  // A5：心跳超时由既有对账器在真收口时只读通知；不新增巡检、不改对账语义。
+  const { observeHeartbeatTimeout } = require('./helpers/external-supervisor');
+  scheduleStaleRunningReconciler({
+    db,
+    onHeartbeatTimeout: ({ sessionKey }) => observeHeartbeatTimeout({ sessionKey }),
+  });
 } catch (e) {
   logger.warn('[retention] scheduler not started:', e && e.message ? e.message : e);
 }
@@ -337,8 +346,10 @@ try {
 app.get('/api/health', (req, res) => {
   // L3-5（L-22）：权限门 degraded 标记上健康面（运维/探针可见，不再只有 console）
   const { buildHealthShape } = require('../shared-backend/health');
+  const { supervisorHealthShape } = require('./helpers/external-supervisor');
   res.json({
     ...buildHealthShape({ service: 'petri-r', readiness: true }),
+    supervisorSnapshot: supervisorHealthShape().details,
     permissionGateDegraded: process.env.PETRI_PERMISSION_GATE_DEGRADED === '1',
   });
 });
