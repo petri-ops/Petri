@@ -28,6 +28,7 @@ const {
   deriveObservedStateDigest,
   mapDecisionToIterationStatus,
 } = require('../shared-backend/loop-controller');
+const { logError } = require('../shared-backend/error-log');
 const { decideIterationOutcome } = require('./helpers/loop-decision');
 // BLOCK-508 — agent 循环层 stall-resume：纯函数决策/去重/checkpoint，不碰 provider 层
 const {
@@ -512,7 +513,10 @@ async function runLoop({
         conversationId: String(conversationId || ''),
         sourceDigest: cp.observedStateDigest || cp.checkpointId,
       });
-    } catch {}
+    } catch (error) {
+      // 第二轮 harness 评估 M3：checkpoint 写失败不再静默（与第一轮 OB-004 同向留痕）
+      logError('checkpoint_write_failed', error, { loopRunId: loopRunId || null, conversationId: conversationId || null });
+    }
   }
 
   function _loopPersistProgressIteration(providerIteration, assistantToolActivities, toolResultEventsByCallIdRef) {
