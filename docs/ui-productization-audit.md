@@ -7110,3 +7110,7 @@ owner 实机反馈 hiddenInset 后红绿灯太淡/与工具行不齐/离收起�
 ### UI-744 三次精调（msg_d5fa5aa26dd1）：CDP 实测红绿灯/工具行同线对齐
 
 CDP 实测（owner 在线 dev 窗口，1385×949）：三处 header（左/中/右）均 y=0/h=38、paddingTop=0（无残留标题条高度，"上层太宽"假设被数据排除）；leftTools（侧栏开关）y=4.7/h=28 → 中心 y=18.7；tabPill（文件 tab）y=7.7/h=22 → 中心 y=18.7；三处工具行视觉中心统一（无需分别调整）。Electron d.ts 仅声明 `trafficLightPosition?: Point`，未写坐标语义；依 owner 视觉反馈（灯偏上）+ CDP 工具行中心 18.7 推断 y 为灯中心坐标——旧 y=13 使灯比工具行高约5.7px，改 y=19（对齐 18.7）。**诚实边界**：坐标语义未经官方文档证实，两种语义下 y 增大都使灯下移（与 owner 反馈方向一致），需 owner 重启后按 Orca 截图复验；若仍偏则按截图像素差再微调。HK-01 test/traffic-light-tune 红1/3→绿3/3 + hiddenInset 三套 HK 合计9/9 + 全静态门10/10。
+
+### UI-744 终局标定收口（msg_c48247c40782 / 7点目测+CDP反解）
+
+owner 多轮目测数据（y7=高/y13=微高/y13.5=低/y14=低/y15=低/y16=低/y19=更远）完美符合模型：**trafficLightPosition.y=灯顶部坐标、灯中心=y+6**（12px 灯径），7 点无异常、语义已实证确定（不再猜）。CDP 精测侧栏开关 svg 图标中心=18.73、button 中心=18.73、leftZone 中心=18.73（三处一致，图标无偏移）；反解理论最优 y=18.73-6=12.73 → 取 12.7。终局排查"web 顶部预留"：CDP Runtime.evaluate outerHeight=885/innerHeight=949（inner>outer 异常）、devicePixelRatio=1.86、bodyTop/docTop/firstHeaderY 全=0 → **web 内容已铺到 y=0、无顶部预留**，且此 CDP 连的是测试实例隐藏窗（_window-create.js IS_TEST_INSTANCE show:false + backgroundThrottling:false），非 owner 主窗——无法从该窗推断 owner 主窗几何。按令保持 y=12.7 不动、不再多轮试探；6 个临时探针提交（y7/16/15/14/13.5/12.7）收敛为一笔正式提交，HK-01 断言实测标定值 12.7。**诚实边界**：owner 最后反馈"还是低"未经终验确认——已按数据最优值收口，若仍偏差建议 owner 给单一像素差或恢复 A 案 default，不再远程盲调；灰灯属失焦 mac 标准行为，位置以聚焦态目测为准。

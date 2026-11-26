@@ -128,7 +128,7 @@ async function createWindow({
     // 工具行（leftTools/tabPill）中心 y≈18.7。trafficLightPosition.y 是灯中心坐标
     // （非左上角）——此前 y=13 使灯比工具行高约5.7px（owner「红绿灯偏上」根因）。
     // 改 y=19 对齐工具行中心；x=20 + header 左区 padding-left:96px 留舒适间距。
-    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 20, y: 19 } } : {}),
+    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 20, y: 12.7 } } : {}),
     backgroundColor: "#1f2330",
     // 窗口/任务栏图标（mac 走 app bundle 会忽略此值；win/linux dev 态即时可见，
     // packaged 态由 electron-builder 的 icon 条目接管）
