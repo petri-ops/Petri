@@ -3945,8 +3945,8 @@ body:has([data-petri-layer='modal']) .resizeHandleV {
   bottom: 0;
   left: 4px;
   width: 1px;
-  background: color-mix(in srgb, var(--petri-border) 62%, transparent 38%);
-  opacity: 0.72;
+  /* 试用反馈⑤（owner msg_c1bb714f36ce）：旧 62%×.72 实机仅 ~7% 看不清；统一用 --petri-border-strong、不叠透明度 */
+  background: var(--petri-border-strong);
 }
 
 /* 指针跟随渐晕：横跨接缝的椭圆光斑，亮部集中在指针附近、向上下渐隐 */
