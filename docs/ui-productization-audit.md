@@ -7058,3 +7058,11 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - 来源：试用反馈④后续（msg_890b2d097359）——CDP 实证 owner「复制会话 ID 点击无效」真根因=z=4000 全屏透明瞬态层盖住 z=1000 右键菜单、点击被吞（该层卸载后即正常）；全屏卡死线（双状态机统一 855aff48d+1d420518a）已闭合。
 - 改动：LeftPanel 右键菜单 zIndex 从 `--petri-z-dropdown`(1000) 提到 `--petri-z-toast`(10000，全局最高浮层档)，关闭层仍 overlay(4000)；任意瞬态层挂载时菜单恒在最上。
 - 验证：HK-01 静态 3/3（z-index token/阶梯 toast>overlay/关闭层档）+ CDP 实证——真实右键后注入 z=4000 全屏透明阻断层，elementFromPoint 仍命中 menuitem（menuZ=10000, topIsMenuItem=true）；邻域 19/19、全静态门 10/10。
+
+## UI-740: 右栏工具菜单分组（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）
+
+- **来源**：owner msg_26327e7a3def 右栏系统审计的无争议项（纯分组排序、不改能力清单）。
+- **核真纠正**：右栏实际 15 core surface（home+14），终端=底部面板、侧聊=独立窗（非右栏 tab）；`createWorkSurfaceState` 初始 tabs=[] → 面板本就按需打开、"默认收起"已实现；工具菜单 17 入口平铺造成感知负担。无面板打开次数 telemetry（funnel_events 仅 4 类项目级事件）→ 判级基于功能真源、不编造频率。完整分析见 acceptance/right-panel-audit/PANEL-AUDIT.md（含 4 项 owner 裁决表：generated 归并/workflow 并入 jobs/evidence 去留/是否补埋点）。
+- **改动**：`TitleBarToolItem` 加可选 `group`；`useWorkspaceTitleBar.ts` 定义 MENU_GROUPS 四组（主工作区/分析治理/审计证据/环境入口），菜单项按组稳定排序（组内顺序不变）、入口不丢；`TitleBarRightZone.tsx` 组变化时插组标题；ColumnizedTitleBar.module.css 加 `.toolMenuGroupTitle`（body 字号+opacity 0.6，避让 small-font 棘轮）。
+- **验证**：HK-01 静态 4/4（组覆盖/入口不丢/渲染标题/样式）+ theme-token 与邻域 26/26 + 全静态门 10/10；CDP 复验时 owner 不在 project 页如实记录、HMR 生效。
+- **状态边界**：观感零代签 pending_human_eye 待 owner 过目；裁决表 4 项未拍板前不合并/移除任何面板；dev Electron 边界内。G0 永久 maintained · G1 进行中。

@@ -190,7 +190,11 @@ export function TitleBarRightZone(): React.ReactElement {
                   role="menu"
                   style={{ position: 'fixed', top: menuAnchor?.top ?? 42, right: menuAnchor?.right ?? 12, left: 'auto' }}
                 >
-                  {toolMenuItems.map((item) => (
+                  {toolMenuItems.map((item, itemIndex) => (
+                    <React.Fragment key={item.id}>
+                    {(itemIndex === 0 || toolMenuItems[itemIndex - 1]?.group !== item.group) && (
+                      <div className={styles.toolMenuGroupTitle} role="presentation">{item.group}</div>
+                    )}
                     <button
                       key={item.id}
                       type="button"
@@ -206,6 +210,7 @@ export function TitleBarRightZone(): React.ReactElement {
                       ) : null}
                       {item.isOpen && <Icon name="check" size={13} />}
                     </button>
+                    </React.Fragment>
                   ))}
                 </div>
               </>,

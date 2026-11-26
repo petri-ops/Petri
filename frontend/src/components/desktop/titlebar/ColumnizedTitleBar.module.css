@@ -90,3 +90,12 @@
     opacity: 0.35;
   }
 }
+
+/* 右侧栏审计（msg_26327e7a3def）：工具菜单分组标题（纯呈现，不改入口语义） */
+.toolMenuGroupTitle {
+  padding: 6px 10px 2px;
+  /* 不占 small-font 棘轮：body 字号 + 低透明弱化 */
+  font-size: var(--petri-font-size-body);
+  opacity: 0.6;
+  color: var(--petri-text-muted);
+}

@@ -22,6 +22,8 @@ export interface TitleBarToolItem {
   label: string;
   icon: IconName;
   isOpen?: boolean;
+  /** 右侧栏审计（msg_26327e7a3def）菜单分组：纯呈现分组，不改面板去留与功能 */
+  group?: string;
 }
 
 export interface TitleBarResultItem {

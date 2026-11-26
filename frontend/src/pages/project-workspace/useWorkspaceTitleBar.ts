@@ -116,6 +116,20 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     () => surfaces.filter((surface) => surface.id !== 'home' && isTabSurface(surface)),
     [surfaces]
   );
+/** 右侧栏审计（owner msg_26327e7a3def）：工具菜单四组呈现（纯分组、不改面板去留/顺序语义） */
+const MENU_GROUPS = [
+  { title: '主工作区', ids: ['results', 'files', 'generated', 'model3d', 'browser'] },
+  { title: '分析治理', ids: ['analyze', 'review', 'jobs', 'workflow'] },
+  { title: '审计证据', ids: ['trace', 'io', 'agent', 'plan', 'evidence'] },
+  { title: '环境入口', ids: ['host:terminal', 'host:side-chat'] },
+] as const;
+function menuGroupFor(id: string): string {
+  return MENU_GROUPS.find((group) => (group.ids as readonly string[]).includes(id))?.title ?? '主工作区';
+}
+function menuGroupRank(id: string): number {
+  return MENU_GROUPS.findIndex((group) => (group.ids as readonly string[]).includes(id));
+}
+
   // BLOCK-253 E1 — 宿主入口统一：底部终端/侧聊与右轨面同一菜单。
   const hostToolItems = useMemo(() => [
     { id: 'host:terminal', label: '终端', icon: 'terminal' as const, isOpen: bottomTerminalOpen },
@@ -201,7 +215,8 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
           icon: surface.icon,
           isOpen: tabs.some((tab) => tab.surfaceId === surface.id),
         })),
-      ],
+      ].map((item) => ({ ...item, group: menuGroupFor(item.id) }))
+        .sort((a, b) => menuGroupRank(a.id) - menuGroupRank(b.id)),
       onSelectToolItem: (itemId) => {
         if (itemId === 'host:terminal') {
           onToggleBottomTerminal();
