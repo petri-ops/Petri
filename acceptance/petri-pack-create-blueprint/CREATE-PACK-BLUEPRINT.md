@@ -53,6 +53,18 @@
 ### 2.4 owner 强参与原则产品化
 - 生成是"对话式迭代"而非"一锤子买卖"：每轮生成返回多候选 + 可反馈"保留/重做/调整"；挑选结果落 artifact-truth 并可在 Result Studio 继续加工。此循环形态由包定义，内核只提供 artifact 与事件通道。
 
+## §2.5 设计宪法（owner msg_a9c7bc882f84 裁决 · 融入蓝图与 P0）
+
+**第一层 · 展示宪法（格式即插件，通用走内核）**：通用格式（mp4/glTF/图片/SVG）由内核原生 viewer 展示（3D 面板/生成文件面板已承接），领域专属格式才由包注册渲染器（artifactTypes 声明→展示层自动路由）。判例=bio 包 P6「resultSurfaces 退役回 core viewer，放宽验收=假绿」——领域渲染器只用于真领域专属格式，不为通用格式造第二 viewer。
+
+**第二层 · 生成宪法（人是导演，agent 是全部执行者）**：
+1. 多候选并排：一次生成 N 候选（P0 `count>1`，当前 1-4），Result Studio 并排对比（今日 logo 六概念流程产品化）；
+2. 指向式迭代：owner 点候选+口述方向 → `referenceImagePath` 真图内容 base64 走 image-to-image；**无人手编辑工具概念**——owner 指方向、agent 执行；
+3. 规格自证：每候选带 provenance（prompt/model/seed/sha256/reference），可复现可审计可回滚（artifact-truth 同款 sha256）；
+4. 验收结构化：owner 结构化要求→agent 自检对比，减少来回。
+
+后续视频/3D/设计子域沿用同一宪法。**P0 新增验收项**：Result Studio 多候选并排可达（与注册/调用/sha256/实机出图并列）。
+
 ## §3 P0-P3 分级路线（能力/依赖/成本/验收口径）
 
 | 级 | 能力 | 依赖 | 成本 | 验收口径 |
