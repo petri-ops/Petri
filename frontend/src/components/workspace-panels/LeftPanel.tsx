@@ -12,6 +12,7 @@ import { setConversationDragData } from '@/components/copilot/SimpleChat/convers
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useConversationRun } from '@/components/copilot/conversationRunStore';
 import { formatDate, formatRelativeShort } from '@/lib/format';
+import { copyText, exportConversation } from '@/lib/conversationActions';
 import styles from '@/pages/project-workspace.module.css';
 import button from '@/components/ui/controls/button.module.css';
 
@@ -730,6 +731,8 @@ function ConversationItem({
   // UI-715 — 会话行右键信息菜单（对标 ZCode 左侧会话右键形态）：只读展示会话 ID +
   // 复制 ID / 复制会话信息（JSON），服务「全链可审计」的定位取证场景（乙组取证多次需要会话 id）。
   const [infoMenu, setInfoMenu] = React.useState<{ x: number; y: number } | null>(null);
+  const [copyFeedback, setCopyFeedback] = React.useState(false);
+  const [exportFeedback, setExportFeedback] = React.useState<string | null>(null);
   const infoMenuRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -910,8 +913,11 @@ function ConversationItem({
               type="button"
               role="menuitem"
               onClick={() => {
-                void navigator.clipboard.writeText(conversation.id).catch(() => {});
-                setInfoMenu(null);
+                void copyText(conversation.id).then((ok) => {
+                  if (!ok) return; // 失败保持菜单可见（静默失败即本 bug 根因，不再吞错）
+                  setCopyFeedback(true);
+                  window.setTimeout(() => { setCopyFeedback(false); setInfoMenu(null); }, 520);
+                });
               }}
               style={{
                 display: 'block',
@@ -926,7 +932,7 @@ function ConversationItem({
                 fontSize: 'var(--petri-font-size-sm, 12px)',
               }}
             >
-              复制会话 ID
+              {copyFeedback ? '✓ 已复制会话 ID' : '复制会话 ID'}
             </button>
             <button
               type="button"
@@ -946,6 +952,26 @@ function ConversationItem({
               }}
             >
               复制会话信息（JSON）
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setExportFeedback('导出中…');
+                void exportConversation(conversation.id, (message) => {
+                  // 轻量回执：菜单项文字异步变「✓/失败」，不弹模态、不打断核查流程
+                  setExportFeedback(message.startsWith('已导出') ? '✓ 已导出会话' : '导出失败');
+                  window.setTimeout(() => { setExportFeedback(null); setInfoMenu(null); }, 1800);
+                });
+              }}
+              style={{
+                display: 'block', width: '100%', textAlign: 'left', padding: '6px 8px',
+                border: 'none', borderRadius: 6, background: 'transparent',
+                color: 'var(--petri-text)', cursor: 'pointer',
+                fontSize: 'var(--petri-font-size-sm, 12px)',
+              }}
+            >
+              {exportFeedback || '导出会话'}
             </button>
           </div>
         </>,

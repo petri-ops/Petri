@@ -112,6 +112,26 @@ describe('UI-715 会话行右键信息菜单', () => {
     expect(screen.queryByRole('menu')).toBeNull();
   });
 
+
+  it('试用反馈⑫：clipboard API 失败时 fallback execCommand 仍复制并给可见反馈', async () => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: vi.fn(() => Promise.reject(new Error('denied'))) }, configurable: true,
+    });
+    const exec = vi.fn(() => true);
+    Object.defineProperty(document, 'execCommand', { value: exec, configurable: true });
+    const { row } = renderWithConv();
+    fireEvent.contextMenu(row);
+    fireEvent.click(screen.getByRole('menuitem', { name: '复制会话 ID' }));
+    await waitFor(() => expect(exec).toHaveBeenCalledWith('copy'));
+    await waitFor(() => expect(screen.getByText('✓ 已复制会话 ID')).toBeTruthy());
+  });
+
+  it('试用反馈⑫：右键菜单含导出会话（输入框下入口已迁移）', () => {
+    const { row } = renderWithConv();
+    fireEvent.contextMenu(row);
+    expect(screen.getByRole('menuitem', { name: '导出会话' })).toBeTruthy();
+  });
+
   it('普通左键点击不弹菜单（仅右键触发）', () => {
     renderWithConv();
     fireEvent.click(screen.getByText('会话甲').closest('li')!);

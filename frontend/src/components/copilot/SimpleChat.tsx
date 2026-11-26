@@ -154,7 +154,6 @@ import { Icon } from '@/components/icons/Icon';
 // BLOCK-154 波次 3 — 无 timeline 分段消息的共享空数组（行 memo 的 segments prop
 // 需要稳定引用；`?? []` 每次新建会击穿 memo）。
 const EMPTY_ROW_SEGMENTS: ConversationSegment[] = [];
-import { getBridge } from '@/lib/desktopBridge';
 import { ModelMenu } from './SimpleChat/ModelMenu';
 import { resolveActiveRunStartIndex } from './SimpleChat/activeRunWindow';
 import { ModelChip } from './SimpleChat/ModelChip';
@@ -263,40 +262,6 @@ export function SimpleChat({
   // 持续可见语义见 hook 调用后的 steerNotice 副本——state 移至 useChatStream
   // 之后声明，使 effect 依赖可读 streaming）
 
-  // UI-444 加映（用户反馈「点击了下载但没有窗口出来」）——改为原生另存为：
-  // fetch 后端组合的 Markdown → files.saveTextFile（原生保存对话框，位置可控、
-  // 确认后写入）→ 行内回执告知路径；浏览器（非桌面）回退 blob 锚点下载。
-  const handleExportConversation = useCallback((): void => {
-    if (!conversationId) return;
-    void (async () => {
-      const url = `${getPlatformApiPrefix()}/ai/conversations/${encodeURIComponent(conversationId)}/export.md`;
-      const token = getToken();
-      let content: string | null = null;
-      try {
-        const resp = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : undefined });
-        if (resp.ok) content = await resp.text();
-      } catch { content = null; }
-      if (content == null) {
-        setSteerNotice('会话导出失败：无法读取会话内容');
-        return;
-      }
-      const name = `会话导出-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}.md`;
-      const bridge = getBridge('files');
-      if (bridge?.saveTextFile) {
-        const r = await bridge.saveTextFile(name, content);
-        if (r && r.ok && r.path) setSteerNotice(`已导出：${r.path}`);
-        else if (r && r.ok && r.canceled) { /* 用户取消，不打扰 */ }
-        else setSteerNotice('会话导出失败：' + ((r && r.error) || '未知原因'));
-        return;
-      }
-      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = name;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    })();
-  }, [conversationId]);
   // BLOCK-245 P2 — 上下文装配单列表（选中文段 / 图片引用 / 后续 @ 候选共用一条
   // 列表与一条渲染入口）；右栏引用事件订阅与跨项目过滤都在簇内，仅 copilotAsk
   // 拥有者（中央会话）消费，避免右栏 chat tab 与中央会话重复入列。
@@ -1658,16 +1623,6 @@ export function SimpleChat({
               <div className="sc-composer-left">
                 {/* BLOCK-60：死控件 + 已移除；刷新/I-O 收进 ⋯ 溢出菜单 */}
                 <div className="sc-access-picker">
-                  {conversationId && !slimComposer ? (
-                    <button
-                      type="button"
-                      className="sc-access-btn"
-                      onClick={handleExportConversation}
-                      title="导出会话为 Markdown"
-                    >
-                      <Icon name="download" size={14} />
-                    </button>
-                  ) : null}
                   <button
                     type="button"
                     className="sc-access-btn"

@@ -7044,3 +7044,11 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **改动②resize**：DesktopSettingsPanel.tsx `sidebarWidth` state（默认 264）+ pointer 拖拽 handle（200-480px 钳制，setPointerCapture，不持久化——简单优先、避免新增存储）；sidebar 内联 flexBasis/width 覆盖原固定 264px；settings-redesign.module.css 加 handle 样式（8px 命中区、cursor ew-resize、border-card 语义细线）。
 - **验证**：HK-01 静态 4/4（柔化×2/宽度 state+handle+min-max/CSS 不写死）+ theme-token 与设置邻域 20/20 + 全静态门 10/10（DesktopSettingsPanel grow 留因）；CDP 复验时 owner 未停留在设置页、如实记录，由测试守护，Vite HMR 生效。
 - **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目（边框柔化程度 + 拖拽手感）；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。
+
+## UI-739: 会话右键菜单三件——复制ID修复 + 导出会话新增/迁移（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）
+
+- **来源**：owner 试用反馈⑫（msg_9b268abb3522，附右键菜单截图）：「复制会话 ID 点击无效；右键菜单加导出会话；输入框下导出会话转移到右键」。
+- **核真**：复制 ID 原用 `navigator.clipboard.writeText(...).catch(()=>{})` 静默吞错——Electron 渲染进程 API 受限即表现为"点击无效"（无反馈）；导出逻辑原内嵌 SimpleChat 且依赖其 setSteerNotice 回执，无法直接被右键复用。
+- **改动**：新 `lib/conversationActions.ts` 单源——`copyText`（clipboard 优先、失败 `execCommand('copy')` fallback、两者皆败返回 false）+ `exportConversation(id, notify)`（抽自原 UI-444 原生另存为：fetch export.md → files.saveTextFile → blob 回退）；LeftPanel 右键复制 ID 改走 copyText 且成功后菜单项文字「✓ 已复制会话 ID」一闪、新增「导出会话」项（异步文字回执：导出中…→✓ 已导出/失败，不弹模态）；SimpleChat 工具栏导出入口与原 handler 撤除（迁移非复制，getBridge import 同步清理）。
+- **验证**：HK-01 静态 5/5（复制 fallback/反馈/右键导出/原入口撤除/helper 单源）+ 行为回归（LeftPanel 19/19，含新 clipboard 拒绝→execCommand fallback 与导出菜单项测试）+ theme-token 与邻域 42/42 + 全静态门 10/10（LeftPanel grow 留因）。HMR 生效；CDP 实机合成右键较复杂，由组件行为测试守护，如实记录。
+- **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目（复制反馈与导出入口位置）；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。

@@ -21,9 +21,9 @@
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 1921,
-      "bytes": 94423,
-      "sha256": "f155c6696e6209e185d085980dfb7b3a6cfae4ba342210bef149c4fb7594ad3b"
+      "lines": 1876,
+      "bytes": 92226,
+      "sha256": "5d5a3c5ca6c04ce79bb04d868c2b4a81063ed5bcc8d63bac5fa2eb8e68ff16fe"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -386,20 +386,20 @@
       "sha256": "a26ce0c08b135e4497dc31586c7ce442bdacb25f360d290afcb94b74b4cc0a48"
     },
     {
+      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 988,
+      "bytes": 39934,
+      "sha256": "31ca5d86eb27db9f5998fefaac5c6af35cb61d67f6afbb6a715f945e14cce3c3"
+    },
+    {
       "path": "core/shared-backend/loop-repair-strategy.js",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 972,
       "bytes": 36708,
       "sha256": "c81a0a06b01eaa87ac1dcc9fbee98db946783738c1ab6f36edb1a6cd175cc000"
-    },
-    {
-      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 962,
-      "bytes": 38447,
-      "sha256": "fff1394f35f3c9b15271b9b53d45014d853ce148beb35299c1bdf1ea76c900e4"
     },
     {
       "path": "src/main.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86687,
+  "total": 86668,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -918,6 +918,19 @@
       "to": {
         "lines": 609,
         "bytes": 31428
+      }
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
+      "reason": "试用反馈⑫ owner msg_9b268abb3522：右键菜单复制ID fallback+反馈、新增导出会话项（26行交互与轻量回执）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 962,
+        "bytes": 38447
+      },
+      "to": {
+        "lines": 988,
+        "bytes": 39934
       }
     }
   ]
