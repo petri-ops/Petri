@@ -37,7 +37,7 @@ function root(inner: string): SVGSVGElement {
 describe('BLOCK-342 W2/W3/W4 svgEditorInspector', () => {
   it('白名单属性：全是 svg 表现属性，不含任意属性注入面', () => {
     const names = EDITABLE_ATTRS.map((a) => a.name).sort();
-    expect(names).toEqual(['fill', 'font-family', 'font-size', 'font-weight', 'opacity', 'stroke', 'stroke-width', 'text-anchor']);
+    expect(names).toEqual(['fill', 'font-family', 'font-size', 'font-weight', 'opacity', 'rx', 'stroke', 'stroke-width', 'text-anchor']);
     expect(names).not.toContain('onclick');
     expect(names).not.toContain('href');
   });

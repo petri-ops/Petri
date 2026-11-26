@@ -112,6 +112,28 @@
   white-space: nowrap;
 }
 
+.layerList li {
+  position: relative;
+}
+
+.layerVisibility {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 2px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--petri-text-secondary);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.layerVisibility:hover {
+  color: var(--petri-text);
+}
+
 .warn {
   margin-top: auto;
   padding: 6px;

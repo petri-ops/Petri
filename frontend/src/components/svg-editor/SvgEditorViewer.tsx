@@ -21,6 +21,7 @@ import {
   type AlignMode,
   batchAttrOps,
   drawOp,
+  layerVisibilityOps,
   extractPaletteFromMarkup,
   pasteStyleOps,
   readAttrs,
@@ -45,6 +46,7 @@ import {
   translateOp,
   zoomAtPoint,
   clampScale,
+  exportFileName,
 } from './svgEditorModel';
 import styles from './SvgEditorViewer.module.css';
 import layout from './SvgEditorLayout.module.css';
@@ -113,6 +115,53 @@ async function fetchSvgDocument(projectId: string, filePath: string): Promise<Lo
     workspaceFileUrlFor(projectId, relPath),
   );
   return { inspect, markup: viewMarkup, removed: view.removed };
+}
+
+/** P3 导出：触发浏览器下载（文件名纯派生，不触碰磁盘真值）。 */
+function triggerDownload(href: string, filename: string): void {
+  const anchor = document.createElement('a');
+  anchor.href = href;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+}
+
+/** P3 导出：活文档 markup → 离屏 PNG data URL；渲染失败如实回传，不伪造产物。 */
+function renderMarkupToPng(
+  markupText: string,
+  done: (result: { png: string; width: number; height: number } | { error: string }) => void,
+): void {
+  const vb = /viewBox="([\d.\-+\s]+)"/.exec(markupText);
+  let width = 800; let height = 480;
+  if (vb) {
+    const parts = vb[1].trim().split(/[\s,]+/).map(Number);
+    if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+      const cap = 1024;
+      const scale = Math.min(1, cap / Math.max(parts[2], parts[3]));
+      width = Math.max(1, Math.round(parts[2] * scale));
+      height = Math.max(1, Math.round(parts[3] * scale));
+    }
+  }
+  const url = URL.createObjectURL(new Blob([markupText], { type: 'image/svg+xml;charset=utf-8' }));
+  const img = new Image();
+  const cleanup = () => URL.revokeObjectURL(url);
+  img.onload = () => {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { done({ error: 'canvas 2D 上下文不可用' }); cleanup(); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+      done({ png: canvas.toDataURL('image/png'), width, height });
+    } catch (drawError: unknown) {
+      done({ error: drawError instanceof Error ? drawError.message : String(drawError) });
+    } finally {
+      cleanup();
+    }
+  };
+  img.onerror = () => { done({ error: '视图无法解码为位图' }); cleanup(); };
+  img.src = url;
 }
 
 /** 把白名单 op 落到活视图（即时反馈；真值仍以保存时的后端 span 改写为准）。 */
@@ -425,43 +474,31 @@ export function SvgEditorViewer({
     setNotice('已拒绝该提案（未应用任何 op）');
   }, []);
 
-  /** 切片7 渲染回验：当前视图 → 离屏 canvas PNG（data: URL；渲染失败/画布污染如实报错）。 */
+  /** 切片7 渲染回验：当前视图 → 离屏 canvas PNG（与 P3 导出共用渲染路径；失败如实报错）。 */
   const runRenderCheck = React.useCallback(() => {
-    const markupText = currentMarkup();
-    const vb = /viewBox="([\d.\-+\s]+)"/.exec(markupText);
-    let width = 800; let height = 480;
-    if (vb) {
-      const parts = vb[1].trim().split(/[\s,]+/).map(Number);
-      if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
-        const cap = 1024;
-        const scale = Math.min(1, cap / Math.max(parts[2], parts[3]));
-        width = Math.max(1, Math.round(parts[2] * scale));
-        height = Math.max(1, Math.round(parts[3] * scale));
-      }
-    }
-    const blob = new Blob([markupText], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const img = new Image();
-    const cleanup = () => URL.revokeObjectURL(url);
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) { setNotice('渲染回验失败：canvas 2D 上下文不可用'); cleanup(); return; }
-        ctx.drawImage(img, 0, 0, width, height);
-        const png = canvas.toDataURL('image/png');
-        setRenderCheck({ png, width, height });
-        setNotice(`渲染回验快照已生成（${width}×${height}）`);
-      } catch (drawError: unknown) {
-        setNotice(`渲染回验失败：${drawError instanceof Error ? drawError.message : String(drawError)}（含外链资源时浏览器会污染画布）`);
-      } finally {
-        cleanup();
-      }
-    };
-    img.onerror = () => { setNotice('渲染回验失败：视图无法解码为位图'); cleanup(); };
-    img.src = url;
+    renderMarkupToPng(currentMarkup(), (result) => {
+      if ('error' in result) { setNotice(`渲染回验失败：${result.error}（含外链资源时浏览器会污染画布）`); return; }
+      setRenderCheck(result);
+      setNotice(`渲染回验快照已生成（${result.width}×${result.height}）`);
+    });
   }, [currentMarkup]);
+
+  /** P3 导出：SVG（视图 markup，非磁盘真值）→ 浏览器下载。 */
+  const downloadSvg = React.useCallback(() => {
+    const url = URL.createObjectURL(new Blob([currentMarkup()], { type: 'image/svg+xml;charset=utf-8' }));
+    triggerDownload(url, exportFileName(filePath, 'svg'));
+    window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    setNotice('已导出 SVG 副本');
+  }, [currentMarkup, filePath]);
+
+  /** P3 导出：PNG 离屏渲染 → 浏览器下载；渲染失败不出假产物。 */
+  const downloadPng = React.useCallback(() => {
+    renderMarkupToPng(currentMarkup(), (result) => {
+      if ('error' in result) { setNotice(`导出 PNG 失败：${result.error}`); return; }
+      triggerDownload(result.png, exportFileName(filePath, 'png'));
+      setNotice(`已导出 PNG（${result.width}×${result.height}）`);
+    });
+  }, [currentMarkup, filePath]);
 
   /** 切片7 判据注入：copilotAsk 带路径 + 待保存 op 摘要 + 结构回验判据（指路 svg_inspect/svg_edit）。 */
   const askRenderCheck = React.useCallback(() => {
@@ -524,7 +561,12 @@ export function SvgEditorViewer({
   const handleDrawBox = React.useCallback((box: { x: number; y: number; width: number; height: number }) => {
     if (tool === 'select') return;
     const color = selectedProps.fill || '#4a7cba';
-    const op = drawOp(tool, box, { color, strokeWidth: Number(selectedProps['stroke-width']) || 2 });
+    const rxRaw = Number(selectedProps.rx);
+    const op = drawOp(tool, box, {
+      color,
+      strokeWidth: Number(selectedProps['stroke-width']) || 2,
+      ...(Number.isFinite(rxRaw) && rxRaw > 0 ? { rx: rxRaw } : {}),
+    });
     if (!op) return;
     setTool('select');
     commit([op], currentMarkup());
@@ -764,6 +806,20 @@ export function SvgEditorViewer({
     commit([op], currentMarkup());
   }, [commit, currentMarkup, rootEl, selected]);
 
+  /** P3 图层可见性：眼睛按钮折算 set_style/remove_attr op，真值仍走保存。 */
+  const toggleLayerVisibility = React.useCallback((key: string) => {
+    const root = rootEl();
+    if (!root) return;
+    const el = findByPath(root, decodePath(key));
+    if (!el) return;
+    const hidden = parseStyleAttr(el.getAttribute('style')).some((s) => s.name === 'display' && s.value.trim() === 'none')
+      || el.getAttribute('display') === 'none';
+    const ops = layerVisibilityOps(root, el, hidden);
+    if (ops.length === 0) return;
+    commit(ops, currentMarkup());
+    setNotice(hidden ? '已显示图层；⌘S 保存到文件' : '已隐藏图层；⌘S 保存到文件');
+  }, [commit, currentMarkup, rootEl]);
+
   /** P1.1 选区浮动工具条：动作与属性面板动作行/快捷键同源（deleteSelected/duplicateSelected/askAgent/openTextEditor）。 */
   const handleSelectionAction = React.useCallback((action: 'delete' | 'duplicate' | 'ask' | 'text') => {
     if (action === 'delete') { deleteSelected(); return; }
@@ -932,6 +988,19 @@ export function SvgEditorViewer({
     : state.status === 'ready'
       ? state.inspect.elements.filter((el) => el.path.length <= 3).slice(0, 300)
       : [];
+
+  // P3 图层可见性：从活文档纯派生隐藏集合（不读 DOM ref，渲染期零副作用）。
+  const hiddenLayerKeys = React.useMemo(() => {
+    const keys = new Set<string>();
+    const parsed = new DOMParser().parseFromString(markup || '<svg xmlns="http://www.w3.org/2000/svg" />', 'image/svg+xml').documentElement;
+    const walk = (el: Element, path: number[]) => {
+      const styleHidden = parseStyleAttr(el.getAttribute('style')).some((s) => s.name === 'display' && s.value.trim() === 'none');
+      if (styleHidden || el.getAttribute('display') === 'none') keys.add(pathKey(path));
+      Array.from(el.children).forEach((child, i) => walk(child, [...path, i]));
+    };
+    walk(parsed, []);
+    return keys;
+  }, [markup]);
 
   // 属性面板数据源=后端 inspect（渲染期不读 DOM ref；删除/移动后以保存后的重新 inspect 为准）
   const selectedRows = state.status === 'ready'
@@ -1108,6 +1177,8 @@ export function SvgEditorViewer({
                 {expanded ? '退出全屏' : '全屏编辑'}
               </button>
               <button type="button" className={styles.tool} onClick={fitToView} data-action="fit">适应窗口</button>
+              <button type="button" className={styles.tool} onClick={downloadSvg} data-action="export-svg" title="导出当前视图为 SVG 副本（不写回真值文件）">导出 SVG</button>
+              <button type="button" className={styles.tool} onClick={downloadPng} data-action="export-png" title="导出当前视图为 PNG 位图（含外链资源可能被画布拒绝）">导出 PNG</button>
               {DRAW_TOOLS.map((item) => (
                 <button
                   key={item.id}
@@ -1289,6 +1360,16 @@ export function SvgEditorViewer({
                       >
                         {el.id ? `#${el.id}` : `<${el.tag}>`}
                         {el.textPreview ? <span className={styles.layerText}>{el.textPreview.slice(0, 24)}</span> : null}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.layerVisibility}
+                        data-action="layer-visibility"
+                        data-hidden={hiddenLayerKeys.has(key) ? '1' : '0'}
+                        title={hiddenLayerKeys.has(key) ? '显示此图层' : '隐藏此图层'}
+                        onClick={() => toggleLayerVisibility(key)}
+                      >
+                        {hiddenLayerKeys.has(key) ? '显' : '隐'}
                       </button>
                     </li>
                   );

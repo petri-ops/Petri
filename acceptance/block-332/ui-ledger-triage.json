@@ -1,16 +1,22 @@
 {
-  "generatedAt": "2026-11-25T02:49:42.310Z",
+  "generatedAt": "2026-11-26T14:31:18.267Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 518,
-  "uniqueIds": 509,
+  "sections": 538,
+  "uniqueIds": 529,
   "counts": {
-    "blocked": 15,
-    "verified": 479,
-    "live-missing": 11,
-    "closed": 13
+    "blocked": 18,
+    "live-missing": 26,
+    "verified": 480,
+    "closed": 13,
+    "unknown": 1
   },
-  "debt": 26,
+  "debt": 44,
   "liveMissing": [
+    {
+      "id": "UI-728",
+      "deps": [],
+      "title": "z-index 六档语义 token 替换（2026-11-25 **in_progress**；harness 隐形体验优化队列 3 B1；视觉层级，观感零代签）"
+    },
     {
       "id": "UI-723",
       "deps": [],
@@ -65,9 +71,85 @@
       "id": "UI-534",
       "deps": [],
       "title": "MCP 服务货架治理状态（**RW-02 d 档改判 2026-10-30：契约/类型完成、UI 控件未交付——改判为待交付登记，非已交付未验证**（2026-10-20 **in"
+    },
+    {
+      "id": "UI-730",
+      "deps": [],
+      "title": "模型接口面板清理——识图角色退役 + 向量配置迁知识空间（2026-11-26 **in_progress**；代码完成，实机待 owner 重试）"
+    },
+    {
+      "id": "UI-734",
+      "deps": [],
+      "title": "摘要浮卡左缘灰线清理（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）"
+    },
+    {
+      "id": "UI-735",
+      "deps": [],
+      "title": "三栏背景分区 B + 会话身份标识 A（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 实机确认）"
+    },
+    {
+      "id": "UI-736",
+      "deps": [],
+      "title": "composer 麦克风图标修正 + 与速记板位置对换（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）"
+    },
+    {
+      "id": "UI-737",
+      "deps": [],
+      "title": "优化提示词内联化 + model_output_empty 核真（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）"
+    },
+    {
+      "id": "UI-738",
+      "deps": [],
+      "title": "设置页边框柔化 + 左右分区可拖拽调宽（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）"
+    },
+    {
+      "id": "UI-739",
+      "deps": [],
+      "title": "会话右键菜单三件——复制ID修复 + 导出会话新增/迁移（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）"
+    },
+    {
+      "id": "UI-740",
+      "deps": [],
+      "title": "右栏工具菜单分组（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）"
+    },
+    {
+      "id": "UI-741",
+      "deps": [],
+      "title": "联网开关热生效 + 工具契约铁律（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）"
+    },
+    {
+      "id": "UI-742",
+      "deps": [],
+      "title": "右栏四裁决落地（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）"
+    },
+    {
+      "id": "UI-743",
+      "deps": [],
+      "title": "恢复原生顶栏（2026-11-26 **in_progress**；代码+HMR 不适用需重启，观感待 owner 实机过目）"
+    },
+    {
+      "id": "UI-744",
+      "deps": [],
+      "title": "hiddenInset 融合式深色标题栏（2026-11-26 **in_progress**；代码完成需重启，观感待 owner 对照 Orca 过目）"
+    },
+    {
+      "id": "UI-745",
+      "deps": [],
+      "title": "红绿灯行为对齐 Orca——全屏/最大化隐藏、正常态恢复（2026-11-26 **in_progress**；代码完成需重启，观感待 owner 过目）"
+    },
+    {
+      "id": "UI-746",
+      "deps": [],
+      "title": "方向纠正——恢复自绘顶层栏红绿灯 + 最大化隐藏（2026-11-26 **in_progress**；渲染层 HMR 即时生效）"
     }
   ],
   "blocked": [
+    {
+      "id": "UI-727",
+      "deps": [],
+      "external": true,
+      "title": "欢迎页/错误边界键盘焦点环 + 死 CSS 清理（2026-11-25 **in_progress**；harness 隐形体验优化队列 2 B4+B5；行为面，观感零代签）"
+    },
     {
       "id": "UI-725",
       "deps": [],
@@ -157,8 +239,22 @@
       "deps": [],
       "external": true,
       "title": "段落级错误兜底（2026-10-20 **verified（2026-11-05 探针 D 受控注入：段卡 workspace-preview data-segment-crash"
+    },
+    {
+      "id": "UI-726",
+      "deps": [],
+      "external": true,
+      "title": "重操作确认提交失败留痕（2026-11-26 **in_progress**；代码完成，实机未验）"
+    },
+    {
+      "id": "UI-733",
+      "deps": [],
+      "external": true,
+      "title": "三栏分隔线统一（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）"
     }
   ],
-  "unknown": [],
+  "unknown": [
+    "UI-732"
+  ],
   "duplicateOpenIds": []
 }

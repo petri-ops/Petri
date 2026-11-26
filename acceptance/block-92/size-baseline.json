@@ -221,9 +221,17 @@
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1974,
-      "bytes": 39792,
-      "sha256": "5f70c4960b49cc849be6d3e03f942a0df52a046818554bb2ebd5c1e333803d21"
+      "lines": 1996,
+      "bytes": 40142,
+      "sha256": "e1ea35f1406237270edeba3320be73d23e67becaa12966b6d58994ee3a40124a"
+    },
+    {
+      "path": "frontend/src/components/svg-editor/SvgEditorViewer.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1722,
+      "bytes": 86308,
+      "sha256": "069095c2952f76deabb918833941de2498b70e1a7549d8578971707001f17231"
     },
     {
       "path": "core/petri-server/loop-orchestrator.js",
@@ -232,14 +240,6 @@
       "lines": 1673,
       "bytes": 77722,
       "sha256": "f443cfc9f4b8394cd9ab6d2c08e1e2cf7892464e7328babe43c3cd523fddb665"
-    },
-    {
-      "path": "frontend/src/components/svg-editor/SvgEditorViewer.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1641,
-      "bytes": 82220,
-      "sha256": "78717662596787d07e9ddcf9775f1e054bb88104e1f0f0a4a809459bf6af3c61"
     },
     {
       "path": "frontend/src/styles/custom.css",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86677,
+  "total": 86780,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -983,6 +983,32 @@
       "to": {
         "lines": 1000,
         "bytes": 22948
+      }
+    },
+    {
+      "path": "frontend/src/components/svg-editor/SvgEditorViewer.tsx",
+      "reason": "P3 收官增量：圆角矩形参数化/图层可见性/导出SVG+PNG，HK-01 5/5+SVG全套70/70+types/lint绿，纯前端op折算零新依赖",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 1641,
+        "bytes": 82220
+      },
+      "to": {
+        "lines": 1722,
+        "bytes": 86308
+      }
+    },
+    {
+      "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
+      "reason": "P3 图层可见性按钮样式（token 化零裸色）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 1974,
+        "bytes": 39792
+      },
+      "to": {
+        "lines": 1996,
+        "bytes": 40142
       }
     }
   ]

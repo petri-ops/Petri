@@ -7693,14 +7693,16 @@
         "core/petri-server/routes/svg.js",
         "frontend/src/components/svg-editor/**",
         "frontend/src/lib/svgEditClient.ts",
-        "frontend/src/components/result-studio/viewerRegistry.ts",
-        "acceptance/block-342/**"
-      ],
+      "frontend/src/components/result-studio/viewerRegistry.ts",
+      "acceptance/block-342/**",
+      "acceptance/petri-pack-create/**"
+    ],
       "tests": [
         "test/block342-svg-ops.test.mjs",
         "test/block342-svg-tools.test.mjs",
-        "frontend/src/components/svg-editor/svgEditorModel.test.ts",
-        "frontend/src/components/svg-editor/SvgEditorViewer.test.tsx",
+      "frontend/src/components/svg-editor/svgEditorModel.test.ts",
+      "frontend/src/components/svg-editor/svgEditorP3.test.ts",
+      "frontend/src/components/svg-editor/SvgEditorViewer.test.tsx",
         "frontend/src/components/result-studio/viewerRegistry.block342.test.ts",
         "frontend/src/components/result-studio/viewerRegistry.test.ts",
         "frontend/src/components/result-studio/viewerRegistry.block142.test.ts",

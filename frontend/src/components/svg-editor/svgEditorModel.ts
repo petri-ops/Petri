@@ -233,3 +233,11 @@ export function elementLabel(el: Element | null): string {
   const cls = el.getAttribute('class');
   return cls ? `${tag}.${cls.split(/\s+/)[0]}` : tag;
 }
+
+/** P3 导出文件名：去目录/去旧扩展，非法字符替换，空名回落（只派生名字，不触碰真值文件）。 */
+export function exportFileName(filePath: string, ext: 'png' | 'svg'): string {
+  const base = String(filePath || '')
+    .split(/[\\/]/).pop() || '';
+  const stem = base.replace(/\.[^.]+$/, '').replace(/[\\/:*?"<>|]/g, '_').trim();
+  return `${stem || 'svg-export'}.${ext}`;
+}

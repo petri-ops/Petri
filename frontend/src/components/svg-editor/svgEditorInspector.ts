@@ -45,6 +45,7 @@ export const EDITABLE_ATTRS: ReadonlyArray<{
   { name: 'fill', label: '填充', kind: 'color', placeholder: '#4a7cba / none' },
   { name: 'stroke', label: '描边', kind: 'color', placeholder: '#333 / none' },
   { name: 'stroke-width', label: '描边宽', kind: 'number' },
+  { name: 'rx', label: '圆角半径', kind: 'number' },
   { name: 'opacity', label: '不透明度', kind: 'number' },
   { name: 'font-size', label: '字号', kind: 'number' },
   { name: 'font-family', label: '字体', kind: 'select', options: BRAND_FONT_OPTIONS },
@@ -110,6 +111,30 @@ export function attrOp(target: { id?: string; path: number[] | null }, name: str
   if (!locator) return null;
   if (value === null || value.trim() === '') return { op: 'remove_attr', target: locator, name };
   return { op: 'set_attr', target: locator, name, value: value.trim() };
+}
+
+/**
+ * P3 图层可见性：隐藏/显示折算为白名单 set_style / remove_attr op（真值走 svg_edit，视图层零直改）。
+ * 隐藏态同时识别 style="display:none" 与表现属性 display="none"；显示时分别删键/删属性。
+ * 已处于目标态返回空数组（零操作零 diff）。
+ */
+export function layerVisibilityOps(root: Element, el: Element, visible: boolean): SvgOp[] {
+  if (!el) return [];
+  const locator = el.id ? { id: el.id } : (() => {
+    const p = elementPathFrom(root, el);
+    return p && p.length > 0 ? { path: p } : null;
+  })();
+  if (!locator) return [];
+  const styleHidden = parseStyleAttr(el.getAttribute('style')).some((s) => s.name === 'display' && s.value.trim() === 'none');
+  const attrHidden = el.getAttribute('display') === 'none';
+  if (visible) {
+    const ops: SvgOp[] = [];
+    if (styleHidden) ops.push({ op: 'set_style', target: locator, props: { display: null } });
+    if (attrHidden) ops.push({ op: 'remove_attr', target: locator, name: 'display' });
+    return ops;
+  }
+  if (styleHidden && !attrHidden) return [];
+  return [{ op: 'set_style', target: locator, props: { display: 'none' } }];
 }
 
 /** 批量套样式：同一组属性改动应用到多个目标（多选/同标签批量）。 */
@@ -185,11 +210,12 @@ function elementPathFrom(root: Element, el: Element): number[] | null {
 }
 
 /** 绘制工具：拖拽矩形 → insert op（白名单 markup，交给后端安全校验）；pen 钢笔点列；node 路径节点编辑。 */
-export type DrawTool = 'select' | 'rect' | 'ellipse' | 'line' | 'text' | 'pen' | 'node';
+export type DrawTool = 'select' | 'rect' | 'roundrect' | 'ellipse' | 'line' | 'text' | 'pen' | 'node';
 
 export const DRAW_TOOLS: ReadonlyArray<{ id: DrawTool; label: string; hint: string }> = [
   { id: 'select', label: '选择', hint: '点选/框选/拖拽移动' },
   { id: 'rect', label: '矩形', hint: '拖拽画矩形' },
+  { id: 'roundrect', label: '圆角矩形', hint: '参数化圆角矩形：rx 圆角半径在属性栏可调，上限短边一半' },
   { id: 'ellipse', label: '椭圆', hint: '拖拽画椭圆' },
   { id: 'line', label: '直线', hint: '拖拽画直线' },
   { id: 'text', label: '文字', hint: '拖拽出文字框后输入' },
@@ -200,7 +226,7 @@ export const DRAW_TOOLS: ReadonlyArray<{ id: DrawTool; label: string; hint: stri
 export function drawOp(
   tool: Exclude<DrawTool, 'select'>,
   box: { x: number; y: number; width: number; height: number },
-  opts: { color?: string; strokeWidth?: number; text?: string; parentPath?: number[] } = {},
+  opts: { color?: string; strokeWidth?: number; text?: string; rx?: number; parentPath?: number[] } = {},
 ): SvgOp | null {
   const x = Math.round(box.x);
   const y = Math.round(box.y);
@@ -214,6 +240,12 @@ export function drawOp(
   if (tool === 'rect') {
     if (w < 2 || h < 2) return null;
     return { op: 'insert', parent, index: 'end', markup: `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${color}" />` };
+  }
+  if (tool === 'roundrect') {
+    if (w < 2 || h < 2) return null;
+    const maxRx = Math.min(w, h) / 2;
+    const rx = round(Math.min(Math.max(0, opts.rx ?? 8), maxRx));
+    return { op: 'insert', parent, index: 'end', markup: `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${color}" />` };
   }
   if (tool === 'ellipse') {
     if (w < 2 || h < 2) return null;
