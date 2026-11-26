@@ -7,6 +7,7 @@
  * 模型调用复用当前 chat provider（与 assistant-suggestions 同源）。
  */
 
+const { extractOptimizedText, retryOnEmptyOutput } = require('./prompt-enhance-retry');
 const { modelGateway, getCredential } = require('./model-gateway');
 const { getAiSettings, getChatProviderName } = require('./ai-settings');
 
@@ -199,7 +200,9 @@ async function optimizePromptQuick({ prompt, userId, context } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), QUICK_TIMEOUT_MS);
   try {
-    const result = await modelGateway.chat({
+    // 空输出诊断+重试（owner msg_aaad9b13c360）：仅空正文时自动重试一次、如实标注；
+    // reasoning_content 是思考过程、绝不当答案（extractOptimizedText 守住）。
+    const { result, retried, empty } = await retryOnEmptyOutput(() => modelGateway.chat({
       role: 'chat',
       body: {
         ...quickThinkingParams(activeProfile),
@@ -214,13 +217,11 @@ async function optimizePromptQuick({ prompt, userId, context } = {}) {
       signal: controller.signal,
       thinkingLevel: 'standard',
       disableFallback: true,
-    });
-    const raw = result && result.choices && result.choices[0] && result.choices[0].message
-      ? result.choices[0].message.content
-      : (result && result.content) || '';
-    const optimizedPrompt = cleanText(raw, MAX_PROMPT_CHARS);
-    if (!optimizedPrompt) return { ok: false, error: 'model_output_empty' };
-    return { ok: true, optimizedPrompt, model: providerName, mode: 'quick' };
+    }));
+    if (empty) return { ok: false, error: 'model_output_empty', retried };
+    const optimizedPrompt = cleanText(extractOptimizedText(result), MAX_PROMPT_CHARS);
+    if (!optimizedPrompt) return { ok: false, error: 'model_output_empty', retried };
+    return { ok: true, optimizedPrompt, model: providerName, mode: 'quick', retried };
   } catch (error) {
     return {
       ok: false,
