@@ -25,7 +25,10 @@ const QUICK_PROMPT_SYSTEM_PROMPT = [
 
 function quickOutputBudget(chars) {
   const n = Math.max(0, Math.min(MAX_PROMPT_CHARS, Number(chars) || 0));
-  return Math.max(240, Math.min(1500, Math.ceil(n * 2.4)));
+  // 缺陷修复（owner msg_b9a2833502db）：实机 transcript 证实 deepseek-flash 为推理型模型，
+  // 240 下限会被 reasoning 吃光（finishReason=length、content=''）→ model_output_empty。
+  // 下限抬到 1024 保证思考后仍有正文空间；上限 1500 不变（策展有界、零新依赖）。
+  return Math.max(1024, Math.min(1500, Math.ceil(n * 2.4)));
 }
 
 /** GLM 在 OpenAI 兼容端点默认先吐 reasoning_content，正文常被 max_tokens 吃空；快路径显式关思考。 */

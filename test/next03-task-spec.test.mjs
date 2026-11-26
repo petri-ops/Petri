@@ -51,8 +51,9 @@ test('UI-709 — optimizedPrompt 目标是“可直接发送的自然语言提�
 test('UI-709 快速路径 — 纯文本短输出预算与“不生成 TaskSpec”系统提示', () => {
   assert.match(spec.QUICK_PROMPT_SYSTEM_PROMPT, /只输出优化后的提示词全文/);
   assert.match(spec.QUICK_PROMPT_SYSTEM_PROMPT, /不要 JSON/);
-  assert.equal(spec.quickOutputBudget(40), 240);
-  assert.equal(spec.quickOutputBudget(400), 960);
+  // 缺陷修复（owner msg_b9a2833502db）：deepseek-flash 推理模型思考会吃光 240 预算 → content 空；下限抬到 1024
+  assert.equal(spec.quickOutputBudget(40), 1024);
+  assert.equal(spec.quickOutputBudget(400), 1024);
   assert.equal(spec.quickOutputBudget(5000), 1500);
   assert.deepEqual(spec.quickThinkingParams({ baseUrl: 'https://open.bigmodel.cn/api/coding/paas/v4', model: 'glm-5.3-flash' }), { thinking: { type: 'disabled' } });
   assert.deepEqual(spec.quickThinkingParams({ baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' }), {});
