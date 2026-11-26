@@ -74,7 +74,7 @@ describe('ConfigTransferPanel', () => {
       format: 'petri-config',
       version: 1,
       families: {},
-      envShadowed: [{ family: 'generation', path: 'temperature', envKey: 'PETRI_LLM_TEMPERATURE', overrides: true }],
+      envShadowed: [{ family: 'cost-cap', path: 'costCapCny', envKey: 'PETRI_TASK_COST_CAP_CNY', overrides: true }],
     });
     render(<ConfigTransferPanel />);
     fireEvent.click(screen.getByText('导出配置'));

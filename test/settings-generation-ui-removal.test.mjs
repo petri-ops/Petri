@@ -39,5 +39,6 @@ test('HK-01-4：自动档逻辑仍在（本地规则+三层链），env 后门�
     path.join(ROOT, 'core/petri-server/helpers/ai-settings.js'), 'utf8',
   );
   assert.match(settings, /generation\.intentPreset|intentPreset/);
-  assert.match(settings, /PETRI_LLM_TEMPERATURE/);
+  // env 后门终裁移除（msg_b8392b7ee460）：LLM 温度/预算 env 变量零残留
+  assert.doesNotMatch(settings, /PETRI_LLM_TEMPERATURE|PETRI_LLM_MAX_TOKENS/);
 });

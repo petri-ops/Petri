@@ -1,10 +1,11 @@
 /**
- * generation-intent.js — 意图预设 + 任务感知自动参数（owner 授权 msg_b9d146535752，推荐 A）。
+ * generation-intent.js — 意图预设 + 任务感知自动参数（owner 授权 msg_b9d146535752，推荐 A；
+ * env 后门终裁移除 msg_b8392b7ee460）。
  *
  * 红线：①预设=策展常量表（有界范围），**agent 不可自写自己的生成参数**（防自我强化回路，
- * 与 A3 注入防护/外部监督器只观测同哲学）；②优先级链 env > 意图覆盖 > 旧 generation 裸值
- * > 自动档；③判定失败一律落平衡 0.4（今天行为零突变）；④底层 provider 链/DB/schema 零改、
- * 思考档位 reasoning 键零改、零新依赖。
+ * 与 A3 注入防护/外部监督器只观测同哲学）；②优先级链 意图覆盖 > 旧 generation 裸值 > 自动档
+ * （env 通道已死，产品化后不暴露环境变量设参）；③判定失败一律落平衡 0.4；④底层 provider 链/
+ * DB/schema 零改、思考档位 reasoning 键零改、零新依赖。
  */
 
 /** 策展四档（有界常量；agent 不可写）。maxTokens='adaptive' = 交给 loop 既有 resolveOutputBudget。 */
@@ -52,25 +53,19 @@ function parseMaxTokens(value) {
 }
 
 /**
- * 优先级链解析（env > 意图覆盖 > 旧 generation 裸值 > 自动档）。
- * 忽略 agentDeclared（红线：agent 不可自写参数）。
+ * 优先级链解析（意图覆盖 > 旧 generation 裸值 > 自动档；env 通道已移除）。
+ * 忽略 env 与 agentDeclared（红线：agent 不可自写参数、产品化后不靠环境变量设参）。
  * @returns {{temperature:number, maxTokens:number|string|undefined, source:string}}
  */
-function resolveGenerationParams({ env = {}, intentPreset = '', generation = {}, detected = 'balanced' } = {}) {
-  // 1) env 专家后门（最高，零变化）
-  if (env.PETRI_LLM_TEMPERATURE != null || env.PETRI_LLM_MAX_TOKENS != null) {
-    return {
-      temperature: parseBounded(env.PETRI_LLM_TEMPERATURE, 0.4),
-      maxTokens: parseMaxTokens(env.PETRI_LLM_MAX_TOKENS),
-      source: 'env',
-    };
-  }
-  // 2) 意图覆盖（用户在设置页选了意图）
+function resolveGenerationParams({ intentPreset = '', generation = {}, detected = 'balanced' } = {}) {
+  // env 后门已移除（owner 终裁 msg_b8392b7ee460）：即使调用方传 env 字段也忽略，
+  // 不再有 'env' source。产品化后能力通道=config/API（intentPreset）+ 旧 generation 兼容 + 自动档。
+  // 1) 意图覆盖（用户在设置页选了意图）
   if (intentPreset && Object.prototype.hasOwnProperty.call(PRESETS, intentPreset)) {
     const p = PRESETS[intentPreset];
     return { temperature: p.temperature, maxTokens: p.maxTokens, source: 'intent_override' };
   }
-  // 3) 旧 generation 裸值兼容（今天行为零突变）
+  // 2) 旧 generation 裸值兼容（今天行为零突变）
   if (generation && (generation.temperature != null || generation.maxTokens != null)) {
     return {
       temperature: parseBounded(generation.temperature, 0.4),
@@ -78,7 +73,7 @@ function resolveGenerationParams({ env = {}, intentPreset = '', generation = {},
       source: 'legacy_generation',
     };
   }
-  // 4) 自动档（默认）：本地规则判定，未知档落平衡
+  // 3) 自动档（默认）：本地规则判定，未知档落平衡
   const preset = Object.prototype.hasOwnProperty.call(PRESETS, detected) ? detected : 'balanced';
   const p = PRESETS[preset];
   return { temperature: p.temperature, maxTokens: p.maxTokens, source: 'auto' };

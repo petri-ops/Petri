@@ -399,22 +399,20 @@ async function listAvailableModels(provider, apiKey) {
  * 来源优先级：env 覆盖 > ai-settings.json `generation` 键 > 缺省（loop 侧 0.4/16384）。
  * 诚实边界：仅收数值域合法值；maxTokens 下限 256 防误配物理截断。
  * BLOCK-199 P2 — 形状（类型/区间/取整）改由 shared-config schema 单源声明；**胜负保持原样**：
- * env 一旦"存在"就赢（哪怕值非法也直接丢键，不回落到文件），这条不是设计而是现状，
- * 由拆前基线 test/block199-config-compat.test.mjs 冻结。
+ * owner 终裁 msg_b8392b7ee460：env 后门移除，产品化后不靠环境变量设参——只认文件值。
+ * 数值域外仍丢键（BLOCK-199 既有行为不变）。
  */
-function _pickGenerationValue(entryKey, envVarName, fileValue) {
+function _pickGenerationValue(entryKey, fileValue) {
   const entry = findConfigKey(entryKey);
-  const envRaw = process.env[envVarName];
-  if (envRaw == null) return validateConfigValue(entry, fileValue);
-  return validateConfigValue(entry, envRaw);
+  return validateConfigValue(entry, fileValue);
 }
 
 function _sanitizeGeneration(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
   const out = {};
-  const temperature = _pickGenerationValue('generation.temperature', 'PETRI_LLM_TEMPERATURE', source.temperature);
+  const temperature = _pickGenerationValue('generation.temperature', source.temperature);
   if (temperature.ok) out.temperature = temperature.normalized;
-  const maxTokens = _pickGenerationValue('generation.maxTokens', 'PETRI_LLM_MAX_TOKENS', source.maxTokens);
+  const maxTokens = _pickGenerationValue('generation.maxTokens', source.maxTokens);
   if (maxTokens.ok) out.maxTokens = maxTokens.normalized;
   return out;
 }
@@ -428,7 +426,7 @@ function getGenerationDefaults(context) {
     const { detectIntentPreset, resolveGenerationParams } = require('./generation-intent');
     const detected = detectIntentPreset({ userText: context.userText, taskKind: context.taskKind });
     const resolved = resolveGenerationParams({
-      env: process.env,
+      // env 后门已移除（msg_b8392b7ee460）：resolveGenerationParams 不再接收 env
       intentPreset: generation && typeof generation.intentPreset === 'string' ? generation.intentPreset : '',
       generation: generation && typeof generation === 'object' ? generation : {},
       detected: detected.preset,

@@ -33,7 +33,7 @@ test('集成：无 context 的既有调用走原路径（temperature 保留、�
   assert.equal(parsed.source, undefined);
 });
 
-test('集成：context 启用自动档——创作关键词落 0.8（无裸值/无 env）', () => {
+test('集成：context 启用自动档——创作关键词落 0.8（无裸值）', () => {
   const out = run(
     'console.log(JSON.stringify(s.getGenerationDefaults({ userText: "写一个有创意的故事开头", taskKind: "primary" })))',
     {},
@@ -49,7 +49,7 @@ test('集成：旧 generation 裸值优先于自动档（今天行为零突变�
   assert.deepEqual(JSON.parse(out), { temperature: 0.7, maxTokens: 222, source: 'legacy_generation' });
 });
 
-test('集成：env 最高优先，压过 generation 裸值与自动档', () => {
+test('集成：env 后门已死——即使环境有 PETRI_LLM_TEMPERATURE 也被忽略（终裁 msg_b8392b7ee460）', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-gen-intent-env-'));
   fs.writeFileSync(path.join(dir, 'ai-settings.json'), JSON.stringify({ generation: { temperature: 0.7 } }));
   const result = spawnSync(process.execPath, ['-e', `
@@ -58,7 +58,7 @@ test('集成：env 最高优先，压过 generation 裸值与自动档', () => {
   `], { encoding: 'utf8', env: { ...process.env, PETRI_LOCAL_DATA_DIR: dir, PETRI_LLM_TEMPERATURE: '1.3' }, timeout: 20000 });
   fs.rmSync(dir, { recursive: true, force: true });
   assert.equal(result.status, 0, result.stderr);
-  assert.deepEqual(JSON.parse(result.stdout.trim()), { temperature: 1.3, source: 'env' });
+  assert.deepEqual(JSON.parse(result.stdout.trim()), { temperature: 0.7, source: 'legacy_generation' });
 });
 
 test('集成：intentPreset 覆盖优先于自动判定（用户选意图）', () => {

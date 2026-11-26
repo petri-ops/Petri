@@ -63,10 +63,7 @@ test('envShadowedKeys：算出"设置页的值正被 env 盖住"，并区分是�
 test('saveGenerationDefaults：非法值抛结构化拒绝（不再静默丢键），合法值与清键照旧', () => {
   const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), 'b199-writeguard-'));
   const prevDataDir = process.env.PETRI_LOCAL_DATA_DIR;
-  const prevEnv = { t: process.env.PETRI_LLM_TEMPERATURE, m: process.env.PETRI_LLM_MAX_TOKENS };
   process.env.PETRI_LOCAL_DATA_DIR = sandbox;
-  delete process.env.PETRI_LLM_TEMPERATURE;
-  delete process.env.PETRI_LLM_MAX_TOKENS;
   try {
     const ai = require(path.join(ROOT, 'core/petri-server/helpers/ai-settings.js'));
     assert.deepEqual(ai.saveGenerationDefaults({ temperature: 0.3, maxTokens: 4096 }), { temperature: 0.3, maxTokens: 4096 });
@@ -84,8 +81,6 @@ test('saveGenerationDefaults：非法值抛结构化拒绝（不再静默丢键�
   } finally {
     if (prevDataDir === undefined) delete process.env.PETRI_LOCAL_DATA_DIR;
     else process.env.PETRI_LOCAL_DATA_DIR = prevDataDir;
-    if (prevEnv.t !== undefined) process.env.PETRI_LLM_TEMPERATURE = prevEnv.t; else delete process.env.PETRI_LLM_TEMPERATURE;
-    if (prevEnv.m !== undefined) process.env.PETRI_LLM_MAX_TOKENS = prevEnv.m; else delete process.env.PETRI_LLM_MAX_TOKENS;
     try { fs.rmSync(sandbox, { recursive: true, force: true }); } catch { /* 临时目录清理失败不影响结论 */ }
   }
 });

@@ -84,15 +84,15 @@ test('cost-cap：env > 文件 > null，且 >0 与两位小数取整的口径不�
   assert.equal(costCap.isCostCapExceeded({ capCny: null, spentCny: 999 }).exceeded, false);
 });
 
-test('ai-settings generation：env 覆盖文件、数值域外丢键、maxTokens 取整', () => {
+test('ai-settings generation：env 后门已移除（文件值生效）、数值域外丢键、maxTokens 取整', () => {
   const ai = require(path.join(ROOT, 'core/petri-server/helpers/ai-settings.js'));
   const prev = { ...process.env };
   try {
     process.env.PETRI_LLM_TEMPERATURE = '0.7';
     process.env.PETRI_LLM_MAX_TOKENS = '8192';
+    // 终裁 msg_b8392b7ee460：env 后门已死，文件未配置=空对象（不被 env 注入）
     const gen = ai.getGenerationDefaults();
-    assert.equal(gen.temperature, 0.7, 'env 赢文件');
-    assert.equal(gen.maxTokens, 8192);
+    assert.deepEqual(gen, {}, 'env 变量存在但不再影响 generation');
   } finally {
     delete process.env.PETRI_LLM_TEMPERATURE;
     delete process.env.PETRI_LLM_MAX_TOKENS;

@@ -7,7 +7,6 @@ import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
  * 用户选意图（精准/平衡/创作/长文）而非裸 temperature/max_tokens 滑杆；
  * 写 ai-settings.json `generation.intentPreset`（策展四档，oneOf 注册）。
  * 未设置=自动档：loop 按任务意图本地规则选预设（判定失败落平衡）。
- * env PETRI_LLM_TEMPERATURE/PETRI_LLM_MAX_TOKENS 仍最高优先（专家后门）。
  */
 interface GenerationDefaults {
   temperature?: number;
@@ -93,7 +92,7 @@ export function GenerationDefaultsPanel(): React.ReactElement {
     <div className="petri-generation-defaults" data-testid="generation-defaults">
       <div className="petri-settings-section__heading">
         <h3>生成参数（全局缺省）</h3>
-        <p>选意图不选参数；自动档按任务意图本地判定（失败落平衡 0.4）。env PETRI_LLM_TEMPERATURE / PETRI_LLM_MAX_TOKENS 为专家后门、优先级最高。</p>
+        <p>选意图不选参数；自动档按任务意图本地判定（失败落平衡 0.4）。</p>
       </div>
       {loaded ? (
         <div className="petri-generation-defaults__fields">

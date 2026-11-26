@@ -79,3 +79,7 @@
 **「不行，改」** = 给方向（改档位值 / 改两案选择 / 先只做两档 / 思考档位也纳入），本材料不动手等明确裁决。
 
 status: pending_user_ruling（本件为方案材料，Agent 不代答、不写实现代码）
+
+## §6 终形态更新（owner 终裁 msg_b8392b7ee460）
+
+owner 原话：「后面会变成软件 设置成环境变量会很奇怪 这个环境变量就不用了吧」——**env 后门（PETRI_LLM_TEMPERATURE/MAX_TOKENS）已移除**。上文 §0/§1/§3/§4 中记载的 env 层是裁决当时的设计，作为决策留痕保留；终形态优先级链为 **意图覆盖 > 旧 generation 兼容 > 自动档**（无 env 层），`source` 枚举去掉 'env'。能力通道变化：原先靠 env 调参的场景改走 config/API（generation.intentPreset）或旧 generation 键，intentPreset 与旧键兼容读取均保留。配置 schema 的 generation envKeys 清空，其它 family 的通用 env 遮蔽机制不变。

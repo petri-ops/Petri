@@ -277,12 +277,12 @@ const CONFIG_KEYS = Object.freeze([
   // —— 生成参数（helpers/ai-settings.js:315-329；env 数值覆盖文件，域外丢键）——
   {
     key: 'generation.temperature', family: 'generation', path: 'temperature',
-    type: 'number', domain: { min: 0, max: 2 }, envKeys: ['PETRI_LLM_TEMPERATURE'],
+    type: 'number', domain: { min: 0, max: 2 }, envKeys: [], // env 后门移除 msg_b8392b7ee460
     aliases: [], mutable: true, ui: 'settings', dropInvalid: 'drop-key',
   },
   {
     key: 'generation.maxTokens', family: 'generation', path: 'maxTokens',
-    type: 'number', domain: { min: 256, max: 1000000, integer: 'floor' }, envKeys: ['PETRI_LLM_MAX_TOKENS'],
+    type: 'number', domain: { min: 256, max: 1000000, integer: 'floor' }, envKeys: [], // env 后门移除 msg_b8392b7ee460
     aliases: [], mutable: true, ui: 'settings', dropInvalid: 'drop-key',
   },
   // —— 意图预设（试用反馈③深化，owner msg_b9d146535752）——

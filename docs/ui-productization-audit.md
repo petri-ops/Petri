@@ -6994,3 +6994,5 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **边界**：env 后门最高不变、底层 provider/回退链/DB/思考档位 reasoning 键零改、零新依赖、旧 generation 键兼容读取、agent 不可自写生成参数。观感零代签 pending_human_eye，待 owner 实机重试。G0 永久 maintained · G1 进行中。
 
 - **终形态更新（owner 终裁 msg_4639d2fea3a9）**：owner 原话「自动化处理 但是这个内容在设置中就不要出现了 出现就需要了解是什么 耗费用户心力」——**设置页移除整个「默认偏好/意图」区**（删 ModelPreferenceTabs/GenerationDefaultsPanel 挂载，前者文件删除），自动档（本地规则按任务判定）成为唯一 UI 内形态、永远自动不可关；env 专家后门与 generation.intentPreset API 键保留但 UI 无入口（三层链在 UI 无意图层时降级为 env>自动）；旧 generation 键兼容读取不变、reasoning 思考档位分区保留。HK-01 面板移除断言 4/4 绿、knip 0 新增、全静态门绿；HMR 落 owner 窗口。本条不翻 verified（观感零代签，自动档行为待 owner 实机确认）。
+
+- **env 后门移除（owner 终裁 msg_b8392b7ee460，原话「后面会变成软件 设置成环境变量会很奇怪 这个环境变量就不用了吧」）**：PETRI_LLM_TEMPERATURE / PETRI_LLM_MAX_TOKENS 开发期通道撤销（config-schema generation envKeys 清空、ai-settings 不再读 env、generation-intent 去 env 层与 'env' source）；能力通道改走 config/API 的 generation.intentPreset + 旧 generation 兼容读取 + 自动档，产品化后不暴露环境变量设参。其它 family 的通用 env 遮蔽机制（feature-flags/cost-cap）不变。HK-01 新链断言（intentPreset>兼容>自动、显式设 env 被忽略）全绿、全静态门绿；行为通道变化如实记录，观感零代签。

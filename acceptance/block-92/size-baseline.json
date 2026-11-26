@@ -294,8 +294,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1198,
-      "bytes": 63161,
-      "sha256": "50679cfda80f2b9a044df1c04eec5339d7bf43acc3e2f7f8f0b00daf44361044"
+      "bytes": 63190,
+      "sha256": "99998b378dc52429e930a67e75e60a5657dbd159d5b467cb3b85f4d123bc751c"
     },
     {
       "path": "core/shared-backend/skill-runtime.js",

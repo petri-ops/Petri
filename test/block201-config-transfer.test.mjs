@@ -144,10 +144,11 @@ test('按区重置拒绝未知族与空清单（不猜意图）', () => {
 });
 
 test('env 遮蔽在导出里点名（导入后不生效的原因必须可见）', () => {
-  aiSettings.saveGenerationDefaults({ temperature: 0.5 });
-  const envelope = transfer.exportConfig({ env: { PETRI_LLM_TEMPERATURE: '1.5' } });
-  const shadow = envelope.envShadowed.find((row) => row.family === 'generation' && row.path === 'temperature');
-  assert.ok(shadow, 'env 覆盖必须出现在 envShadowed 里');
-  assert.equal(shadow.envKey, 'PETRI_LLM_TEMPERATURE');
+  // 终裁 msg_b8392b7ee460：generation 的 env 后门已移除，通用 env 遮蔽机制用 cost-cap family 验证
+  const envelope = transfer.exportConfig({ env: { PETRI_TASK_COST_CAP_CNY: '1.5' } });
+  assert.equal(envelope.envShadowed.some((row) => row.envKey === 'PETRI_LLM_TEMPERATURE'), false);
+  const shadow = envelope.envShadowed.find((row) => row.family === 'cost-cap' && row.path === 'costCapCny');
+  assert.ok(shadow, '通用 env 覆盖仍须出现在 envShadowed 里');
+  assert.equal(shadow.envKey, 'PETRI_TASK_COST_CAP_CNY');
   assert.equal(shadow.overrides, true);
 });

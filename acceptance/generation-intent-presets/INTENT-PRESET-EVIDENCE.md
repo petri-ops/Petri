@@ -16,7 +16,7 @@
 
 ## §2 优先级链（实测）
 
-env `PETRI_LLM_TEMPERATURE/MAX_TOKENS`（最高，专家后门） > `generation.intentPreset`（用户意图覆盖） > 旧 `generation.temperature/maxTokens` 裸值（今天行为零突变） > 自动档（本地规则判意图，失败落平衡 0.4）。
+`generation.intentPreset`（用户意图覆盖） > 旧 `generation.temperature/maxTokens` 裸值（今天行为零突变） > 自动档（本地规则判意图，失败落平衡 0.4）。**env 后门已按 owner 终裁 msg_b8392b7ee460 移除**（产品化后不靠环境变量设参；能力通道=config/API 的 intentPreset + 旧 generation 兼容 + 自动档）。
 - 自动档四档：精准 0.2 / 平衡 0.4 / 创作 0.8 / 长文（temperature=0.4 + `maxTokens='adaptive'` 交 loop 既有 `resolveOutputBudget` 自适应）。
 - 实测微调：未调整（按裁决值）；如需 ±0.1 内微调须留因并回报（令④）。
 
