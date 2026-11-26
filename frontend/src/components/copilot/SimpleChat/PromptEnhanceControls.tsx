@@ -13,7 +13,7 @@ export function PromptEnhanceControls({
   hasProject: boolean;
   contextItems: ComposerContextItem[];
   onApplyText: (next: string) => void;
-}): React.ReactElement {
+}): React.ReactElement | null {
   const [busy, setBusy] = React.useState(false);
   const [notice, setNotice] = React.useState<string | null>(null);
   const requestRef = React.useRef(0);
@@ -50,19 +50,21 @@ export function PromptEnhanceControls({
     }
   }, [busy, context, onApplyText, prompt]);
 
+  // 试用反馈⑩（owner msg_127b24566491）：空输入时按钮不存在；有文字才内联出现在提示词文字右侧
+  if (!prompt.trim()) return null;
   return (
     <>
       <button
         type="button"
-        className="sc-access-btn"
+        className="sc-prompt-enhance-inline"
         data-testid="prompt-enhance"
-        disabled={!prompt.trim() || busy}
-        title={prompt.trim() ? '优化提示词：生成后直接覆盖输入框（不自动发送）' : '先输入内容，再优化提示词'}
+        disabled={busy}
+        title={busy ? '正在优化提示词…' : '优化提示词：生成后直接覆盖输入框（不自动发送）'}
         onClick={() => void run()}
       >
         <Icon name="sparkles" size={14} />
       </button>
-      {notice && <span role="status" data-testid="prompt-enhance-status" className="sc-hint">{notice}</span>}
+      {notice && <span role="alert" data-testid="prompt-enhance-status" className="sc-prompt-enhance-notice">{notice}</span>}
     </>
   );
 }

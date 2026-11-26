@@ -50,8 +50,14 @@ describe('UI-709 提示词优化点击即覆盖', () => {
     render(<PromptEnhanceControls prompt="原稿" hasProject={false} contextItems={[]} onApplyText={onApplyText} />);
 
     fireEvent.click(screen.getByTestId('prompt-enhance'));
-    await waitFor(() => expect(screen.getByRole('status').textContent).toContain('优化失败'));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('优化失败'));
     expect(onApplyText).not.toHaveBeenCalled();
     expect(screen.queryByTestId('prompt-enhance-dialog')).toBeNull();
   });
 });
+
+
+  it('试用反馈⑩：空输入时按钮不渲染', () => {
+    render(<PromptEnhanceControls prompt="" hasProject={false} contextItems={[]} onApplyText={() => {}} />);
+    expect(screen.queryByTestId('prompt-enhance')).toBeNull();
+  });

@@ -2089,6 +2089,36 @@
 .sc-composer-body {
   display: flex;
   min-height: 0;
+  /* 试用反馈⑩：优化提示词内联于输入文字右侧（绝对定位锚点），错误浮层不占工具栏 */
+  position: relative;
+}
+
+.sc-prompt-enhance-inline {
+  position: absolute;
+  right: var(--petri-space-4);
+  bottom: var(--petri-space-3);
+  border: none;
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-accent-bg);
+  color: var(--petri-text-secondary);
+  cursor: pointer;
+  padding: 3px 6px;
+  line-height: 1;
+}
+.sc-prompt-enhance-inline:hover:not(:disabled) { background: color-mix(in srgb, var(--petri-accent-bg) 60%, var(--petri-text) 8%); }
+.sc-prompt-enhance-inline:disabled { cursor: default; opacity: 0.6; }
+.sc-prompt-enhance-notice {
+  position: absolute;
+  right: var(--petri-space-4);
+  bottom: calc(100% + 4px);
+  z-index: var(--petri-z-dropdown);
+  max-width: 80%;
+  padding: 4px 8px;
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--petri-text) 12%, transparent);
 }
 
 .sc-input {

@@ -22,8 +22,8 @@
       "wave": "A",
       "module": "W-03",
       "lines": 1921,
-      "bytes": 94425,
-      "sha256": "0745a26187f8fa890352759d0f7ce1cc147807471c570b67c922eb20edca2654"
+      "bytes": 94423,
+      "sha256": "f155c6696e6209e185d085980dfb7b3a6cfae4ba342210bef149c4fb7594ad3b"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -205,9 +205,9 @@
       "path": "frontend/src/components/copilot/simple-chat.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 5495,
-      "bytes": 133900,
-      "sha256": "f58b3533afd98941bfb5b3d748b3379b4bf0e437747217a4bb71d355a3a6db9f"
+      "lines": 5525,
+      "bytes": 134972,
+      "sha256": "de041110dc56186cb128f9559d01d5963e443e3df20eac3e42368950fe67e2b1"
     },
     {
       "path": "frontend/src/components/desktop/desktop.css",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86636,
+  "total": 86666,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -892,6 +892,19 @@
       "to": {
         "lines": 5495,
         "bytes": 133900
+      }
+    },
+    {
+      "path": "frontend/src/components/copilot/simple-chat.css",
+      "reason": "试用反馈⑩ owner msg_127b24566491：优化提示词内联化（按钮默认隐藏+文字右侧内联+错误浮层），外观样式新增非布局几何",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 5495,
+        "bytes": 133900
+      },
+      "to": {
+        "lines": 5525,
+        "bytes": 134972
       }
     }
   ]

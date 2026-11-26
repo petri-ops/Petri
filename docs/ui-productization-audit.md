@@ -7028,3 +7028,11 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **改动**：空闲态 `play`→`mic`（Icon 组件既有 mic mark、零新依赖）、录音中仍 `square` 停止；JSX 中把 ComposerMicButton 块移到 ScratchpadDock 之后（位置对换，中间知识/模型按钮不动）；aria/title/onTranscript/onQuote 语义零变。
 - **验证**：HK-01 静态 4/4（图标 mic/录音 square/位置顺序/语义未删）+ 组件行为 2/2 + theme-token 与邻域 22/22 + 全静态门 10/10；CDP 实机确认 mic 按钮在场且 SVG 加载、Vite HMR 生效。
 - **状态边界**：观感零代签 pending_human_eye，待 owner 实机过目（麦克风图标形态 + 新位置）；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。
+
+## UI-737: 优化提示词内联化 + model_output_empty 核真（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）
+
+- **来源**：owner 试用反馈⑩（msg_127b24566491，附截图）：「优化提示词图标默认不存在，输入文字后出现在文字右侧；错误信息不该挤在工具栏」。
+- **改动**：`PromptEnhanceControls.tsx` 空输入 `return null`（按钮默认不渲染）、有文字时渲染于 `.sc-composer-body`（textarea 之后）、`role=alert` 独立浮层呈现错误（不再挤工具栏）；调用处从 composer 工具栏移至输入容器；CSS 新增 `.sc-prompt-enhance-inline`（absolute 定位到输入区文字右侧、hover 用 accent-bg 派生不占 accent 棘轮）+ notice 浮层（body 字号不占 sm 棘轮）。
+- **model_output_empty 核真（另立修复项，不混本 UX 单）**：前端 `PromptEnhanceControls.tsx:41` 对空 optimizedPrompt 抛错；后端真源 `core/petri-server/helpers/task-spec.js:49 cleanText` 把模型返回内容折叠/清洗后为空 → `:219` 返回 `model_output_empty`。GLM 类模型有 `quickThinkingParams` 显式关思考（gemini/zhipuai），owner 当前 deepseek-flash 不在匹配内——模型若返回空正文（思考段吞正文/工具调用空回）即报此错。待 owner 决定是否另立"空输出诊断+重试"修复项。
+- **验证**：组件测试 3/3（空输入无按钮/点击覆盖/失败 alert）+ theme-token 与邻域 22/22 + 全静态门 10/10（CSS grow 留因）；CDP 复验时 owner 在 settings 页、composer 未实例化如实记录，由组件测试守护，Vite HMR 生效。
+- **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。

@@ -1652,6 +1652,7 @@ export function SimpleChat({
                 onChange={onInputChange}
                 onKeyDown={onKeyDown}
               />
+              {!slimComposer && <PromptEnhanceControls prompt={input} hasProject={Boolean(projectId)} contextItems={composerContext.items} onApplyText={handleInsertComposerText} />}
             </div>
             <div className="sc-composer-bar">
               <div className="sc-composer-left">
@@ -1714,7 +1715,6 @@ export function SimpleChat({
                     </>
                   )}
                 </div>
-                {!slimComposer && <PromptEnhanceControls prompt={input} hasProject={Boolean(projectId)} contextItems={composerContext.items} onApplyText={handleInsertComposerText} />}
                 {/* BLOCK-69 / UI-318 — 知识空间大脑开关（独立 icon 开关，不挂已移除的 ⋯ 菜单） */}
                 <button
                   type="button"
