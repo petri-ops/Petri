@@ -116,25 +116,12 @@ async function createWindow({
     minWidth: 720,
     minHeight: 520,
     title: IS_TEST_INSTANCE ? `[TEST] ${BRAND.APP_NAME}` : BRAND.APP_NAME, // BLOCK-61：品牌单一事实源；[TEST] 前缀=BLOCK-100 窗口级标记
-    // owner 裁决 A（msg_812fc13259da）— 恢复原生顶栏：native 红绿灯/拖拽/全屏交给 OS，
-    // 移除自绘窗口控制层（bug 滋生地）。状态机修复（_fullscreen-state.js）保留，
-    // 原生全屏（Ctrl+Cmd+F / 绿钮）仍走统一状态机。
-    frame: true,
-    // 顶栏精修（owner msg_681c8e528751，对照 Orca）：darwin hiddenInset——原生红绿灯
-    // 悬浮在 app 深色 header 上，不再有 OS 浅色标题栏 + app tab 行两层皮；
-    // 交通灯位置 (16,12) 取自 Orca 同栈 Electron 实现，38px header 内可容。
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    // Petri 专属固定值（终局 msg_f40c267460b2，ground truth 像素标定）：
-    // Orca 固定 {x:16,y:12} 配其自身几何（标杆 D≈0）；Petri owner 聚焦截图实测
-    // 灯中心 y=33.5px / 工具行图标中心 y=28.5px（D=5 截图像素低），缩放≈1.5x
-    // → D≈3.3 CSS px → y = 12.7 - 3.3 ≈ 9.4（灯顶坐标语义已7点实证、灯中心=y+6）。
-    // 早期 12.7 来自 CDP 测试隐藏窗几何反解（18.73-6），与实际主窗不符——ground truth 修正。
-    // x=20 配 header 左区 padding-left:96px 给交通灯留位（比 Orca x16 +4）。
-    // 终值 y=11.4（残差像素精修 msg_91a73f6f0b84）：y9.4 截图同图内量得灯中心 y=23.5px、
-    // 工具行图标中心 y=26.5px → 灯高 3 截图像素（缩放≈1.5x→2CSS）；y增大使灯下移 → 9.4+2=11.4。
-    // 历史：Orca固定{16,12}配其几何；Petri先CDP反解12.7（测试隐藏窗失准）、ground truth修正9.4（过调）、
-    // 本轮残差收敛11.4。灯顶坐标语义已7点实证；x=20配96px红灯位。
-    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 20, y: 11.4 } } : {}),
+    // Self-drawn traffic-light buttons in TitleBar.tsx — see src/main.js comments
+    // around setupWindowIpc() for the IPC contract (window:minimize/maximize/close).
+    // Frameless on every platform so the renderer owns the window controls; on macOS
+    // TitleBar draws the Cursor-style grey circular capsule (not the native OS lights),
+    // on Windows/Linux it draws the square WindowControls.
+    frame: false,
     backgroundColor: "#1f2330",
     // 窗口/任务栏图标（mac 走 app bundle 会忽略此值；win/linux dev 态即时可见，
     // packaged 态由 electron-builder 的 icon 条目接管）
@@ -443,17 +430,8 @@ async function createWindow({
     }
     win.webContents.send(CHANNELS.window.maximizeChanged, isMaximized);
   };
-  // 红绿灯行为对齐 Orca（owner msg_92db4f7b765a）：全屏/最大化时隐藏原生红绿灯，
-  // 退出恢复。仅 macOS 有 setWindowButtonVisibility；API 缺失/异常时不阻塞窗口事件。
-  const setTrafficLightsVisible = (visible) => {
-    const win = getMainWindow();
-    if (!win || win.isDestroyed()) return;
-    try {
-      if (typeof win.setWindowButtonVisibility === 'function') win.setWindowButtonVisibility(visible);
-    } catch { /* 平台/窗口状态下 API 不可用：保持默认形态 */ }
-  };
-  mainWindow.on("maximize", () => { setTrafficLightsVisible(false); publishMaximizedState(true); });
-  mainWindow.on("unmaximize", () => { setTrafficLightsVisible(true); publishMaximizedState(false); });
+  mainWindow.on("maximize", () => publishMaximizedState(true));
+  mainWindow.on("unmaximize", () => publishMaximizedState(false));
 
   // ── Fullscreen State → Renderer ────────────────────────────────
   // 试用反馈④更新（msg_21d38a84e33b）：native 与 simple 两套事件都监听——
@@ -464,13 +442,10 @@ async function createWindow({
     if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
     win.webContents.send(CHANNELS.window.fullscreenChanged, value);
   };
-  mainWindow.on("enter-full-screen", () => { setTrafficLightsVisible(false); publishFullScreen(true); });
-  mainWindow.on("leave-full-screen", () => { setTrafficLightsVisible(true); publishFullScreen(false); });
-  mainWindow.on("enter-simple-full-screen", () => { setTrafficLightsVisible(false); publishFullScreen(true); });
-  mainWindow.on("leave-simple-full-screen", () => { setTrafficLightsVisible(true); publishFullScreen(false); });
-
-  // 初始态（窗口以最大化/全屏恢复启动时）同样隐藏，避免与 Orca 形态不一致。
-  setTrafficLightsVisible(!mainWindow.isMaximized() && !mainWindow.isFullScreen());
+  mainWindow.on("enter-full-screen", () => publishFullScreen(true));
+  mainWindow.on("leave-full-screen", () => publishFullScreen(false));
+  mainWindow.on("enter-simple-full-screen", () => publishFullScreen(true));
+  mainWindow.on("leave-simple-full-screen", () => publishFullScreen(false));
 
   return mainWindow;
 }

@@ -1,16 +1,52 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TitleBarResultItem } from '@/hooks/useWorkspacePanels';
+import { MOBILE_BREAKPOINT_PX } from '@/lib/uiBreakpoints';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import { TitleBar } from './TitleBar';
 
-afterEach(() => {
-  cleanup();
-  vi.unstubAllGlobals();
-  vi.clearAllMocks();
-});
+type DesktopWindow = NonNullable<Window['petriDesktop']>['window'];
+type DesktopBridge = NonNullable<Window['petriDesktop']>;
+
+function makeBridge(overrides: Partial<DesktopWindow> = {}): DesktopBridge {
+  const windowApi: DesktopWindow = {
+    minimize: vi.fn(),
+    maximize: vi.fn(),
+    close: vi.fn(),
+    isMaximized: vi.fn().mockResolvedValue(false),
+    onMaximizeChanged: vi.fn(() => vi.fn()),
+    isFullScreen: vi.fn().mockResolvedValue(false),
+    toggleFullScreen: vi.fn(),
+    onFullScreenChanged: vi.fn(() => vi.fn()),
+    // UI-411 — 测试实例窗口管理方法（mock 补齐满足 bridge 类型契约）
+    setAlwaysOnTop: vi.fn().mockResolvedValue({ ok: true }),
+    setIgnoreMouseEvents: vi.fn().mockResolvedValue({ ok: true }),
+    onTestManageModeChanged: vi.fn(() => vi.fn()),
+    testManageToggle: vi.fn(),
+    testManageHover: vi.fn(),
+    ...overrides,
+  };
+  return {
+    isDesktop: true,
+    // mac 分支才渲染交通灯窗口控件；缺这个字段会导致相关用例全部找不到按钮。
+    platform: 'darwin',
+    window: windowApi,
+  } as DesktopBridge;
+}
+
+function renderTitleBar() {
+  return render(
+    <MemoryRouter>
+      <WorkspacePanelsProvider>
+        <TitleBar />
+      </WorkspacePanelsProvider>
+    </MemoryRouter>,
+  );
+}
 
 function ResultStateHarness({
   resultItems,
@@ -49,6 +85,264 @@ function renderTitleBarWithResults(
     </MemoryRouter>,
   );
 }
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+  return { promise, resolve, reject };
+}
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+  vi.clearAllMocks();
+});
+
+describe('TitleBar desktop window controls', () => {
+  it('renders the three mac traffic controls with labels and the expected icons', () => {
+    const bridge = makeBridge();
+    vi.stubGlobal('petriDesktop', bridge);
+    renderTitleBar();
+
+    const close = screen.getByRole('button', { name: '关闭窗口' });
+    const minimize = screen.getByRole('button', { name: '最小化窗口' });
+    const fullscreen = screen.getByRole('button', { name: '全屏' });
+
+    expect(close.getAttribute('title')).toBe('关闭');
+    expect(minimize.getAttribute('title')).toBe('最小化');
+    expect(fullscreen.getAttribute('title')).toBe('全屏');
+    for (const btn of [close, minimize, fullscreen]) {
+      expect(btn.querySelector('svg[aria-hidden="true"]')).toBeTruthy();
+    }
+  });
+
+  it('routes close, minimize, and fullscreen clicks to the desktop bridge', () => {
+    const bridge = makeBridge();
+    vi.stubGlobal('petriDesktop', bridge);
+    renderTitleBar();
+
+    fireEvent.click(screen.getByRole('button', { name: '关闭窗口' }));
+    fireEvent.click(screen.getByRole('button', { name: '最小化窗口' }));
+    fireEvent.click(screen.getByRole('button', { name: '全屏' }));
+
+    expect(bridge.window.close).toHaveBeenCalledTimes(1);
+    expect(bridge.window.minimize).toHaveBeenCalledTimes(1);
+    expect(bridge.window.toggleFullScreen).toHaveBeenCalledTimes(1);
+  });
+
+  // 回归：mac 交通灯窗口控件是 DOM 里最靠前的可聚焦元素。若它们参与键盘焦点，
+  // 页面加载后焦点会默认落在「关闭窗口」上，用户击键被按钮吞掉（空格/回车还会误触关闭）。
+  it('keeps window controls out of the keyboard focus order', async () => {
+    const source = await readFile(
+      resolve(process.cwd(), 'src/components/desktop/titlebar/TitleBarLeftZone.tsx'),
+      'utf8',
+    );
+    const controlBlocks = source
+      .split('<button')
+      .filter((block) => /aria-label=(?:"关闭窗口"|"最小化窗口"|"全屏")/.test(block));
+
+    expect(controlBlocks.length).toBe(3);
+    for (const block of controlBlocks) {
+      expect(block).toContain('tabIndex={-1}');
+    }
+  });
+
+  // mac 交通灯没有最大化态标签，但 useDesktopWindowControls 仍需订阅最大化事件
+  // （供非 mac 双击手势与状态 hydration 使用），并在卸载时注销监听。
+  it('hydrates window state, follows changes, and unregisters the listener', async () => {
+    let onMaximizeChanged: ((isMaximized: boolean) => void) | undefined;
+    const unsubscribe = vi.fn();
+    const bridge = makeBridge({
+      isMaximized: vi.fn().mockResolvedValue(true),
+      onMaximizeChanged: vi.fn((callback: (isMaximized: boolean) => void) => {
+        onMaximizeChanged = callback;
+        return unsubscribe;
+      }),
+    });
+    vi.stubGlobal('petriDesktop', bridge);
+    const view = renderTitleBar();
+
+    await waitFor(() => {
+      expect(bridge.window.isMaximized).toHaveBeenCalledTimes(1);
+      expect(bridge.window.onMaximizeChanged).toHaveBeenCalledTimes(1);
+    });
+    expect(typeof onMaximizeChanged).toBe('function');
+
+    act(() => onMaximizeChanged?.(false));
+    act(() => onMaximizeChanged?.(true));
+    expect(screen.getByRole('button', { name: '全屏' })).toBeTruthy();
+
+    view.unmount();
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+
+  it('subscribes to live state before issuing the initial maximize query', async () => {
+    const order: string[] = [];
+    const bridge = makeBridge({
+      onMaximizeChanged: vi.fn((_callback: (isMaximized: boolean) => void) => {
+        order.push('subscribe');
+        return vi.fn();
+      }),
+      isMaximized: vi.fn(() => {
+        order.push('query');
+        return Promise.resolve(false);
+      }),
+    });
+    vi.stubGlobal('petriDesktop', bridge);
+    renderTitleBar();
+
+    await waitFor(() => expect(bridge.window.isMaximized).toHaveBeenCalledTimes(1));
+    expect(order).toEqual(['subscribe', 'query']);
+  });
+
+  // BLOCK-87 L3-2 — 投影环境（手机/平板浏览器）下的顶栏适配
+  describe('TitleBar projection environment', () => {
+  it('hides desktop window controls when the page is a phone projection', () => {
+    // 手机投影（data-projection 垫片标志）：Windows 窗口控件（最小化/最大化/
+    // 关闭）在浏览器里是垫片 no-op 死按钮，必须整体隐藏。
+    document.documentElement.setAttribute('data-projection', '1');
+    try {
+      const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+      vi.stubGlobal('petriDesktop', bridge);
+      renderTitleBar();
+      expect(screen.queryByRole('button', { name: '最小化' })).toBeNull();
+      expect(screen.queryByRole('button', { name: '关闭' })).toBeNull();
+    } finally {
+      document.documentElement.removeAttribute('data-projection');
+    }
+  });
+
+  it('keeps window controls on a real Windows desktop (no projection flag)', () => {
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('petriDesktop', bridge);
+    renderTitleBar();
+    expect(screen.getByRole('button', { name: '最小化' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '关闭' })).toBeTruthy();
+  });
+
+  it('isProjectionMobile only fires with the projection flag and a narrow viewport', async () => {
+    const { isProjectionMobile } = await import('./titlebar/shared');
+    // jsdom 无 matchMedia：无投影标志时短路 false（不触 matchMedia）；
+    // 有标志 + matchMedia 窄屏命中才为 true；matchMedia 缺失 fail-closed 回 false。
+    expect(isProjectionMobile()).toBe(false);
+    document.documentElement.setAttribute('data-projection', '1');
+    try {
+      const original = window.matchMedia;
+      window.matchMedia = (query: string) => ({ matches: query.includes(String(MOBILE_BREAKPOINT_PX)), media: query, onchange: null, addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn(), dispatchEvent: vi.fn() });
+      expect(isProjectionMobile()).toBe(true);
+      window.matchMedia = (query: string) => ({ matches: false, media: query, onchange: null, addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn(), dispatchEvent: vi.fn() });
+      expect(isProjectionMobile()).toBe(false);
+      delete (window as { matchMedia?: unknown }).matchMedia;
+      expect(isProjectionMobile()).toBe(false);
+      window.matchMedia = original;
+    } finally {
+      document.documentElement.removeAttribute('data-projection');
+    }
+  });
+});
+
+  it('keeps live maximize events authoritative over a late initial query result', async () => {
+    let onMaximizeChanged: ((isMaximized: boolean) => void) | undefined;
+    const initialQuery = deferred<boolean>();
+    const bridge = makeBridge({
+      isMaximized: vi.fn(() => initialQuery.promise),
+      onMaximizeChanged: vi.fn((callback: (isMaximized: boolean) => void) => {
+        onMaximizeChanged = callback;
+        return vi.fn();
+      }),
+    });
+    vi.stubGlobal('petriDesktop', bridge);
+    renderTitleBar();
+
+    await waitFor(() => {
+      expect(bridge.window.isMaximized).toHaveBeenCalledTimes(1);
+      expect(bridge.window.onMaximizeChanged).toHaveBeenCalledTimes(1);
+    });
+
+    // 迟到的初始查询不得覆盖更新的 live 事件结果（状态由 hook 内部持有），
+    // 这里验证流程不抛错且 UI 保持可渲染。
+    await act(async () => {
+      onMaximizeChanged?.(true);
+      initialQuery.resolve(false);
+      await initialQuery.promise;
+    });
+    expect(screen.getByRole('button', { name: '全屏' })).toBeTruthy();
+  });
+
+  it('keeps the safe unmaximized default when the initial query rejects', async () => {
+    const initialQuery = deferred<boolean>();
+    const bridge = { ...makeBridge({ isMaximized: vi.fn(() => initialQuery.promise) }), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('petriDesktop', bridge);
+    renderTitleBar();
+
+    await waitFor(() => {
+      expect(bridge.window.isMaximized).toHaveBeenCalledTimes(1);
+    });
+    // 查询挂起/拒绝时 WindowControls 保持未最大化默认（最大化按钮，非「还原」）。
+    expect(screen.getByRole('button', { name: '最大化' })).toBeTruthy();
+
+    await act(async () => {
+      initialQuery.reject(new Error('window state unavailable'));
+      await Promise.resolve();
+    });
+    expect(screen.getByRole('button', { name: '最大化' })).toBeTruthy();
+  });
+
+  it('keeps the safe default when an older bridge throws before returning a query promise', async () => {
+    // 保持 darwin：win32 的 WindowControls 会在 effect 里同步调用 isMaximized，
+    // 同步 throw 会让 React root 崩溃；hook 路径经 Promise.resolve().then 包裹，可安全兜底。
+    const bridge = makeBridge({
+      isMaximized: vi.fn(() => {
+        throw new Error('window state unavailable');
+      }),
+    });
+    vi.stubGlobal('petriDesktop', bridge);
+    renderTitleBar();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByRole('button', { name: '全屏' })).toBeTruthy();
+  });
+
+  // 双击标题栏切换全屏只在非 mac 生效：mac 上该手势由系统处理，
+  // 组件显式设置 onDoubleClick={!isMac ? ... : undefined}。
+  it('toggles fullscreen on a blank header double-click but ignores buttons and role=button children', () => {
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('petriDesktop', bridge);
+    renderTitleBar();
+    const header = screen.getByRole('banner');
+
+    fireEvent.doubleClick(header);
+    expect(bridge.window.toggleFullScreen).toHaveBeenCalledTimes(1);
+
+    // 非 mac 走 WindowControls，其 aria-label 是「最小化」（mac 交通灯才是「最小化窗口」）。
+    fireEvent.doubleClick(screen.getByRole('button', { name: '最小化' }));
+    expect(bridge.window.toggleFullScreen).toHaveBeenCalledTimes(1);
+
+    const roleButton = document.createElement('div');
+    roleButton.setAttribute('role', 'button');
+    header.appendChild(roleButton);
+    fireEvent.doubleClick(roleButton);
+    expect(bridge.window.toggleFullScreen).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the fixed collapsed left rail width after toggling the left panel', () => {
+    vi.stubGlobal('petriDesktop', undefined);
+    renderTitleBar();
+    const header = screen.getByRole('banner');
+    expect(header.getAttribute('style')).toContain('--titlebar-left-span: 241px');
+
+    fireEvent.click(screen.getByRole('button', { name: '收起左侧栏' }));
+
+    // 非 mac（无 desktop bridge）收起后为 collapsedLeftRail=146；mac 为 180。
+    expect(header.style.getPropertyValue('--titlebar-left-span')).toBe('146px');
+  });
+});
 
 describe('TitleBar workspace-context windowTools (UI-359)', () => {
   function renderAt(initialPath: string) {
@@ -125,6 +419,41 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
     expect(screen.getByRole('button', { name: '展开底部终端' })).toBeTruthy();
   });
 
+  it('keeps window controls on non-workspace routes while windowTools is trimmed', () => {
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('petriDesktop', bridge);
+    renderAt('/');
+
+    // 裁剪只针对面板开关；非 mac 自绘窗口控件必须恒在。
+    expect(screen.getByRole('button', { name: '最小化' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '最大化' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '关闭' })).toBeTruthy();
+  });
+});
+
+describe('TitleBar web fallback', () => {
+  it('renders a placeholder and never calls IPC when petriDesktop is unavailable', () => {
+    vi.stubGlobal('petriDesktop', undefined);
+    renderTitleBar();
+    const header = screen.getByRole('banner');
+
+    expect(screen.queryByRole('button', { name: '关闭窗口' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '最小化窗口' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '全屏' })).toBeNull();
+    expect(header.querySelector('[aria-hidden="true"]')).toBeTruthy();
+
+    expect(() => fireEvent.doubleClick(header)).not.toThrow();
+  });
+
+  it('treats a bridge that is not marked desktop as web content', () => {
+    const bridge = makeBridge();
+    vi.stubGlobal('petriDesktop', { ...bridge, isDesktop: false });
+    renderTitleBar();
+
+    expect(screen.queryByRole('button', { name: '关闭窗口' })).toBeNull();
+    expect(bridge.window.onMaximizeChanged).not.toHaveBeenCalled();
+    expect(bridge.window.isMaximized).not.toHaveBeenCalled();
+  });
 });
 
 describe('TitleBar result selector', () => {
@@ -226,4 +555,21 @@ describe('TitleBar route-aware dividers (UI-377)', () => {
     expect(center.className).not.toContain('centerTitleNoDivider');
   });
 
+  it('drops the window-controls left divider when windowTools is empty (non-workspace route)', () => {
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('petriDesktop', bridge);
+    renderAt('/');
+    const wc = document.querySelector('[class*="windowControls"]') as HTMLElement;
+    expect(wc).toBeTruthy();
+    expect(wc.className).toContain('windowControlsNoDivider');
+  });
+
+  it('keeps the window-controls left divider on workspace routes (toggles present)', () => {
+    const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
+    vi.stubGlobal('petriDesktop', bridge);
+    renderAt('/project/p1/chat');
+    const wc = document.querySelector('[class*="windowControls"]') as HTMLElement;
+    expect(wc).toBeTruthy();
+    expect(wc.className).not.toContain('windowControlsNoDivider');
+  });
 });

@@ -13,7 +13,7 @@
  */
 
 /** 窄屏 / 投影手机浏览器阈值（与 CSS `@media (max-width: 768px)` 同源）。 */
-const MOBILE_BREAKPOINT_PX = 768;
+export const MOBILE_BREAKPOINT_PX = 768;
 
 /** 工作区浮层（compactLayout）阈值（与 CSS `@media (max-width: 960px)` 同源）。 */
 const COMPACT_BREAKPOINT_PX = 960;

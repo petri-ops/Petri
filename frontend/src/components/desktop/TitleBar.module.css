@@ -194,7 +194,7 @@
 .toolMenuAnchor,
 .toolMenu,
 .toolMenuOverlay,
-.iconBtn,
+.winBtn,
 .macTrafficBtn,
 .macTrafficBtnClose {
   -webkit-app-region: no-drag;
@@ -252,13 +252,7 @@
 .resultMenuTrigger,
 .resultMenu,
 .resultMenuOverlay,
-.branchTabs,
-/* 顶栏精修补正（msg_eb9795b7323d）：hiddenInset 融合下 header 空白区是 drag，
-   可点元素必须显式 no-drag，否则按钮/tab 点击被拖窗吞掉。 */
-.tabPill,
-.tabPillMain,
-.tabClose,
-.leftTools {
+.branchTabs {
   -webkit-app-region: no-drag;
 }
 
