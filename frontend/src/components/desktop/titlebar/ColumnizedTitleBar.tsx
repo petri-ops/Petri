@@ -35,7 +35,7 @@ export function ColumnHeader({ side }: { side: 'left' | 'center' | 'right' }): R
 
   return (
     <header
-      className={styles.columnHeader}
+      className={`${styles.columnHeader}${isMac && side === 'left' ? ` ${styles.macTitlebar}` : ''}`}
       onDoubleClick={!isMac ? handleTitleBarDoubleClick : undefined}
     >
       {side === 'left' && <TitleBarLeftZone />}

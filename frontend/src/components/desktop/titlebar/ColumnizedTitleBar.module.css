@@ -38,6 +38,12 @@
   border-bottom: 1px solid var(--titlebar-border);
 }
 
+/* 顶栏精修（owner msg_681c8e528751）：hiddenInset 下原生红绿灯悬浮在左栏 header，
+   左侧留出交通灯位（Orca trafficLightPosition x=16 + 三灯约 52px），tab/按钮不与其重叠。 */
+.macTitlebar :global([class*="leftZone"]) {
+  padding-left: 72px;
+}
+
 /* 单区段（左/右列 header）：zone 在 fixed 条里靠 grid stretch 撑满，flex 行里会
    按内容收缩；此处强制吃掉 header 全宽。 */
 .columnHeader > div:only-child {

@@ -7089,3 +7089,12 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **改动**：①`_window-create.js` frame:false→true + titleBarStyle:'default'（native 红绿灯/拖拽/全屏交 OS）；②`TitleBarLeftZone` 删自绘三按钮（保留左栏开关）、`TitleBarRightZone` 删非 mac WindowControls；③`shared.tsx` 删化石导出（WindowControls/useDesktopWindowControls/DesktopWindowControls/getIsProjection外部化/getIsDesktop）+ 过时测试清理；④自定义元素（通知铃铛/UpdatePill/工具菜单/审阅徽章）本就在内容区列头工具栏（native 标题栏在其上方），功能不丢、无需物理搬移；⑤状态机修复 `_fullscreen-state.js` 保留（native 全屏 Ctrl+Cmd+F 仍走统一状态机）；⑥MOBILE_BREAKPOINT_PX 转模块内私有（knip 零新增）。
 - **验证**：HK-01 test/native-titlebar.test.mjs 红 2/4→绿 4/4（native配置/自绘移除/状态机保留/元素功能不丢）+ TitleBar.test 11/11（过时控件测试清理）+ 邻域 31/31 + 全静态门 10/10（eslint suppressions 已 prune、knip 保留面冻结无新增）。
 - **边界**：main 进程配置改动 Vite HMR 不覆盖——需 owner 重启加载（兴奋执行）；观感零代签 pending_human_eye，待 owner 实机验证红绿灯原生/全屏进出/菜单栏不盖/迁移元素新位置可用。G0 永久 maintained · G1 进行中。
+
+## UI-744: hiddenInset 融合式深色标题栏（2026-11-26 **in_progress**；代码完成需重启，观感待 owner 对照 Orca 过目）
+
+- **来源**：owner msg_681c8e528751——UI-743 原生恢复后两层皮（OS 浅色栏 + app tab 行）不理想，期望 Orca 形态（深色一体化、原生红绿灯悬浮、tab 融合）。
+- **核真 Orca 源**（app.asar strings）：`titleBarStyle: darwin ? 'hiddenInset' : ...` + `trafficLightPosition:{x:16,y:12}`——同栈 Electron 技法直接借。
+- **改动**：①`_window-create.js` titleBarStyle darwin→hiddenInset（非 darwin 仍 default）+ darwin 专属 trafficLightPosition{x:16,y:12}；②`ColumnizedTitleBar.tsx` 左栏 header（side=left + isMac）加 `macTitlebar` class；③CSS `.macTitlebar :global([class*="leftZone"]) padding-left:72px`（留交通灯位，Orca x=16+三灯约52px），header 既有 `-webkit-app-region:drag` 保留（融合后空白区可拖窗）、背景 `--petri-bg-surface` 暗色一体化。
+- **保留**：状态机 `_fullscreen-state.js` 完整（native 全屏仍统一处理）、frame:true 原生红绿灯不回退。
+- **验证**：HK-01 test/hidden-inset-titlebar.test.mjs 红 2/4→绿 4/4（hiddenInset+交通灯位/融合 class+padding/drag/状态机）+ theme/邻域 35/35 + 全静态门 10/10（closure 见 HK）。
+- **边界**：main 配置改动 HMR 不覆盖——需 owner 重启（兴奋执行）；观感零代签 pending_human_eye，待 owner 对照 Orca 截图过目（深色一体/红绿灯悬浮/拖动/tab 不重叠）。G0 永久 maintained · G1 进行中。

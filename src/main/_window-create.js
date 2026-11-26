@@ -120,7 +120,11 @@ async function createWindow({
     // 移除自绘窗口控制层（bug 滋生地）。状态机修复（_fullscreen-state.js）保留，
     // 原生全屏（Ctrl+Cmd+F / 绿钮）仍走统一状态机。
     frame: true,
-    titleBarStyle: 'default',
+    // 顶栏精修（owner msg_681c8e528751，对照 Orca）：darwin hiddenInset——原生红绿灯
+    // 悬浮在 app 深色 header 上，不再有 OS 浅色标题栏 + app tab 行两层皮；
+    // 交通灯位置 (16,12) 取自 Orca 同栈 Electron 实现，38px header 内可容。
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 16, y: 12 } } : {}),
     backgroundColor: "#1f2330",
     // 窗口/任务栏图标（mac 走 app bundle 会忽略此值；win/linux dev 态即时可见，
     // packaged 态由 electron-builder 的 icon 条目接管）
