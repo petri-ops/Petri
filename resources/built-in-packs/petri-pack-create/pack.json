@@ -1,0 +1,27 @@
+{
+  "packId": "petri-pack-create",
+  "name": "格物 · 创作包",
+  "nameEn": "Petri Creation Pack",
+  "version": "0.1.0",
+  "kind": "domain-pack",
+  "description": "格物桌面的创作领域包：图像生成、视频生成、3D 生成与艺术设计工具。装则 generate.* 创作能力可用，卸则除内核通用注册面外干净移除。与 petri-pack-bio（科研）对称。",
+  "provides": {
+    "plugins": "plugins/",
+    "skills": "skills/",
+    "promptFragments": "promptFragments/",
+    "ui": "ui/",
+    "artifactTypes": ["image", "video", "model3d", "design"],
+    "generateTools": ["generate.image", "generate.video", "generate.model3d"]
+  },
+  "requires": {
+    "core": ">=0.0.1-rc.7",
+    "coreCapabilities": [
+      "generate-surface:provider-agnostic-v1",
+      "artifact-truth:sha256-v1"
+    ]
+  },
+  "governance": {
+    "autonomy": "包自治：provider 选型、版权策略、P0-P3 节奏、包内验收由本包规划，不阻塞内核 G1",
+    "kernelBoundary": "内核仅保留 provider 无关生成注册面与领域零硬编码纪律（block-86:43-57）"
+  }
+}

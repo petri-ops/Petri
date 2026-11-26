@@ -97,6 +97,8 @@ const {
   tool_resident_task_list,
   tool_resident_task_read,
 } = require('./workspace-tools');
+// 创作包内置化：provider 无关的生成派发（内置包 registry 驱动，内核零领域硬编码）。
+const { createGenerateHandler } = require('./generate-tools');
 // QODER-E12 — Notebook cell 级编辑（handler 复用 workspace withWorkspace 单源）
 const { createNotebookTools } = require('./notebook-tools');
 const tool_notebook_edit = createNotebookTools().notebookEdit;
@@ -164,6 +166,10 @@ const SIDE_EFFECTS = new Set([
 ]);
 
 const HANDLERS = {
+  // 内置创作包：handler 从包 registry 动态解析，零 provider 字面量。
+  'generate.image': createGenerateHandler('generate.image'),
+  'generate.video': createGenerateHandler('generate.video'),
+  'generate.model3d': createGenerateHandler('generate.model3d'),
   workspace_list: tool_workspace_list,
   workspace_find: tool_workspace_find,
   workspace_search: tool_workspace_search,
@@ -320,6 +326,10 @@ function contract(category, sideEffect, riskTier, resources, estimatedDurationMs
 }
 
 const CONTRACTS = {
+  // 内置创作包：外部 generation provider + 本地 artifact 落盘；取消信号未贯通故 cancellable 默认 false。
+  'generate.image': contract('action', 'external-request', 'R2', ['network.egress', 'artifacts'], 300000),
+  'generate.video': contract('action', 'external-request', 'R2', ['network.egress', 'artifacts'], 600000),
+  'generate.model3d': contract('action', 'external-request', 'R2', ['network.egress', 'artifacts'], 600000),
   workspace_list: contract('workspace', 'none', 'R0', ['project.files'], 100),
   workspace_find: contract('workspace', 'none', 'R0', ['project.files'], 500),
   workspace_search: contract('workspace', 'none', 'R0', ['project.files'], 1000, true),

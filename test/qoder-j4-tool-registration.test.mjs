@@ -63,10 +63,10 @@ test('handler 拒绝：stdio / 未配置服务 / 非法 redirectBase 不触发 b
   assert.equal(calls, 0, '非法请求不得触发真实 OAuth 发起');
 });
 
-test('工具数 119→120（两处断言同步）', () => {
+test('工具数 120→123（内置创作包三工具，两处断言同步）', () => {
   const t = read(path.join(ROOT, 'test/agent-tool-registry.test.mjs'));
-  assert.equal((t.match(/!== 120/g) || []).length, 1, 'getToolDefs 断言须 120');
-  assert.equal((t.match(/tools\.length, 120/g) || []).length, 1, 'receivedBody 断言须 120');
+  assert.equal((t.match(/!== 123/g) || []).length, 1, 'getToolDefs 断言须 123');
+  assert.equal((t.match(/tools\.length, 123/g) || []).length, 1, 'receivedBody 断言须 123');
 });
 
 test('红线：凭据存储/OAuth handler 未改', () => {

@@ -41,6 +41,9 @@ export default tseslint.config(
       // Gen UI vendor 第三方压缩库（d3/lucide/floating-ui，BLOCK-166 随包静态资产，
       // sha256 清单校验管完整性）：minified 代码非本仓源码面，同 node_modules 先例不 lint
       'resources/gen-ui/vendor/**',
+      // 内置领域包运行时（owner 裁决包内置）：从 sibling 仓同步的 Node CommonJS 插件，
+      // 用 node 全局（require/process/Buffer）且有独立测试与体积门，不走主仓浏览器 lint 面。
+      'resources/built-in-packs/**',
     ],
   },
 

@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-24",
+  "updatedAt": "2026-11-26",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -290,6 +290,10 @@
     "files::acceptance/ui-276/resume-verify-script.mjs",
     "files::acceptance/ui-711-live/run-ui711-live.cjs",
     "files::acceptance/ui-ledger-closeout/ui156-uiattch-verify.cjs",
+    "files::resources/built-in-packs/petri-pack-create/plugins/generate-image/index.js",
+    "files::resources/built-in-packs/petri-pack-create/plugins/generate-model3d/index.js",
+    "files::resources/built-in-packs/petri-pack-create/plugins/generate-video/index.js",
+    "files::resources/built-in-packs/petri-pack-create/scripts/ark-credential.cjs",
     "files::resources/gen-ui/vendor/d3-7.9.0.min.js",
     "files::resources/gen-ui/vendor/floating-ui-core-1.7.3.min.js",
     "files::resources/gen-ui/vendor/floating-ui-dom-1.7.4.min.js",
@@ -505,6 +509,26 @@
       "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/settings-speech-section.cjs",
       "reason": "item40 设置页语音独立成区 dev-verify flow 入口（BLOCK-517 W3/W4/W5 同根先例，不删 flow 文件）",
       "date": "2026-11-25"
+    },
+    {
+      "key": "files::resources/built-in-packs/petri-pack-create/plugins/generate-image/index.js",
+      "reason": "内置创作包运行时：由 generate-tools.js 动态 require（包 registry entry 驱动），静态扫描盲区；sibling 仓有独立测试与体积门",
+      "date": "2026-11-26"
+    },
+    {
+      "key": "files::resources/built-in-packs/petri-pack-create/plugins/generate-video/index.js",
+      "reason": "内置创作包运行时：动态 require 入口，同上",
+      "date": "2026-11-26"
+    },
+    {
+      "key": "files::resources/built-in-packs/petri-pack-create/plugins/generate-model3d/index.js",
+      "reason": "内置创作包运行时：动态 require 入口，同上",
+      "date": "2026-11-26"
+    },
+    {
+      "key": "files::resources/built-in-packs/petri-pack-create/scripts/ark-credential.cjs",
+      "reason": "内置包凭据读取脚本：供宿主/自调用按需 require，动态入口",
+      "date": "2026-11-26"
     }
   ]
 }

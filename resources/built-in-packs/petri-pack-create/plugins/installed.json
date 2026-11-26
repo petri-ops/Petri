@@ -1,0 +1,26 @@
+[
+  {
+    "id": "generate-image",
+    "version": "0.1.0",
+    "installedAt": "2026-11-26T00:00:00.000Z",
+    "type": "generation-plugin",
+    "kind": "image",
+    "provider": "seedream"
+  },
+  {
+    "id": "generate-video",
+    "version": "0.1.0",
+    "installedAt": "2026-11-26T00:00:00.000Z",
+    "type": "generation-plugin",
+    "kind": "video",
+    "provider": "seedance"
+  },
+  {
+    "id": "generate-model3d",
+    "version": "0.1.0",
+    "installedAt": "2026-11-26T00:00:00.000Z",
+    "type": "generation-plugin",
+    "kind": "model3d",
+    "provider": "seed3d"
+  }
+]

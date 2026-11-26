@@ -39,6 +39,7 @@ const TOOL_DEFS = [
   ...domainModules['agent-orchestration'],
   ...domainModules['browser'],
   ...domainModules['godot'],
+  ...domainModules['generate'],
   ...domainModules['computer'],
   ...domainModules['knowledge'],
   ...domainModules['mcp'],

@@ -1,0 +1,29 @@
+{
+  "version": "create-pack-registry/v1",
+  "tools": [
+    {
+      "id": "generate.image",
+      "provider": "seedream",
+      "entry": "plugins/generate-image/index.js",
+      "exportName": "generateImage",
+      "credentialProvider": "ark",
+      "status": "p0"
+    },
+    {
+      "id": "generate.video",
+      "provider": "seedance",
+      "entry": "plugins/generate-video/index.js",
+      "exportName": "generateVideo",
+      "credentialProvider": "ark",
+      "status": "active"
+    },
+    {
+      "id": "generate.model3d",
+      "provider": "seed3d",
+      "entry": "plugins/generate-model3d/index.js",
+      "exportName": "generateModel3D",
+      "credentialProvider": "ark",
+      "status": "active"
+    }
+  ]
+}

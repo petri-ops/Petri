@@ -78,6 +78,10 @@ const TOOL_METADATA = {
   result_selection_run: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   result_enrichment_from_context: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   generate_methods: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: null },
+  // 内置创作包 generate.*：外部 generation + 本地 artifact 落盘；写类/需审批/串行。
+  'generate.image': { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 300000 },
+  'generate.video': { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 600000 },
+  'generate.model3d': { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 600000 },
   // ---- Result Studio 域：破坏性（串行 + 审批）----
   result_changeset_revert: { readOnly: false, destructive: true, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   result_changeset_revert_in_context: { readOnly: false, destructive: true, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },

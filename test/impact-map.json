@@ -10284,6 +10284,32 @@
       "tests": [
         "test/block201-settings-baseline.test.mjs"
       ]
+    },
+    {
+      "id": "create-pack-builtin-generate",
+      "note": "owner 裁决「包应内置」：创作包运行时随主仓内置，generate.image/video/model3d 默认进 agent 工具目录；内核零 provider 硬编码，通用 handler 从内置包 registry 动态派发并注入凭据。HK-01 红4/4→绿4/4，域/元数据/动词/基线同批同步。",
+      "patterns": [
+        "core/petri-server/agent-tools/generate-tools.js",
+        "core/petri-server/agent-tools/tool-defs/generate.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "resources/built-in-packs/**",
+        "electron-builder.yml",
+        "acceptance/create-pack-builtin/**"
+      ],
+      "tests": [
+        "test/generate-builtin-tools.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/block109-p2-tool-metadata.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "test/block113-tool-prerouting.test.mjs",
+        "test/qoder-j4-tool-registration.test.mjs",
+        "test/block116-decision-platform.test.mjs",
+        "test/block157-skill-visibility.test.mjs",
+        "test/block346-tool-defs-assembly.test.mjs",
+        "frontend/src/components/copilot/toolActivity.test.ts"
+      ]
     }
   ]
 }

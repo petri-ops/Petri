@@ -402,6 +402,14 @@
       "sha256": "c81a0a06b01eaa87ac1dcc9fbee98db946783738c1ab6f36edb1a6cd175cc000"
     },
     {
+      "path": "frontend/src/components/copilot/toolActivity.ts",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 948,
+      "bytes": 40226,
+      "sha256": "57d91081bc41c2a3e27cc093a439762f13bc2c7846b3432938698ecd3dce8d01"
+    },
+    {
       "path": "src/main.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -416,14 +424,6 @@
       "lines": 942,
       "bytes": 43190,
       "sha256": "1b162d4c2cbc75f2a19cdcac316ac7d94776bcafe45bb4e8783f8a4c35438f6e"
-    },
-    {
-      "path": "frontend/src/components/copilot/toolActivity.ts",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 938,
-      "bytes": 39878,
-      "sha256": "aab864625303b529134fef404239553d83f43e1db45a0c3bac7c771afb7f0da8"
     },
     {
       "path": "frontend/src/components/work-surface/Model3DSurface.tsx",
@@ -501,9 +501,9 @@
       "path": "core/petri-server/agent-tools/tool-events.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 801,
-      "bytes": 35735,
-      "sha256": "85e2ff7d8c0c3507477be8cb78be73e938697dc3b85468e44d976c019c57bd52"
+      "lines": 807,
+      "bytes": 36046,
+      "sha256": "5cb56701bef49ef02d186e6941486b28c4673c933dfd7e7fcb8830f4f3f5117f"
     },
     {
       "path": "frontend/src/components/icons/Icon.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86790,
+  "total": 86806,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1022,6 +1022,32 @@
       "to": {
         "lines": 1629,
         "bytes": 69008
+      }
+    },
+    {
+      "path": "frontend/src/components/copilot/toolActivity.ts",
+      "reason": "内置创作包三工具动词/图标+存量 mcp/notebook 补齐（前后端 fixture 恒等门），HK-01+前端28/28绿",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 938,
+        "bytes": 39878
+      },
+      "to": {
+        "lines": 948,
+        "bytes": 40226
+      }
+    },
+    {
+      "path": "core/petri-server/agent-tools/tool-events.js",
+      "reason": "内置创作包三工具动词+存量 mcp/notebook 补齐（fixture 恒等门）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 801,
+        "bytes": 35735
+      },
+      "to": {
+        "lines": 807,
+        "bytes": 36046
       }
     }
   ]

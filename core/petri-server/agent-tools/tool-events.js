@@ -449,6 +449,12 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "federation_list_peers": "已查询协作节点",
   "followup_task": "已派发",
   "generate_methods": "已生成",
+  "generate.image": "已生成图",
+  "generate.video": "已生成视频",
+  "generate.model3d": "已生成模型",
+  // 存量域 mcp/notebook 的动词补登记（白名单/计数同步时一并补齐，fixture 恒等守护）。
+  "mcp_authenticate": "已发起授权",
+  "notebook_edit": "已编辑笔记",
   "interrupt_agent": "已中断",
   "knowledge_doc_delete": "已删除",
   "knowledge_doc_list": "已列出",

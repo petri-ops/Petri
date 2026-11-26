@@ -111,6 +111,12 @@ extraResources:
     filter:
       - "**/*"
       - "!**/.DS_Store"
+  # owner 裁决「包应内置」：创作包运行时随主仓分发（provider 无关 generate.* 的内置实现）。
+  - from: ./resources/built-in-packs
+    to: built-in-packs
+    filter:
+      - "**/*"
+      - "!**/.DS_Store"
   # BLOCK-163 W3 P12（DIST-4）— 原「内置插件」extraResources 退役：目录已在
   # BLOCK-83 P4 从树中删除（electron-builder.yml 曾保留陈旧引用），此处一并清偿；
   # 领域插件分发 = 领域包通道（pack:install-from-dialog/install-path）。

@@ -76,7 +76,8 @@ test('恒等红线：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（工具
   // BLOCK-342 W1 新增 svg 域（svg_inspect/svg_edit）：同 skill/web precedent——
   // 入 DOMAIN_TOOL_DEFS 但不入 TOOL_FAMILIES 决策分类学，θ=0.80 校准契约不动，宁全勿缺。
   assert.deepEqual(Object.keys(DOMAIN_TOOL_DEFS).sort(),
-    ['agent-orchestration', 'browser', 'computer', 'godot', 'knowledge', 'model3d', 'remote', 'resident', 'result-studio', 'session', 'skill', 'svg', 'web', 'workflow', 'workspace', 'worktree']);
+    // generate=本批内置创作包；mcp/notebook 为存量已入域但白名单滞后的事实同步（QODER-J4 / QODER-E12）。
+    ['agent-orchestration', 'browser', 'computer', 'generate', 'godot', 'knowledge', 'mcp', 'model3d', 'notebook', 'remote', 'resident', 'result-studio', 'session', 'skill', 'svg', 'web', 'workflow', 'workspace', 'worktree']);
 });
 
 test('D-1/D-3 定版契约：九域+all 类目集、session 底座、θ=0.80', () => {
