@@ -507,11 +507,16 @@ function getDefinitionName(definition) {
   return definition && definition.function && definition.function.name;
 }
 
+// provider 名投影/回填：独立 helper 承载零依赖映射表（避免 agent-loop-control→registry 架构环）。
+const providerToolNames = require('../helpers/provider-tool-names');
+const { toProviderToolName, fromProviderToolName } = providerToolNames;
+providerToolNames.registerCanonicalToolNames(TOOL_DEFS.map((t) => t.function.name));
+
 function projectProviderDefinition(definition) {
   return {
     type: 'function',
     function: {
-      name: definition.function.name,
+      name: toProviderToolName(definition.function.name),
       description: definition.function.description || '',
       parameters: cloneJson(definition.function.parameters),
     },
@@ -684,4 +689,6 @@ module.exports = {
   getToolHandler,
   getToolContract,
   getToolRegistry,
+  toProviderToolName,
+  fromProviderToolName,
 };

@@ -573,9 +573,9 @@
       "path": "core/petri-server/agent-tools/agent-loop-control.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 708,
-      "bytes": 31278,
-      "sha256": "14c09166e91af2c08bdbcd864119f7f2c07368b5569ab80921499eb4247bbe87"
+      "lines": 713,
+      "bytes": 31812,
+      "sha256": "35632e9f4503dcc501645c68c204bc2ac43163086864c5ac23dcf3a23c61f395"
     },
     {
       "path": "core/shared-backend/artifact-profiles.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86806,
+  "total": 86811,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1048,6 +1048,19 @@
       "to": {
         "lines": 807,
         "bytes": 36046
+      }
+    },
+    {
+      "path": "core/petri-server/agent-tools/agent-loop-control.js",
+      "reason": "conv_99208eb5-6b7 回归修复：tool call name 回填规范名（两处取 fn.name），HK-01 6/6+架构环零新增",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 708,
+        "bytes": 31278
+      },
+      "to": {
+        "lines": 713,
+        "bytes": 31812
       }
     }
   ]

@@ -2,6 +2,7 @@
 
 // BLOCK-109-CORE-ARCH P2 — 工具执行元数据（调度分组地基）
 const { getToolMetadata } = require('./tool-metadata');
+const { fromProviderToolName } = require('../helpers/provider-tool-names');
 
 // Scientific work is goal-terminated, not round-terminated. These compatibility
 // exports remain infinite so existing callers cannot accidentally reintroduce a
@@ -447,7 +448,9 @@ function createAgentToolCallController(options = {}) {
     const providerCallId = typeof toolCall?.id === 'string' && toolCall.id.trim()
       ? toolCall.id.trim()
       : fallbackCallId;
-    const name = typeof fn.name === 'string' ? fn.name.trim() : '';
+    // provider 投影名（generate_image）回填为内核规范名（generate.image）后再执行/查元数据；
+    // 存量合法名零变化，history 里的 tool_calls 仍保留 provider 原名。
+    const name = fromProviderToolName(typeof fn.name === 'string' ? fn.name.trim() : '');
 
     if (seenProviderCallIds.has(providerCallId) || reservedProtocolCallIds.has(providerCallId)) {
       return {
@@ -632,7 +635,9 @@ async function runAgentToolCallBatch(options = {}) {
   for (let i = 0; i < prepared.length; i++) {
     const item = prepared[i];
     const fn = item.toolCall.function && typeof item.toolCall.function === 'object' ? item.toolCall.function : {};
-    const name = typeof fn.name === 'string' ? fn.name.trim() : '';
+    // provider 投影名（generate_image）回填为内核规范名（generate.image）后再执行/查元数据；
+    // 存量合法名零变化，history 里的 tool_calls 仍保留 provider 原名。
+    const name = fromProviderToolName(typeof fn.name === 'string' ? fn.name.trim() : '');
     const meta = getToolMetadata(name);
     if (item.parsed.ok && meta.readOnly && meta.concurrentSafe) parallelItems.push({ item, index: i });
     else serialItems.push({ item, index: i });

@@ -10290,16 +10290,20 @@
       "note": "owner 裁决「包应内置」：创作包运行时随主仓内置，generate.image/video/model3d 默认进 agent 工具目录；内核零 provider 硬编码，通用 handler 从内置包 registry 动态派发并注入凭据。HK-01 红4/4→绿4/4，域/元数据/动词/基线同批同步。",
       "patterns": [
         "core/petri-server/agent-tools/generate-tools.js",
+        "core/petri-server/agent-tools/agent-loop-control.js",
+        "core/petri-server/helpers/provider-tool-names.js",
         "core/petri-server/agent-tools/tool-defs/generate.js",
         "core/petri-server/agent-tools/tool-metadata.js",
         "core/petri-server/agent-tools/tool-events.js",
         "frontend/src/components/copilot/toolActivity.ts",
         "resources/built-in-packs/**",
         "electron-builder.yml",
-        "acceptance/create-pack-builtin/**"
+        "acceptance/create-pack-builtin/**",
+        "acceptance/conv-99208eb5-regression/**"
       ],
       "tests": [
         "test/generate-builtin-tools.test.mjs",
+        "test/provider-tool-name-sanitize.test.mjs",
         "test/agent-tool-registry.test.mjs",
         "test/block109-p2-tool-metadata.test.mjs",
         "test/tool-activity-labels.test.mjs",
