@@ -54,6 +54,7 @@ export type IconName =
   | 'trash'
   | 'key'
   | 'cpu'
+  | 'petri'
   | 'bot'
   | 'sun'
   | 'moon'
@@ -400,6 +401,13 @@ const paths: Record<IconName, React.ReactNode> = {
       <line x1="20" y1="14" x2="23" y2="14" />
       <line x1="1" y1="9" x2="4" y2="9" />
       <line x1="1" y1="14" x2="4" y2="14" />
+    </>
+  ),
+  // Petri — 自有品牌缩略（试用反馈⑧双裁决 msg_b2c65cbb4890）；简约折线标记，currentColor 随主题
+  petri: (
+    <>
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
+      <path d="M7 16.5V7.5l10 9V7.5" />
     </>
   ),
   // Sun — light mode (Lucide sun)

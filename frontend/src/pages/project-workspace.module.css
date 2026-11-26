@@ -584,7 +584,9 @@
 .leftCol {
   width: 220px;
   flex-shrink: 0;
-  background: var(--petri-bg-surface);
+  /* 试用反馈⑧方案B（owner 双裁决 msg_b2c65cbb4890）：左栏微深、中栏纯主底、右栏微浅；
+     仅既有 token color-mix 派生、零新 token；暗色下 subtle 更亮方向自然反转。 */
+  background: color-mix(in srgb, var(--petri-bg-surface) 96%, var(--petri-text) 4%);
   color: var(--petri-text);
   overflow: hidden;
   display: flex;
@@ -2793,7 +2795,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 360px;
   min-width: 96px;
   flex-shrink: 0;
-  background: var(--petri-bg-surface);
+  /* 试用反馈⑧方案B：右栏微浅（bg-subtle 混 20%），中栏保持纯主底；暗色方向自然反转 */
+  background: color-mix(in srgb, var(--petri-bg-surface) 80%, var(--petri-bg-subtle) 20%);
   overflow: hidden;
   display: flex;
   flex-direction: column;

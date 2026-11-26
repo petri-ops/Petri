@@ -197,17 +197,17 @@
       "path": "frontend/src/pages/project-workspace.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 7732,
-      "bytes": 177154,
-      "sha256": "1e2362746a8e54cec78a07e6e8d9b296e483ce43cbe99abb4fc10ee629bac5d3"
+      "lines": 7735,
+      "bytes": 177592,
+      "sha256": "1f2877eb9638d4f21304e4e03adf3c318fe4baebd6df4b5ab69717b698c2f3a4"
     },
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 5494,
-      "bytes": 133771,
-      "sha256": "d7e8f21ff42f6837edd0ed173c73190871f8ff166268e1b9ba1cebbf5364ab8e"
+      "lines": 5495,
+      "bytes": 133900,
+      "sha256": "f58b3533afd98941bfb5b3d748b3379b4bf0e437747217a4bb71d355a3a6db9f"
     },
     {
       "path": "frontend/src/components/desktop/desktop.css",
@@ -506,6 +506,14 @@
       "sha256": "85e2ff7d8c0c3507477be8cb78be73e938697dc3b85468e44d976c019c57bd52"
     },
     {
+      "path": "frontend/src/components/icons/Icon.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 801,
+      "bytes": 23690,
+      "sha256": "27dc93b49d5e0f44544b06b8bf9d0de22bca039d5b08369c5eadb5ef5d440806"
+    },
+    {
       "path": "core/petri-server/helpers/svg-ops.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -520,14 +528,6 @@
       "lines": 799,
       "bytes": 28726,
       "sha256": "0b5bb0053bd6cc65405c89f2347638e08babdda4693965e32829a57f7885bc1f"
-    },
-    {
-      "path": "frontend/src/components/icons/Icon.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 793,
-      "bytes": 23419,
-      "sha256": "e1c9e2fdd8a96e4f21a844798f3027d2c29574a0b9e4441d112cba3b0f165525"
     },
     {
       "path": "frontend/src/components/annotations/AnnotationOverlay.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86624,
+  "total": 86636,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -853,6 +853,45 @@
       "to": {
         "lines": 7732,
         "bytes": 177154
+      }
+    },
+    {
+      "path": "frontend/src/components/icons/Icon.tsx",
+      "reason": "owner双裁决 msg_b2c65cbb4890 身份标识A：新增自有 petri 品牌缩略图标（内联SVG零新依赖）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 793,
+        "bytes": 23419
+      },
+      "to": {
+        "lines": 801,
+        "bytes": 23690
+      }
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.module.css",
+      "reason": "owner双裁决 背景分区B：左右栏背景改既有token color-mix派生+根因注释（中栏不动、零新token）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 7732,
+        "bytes": 177154
+      },
+      "to": {
+        "lines": 7735,
+        "bytes": 177592
+      }
+    },
+    {
+      "path": "frontend/src/components/copilot/simple-chat.css",
+      "reason": "owner双裁决 身份标识A：agent avatar 色提一档+根因注释（text主色不占accent棘轮）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 5494,
+        "bytes": 133771
+      },
+      "to": {
+        "lines": 5495,
+        "bytes": 133900
       }
     }
   ]

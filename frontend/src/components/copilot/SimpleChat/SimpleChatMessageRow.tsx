@@ -223,7 +223,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
           {m.role === 'user' ? (
             <Icon name="user" size={16} />
           ) : (
-            <Icon name="cpu" size={16} />
+            <Icon name="petri" size={16} />
           )}
         </div>
         <div className="sc-msg-body">

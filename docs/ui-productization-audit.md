@@ -7012,3 +7012,11 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **改动**：`.handle::after` 常态 `transparent`（不可见），新增 `:hover/:active::after` 用 `var(--petri-border-strong)` 显 token 化极淡线；拖拽命中区 10px + `col-resize` + `touch-action:none` 零变化，hover glow（::before）保留；暗色 token 已双定义。
 - **验证**：HK-01 静态 3/3（命中区保留/常态透明/hover token 反馈）+ theme-token-contract 19/19 + 全静态门 10/10 绿；Vite HMR 已生效。CDP 实机复验时该浮卡未挂载于当前页（组件按悬浮态挂载），如实记录未取到 live 样式，改由契约测试守护。
 - **状态边界**：观感零代签 pending_human_eye，待 owner 实机过目；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。
+
+## UI-735: 三栏背景分区 B + 会话身份标识 A（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 实机确认）
+
+- **来源**：owner 对反馈⑦/⑧两份视觉材料双裁决（msg_b2c65cbb4890「B 和 A 都采纳，开整」）。
+- **改动①（背景分区 B）**：`project-workspace.module.css` 左栏 `color-mix(bg-surface 96%, text 4%)` 微深、右栏 `color-mix(bg-surface 80%, bg-subtle 20%)` 微浅，**中栏纯 `--petri-bg-surface` 完全不动**（气泡/卡片可读性零风险）；零新 token、暗色下 subtle 更亮方向自然反转、与反馈⑤分隔线 border-strong 兼容。
+- **改动②（身份标识 A）**：`Icon.tsx` 新增自有 `petri` 品牌缩略 mark（内联 SVG、currentColor 随主题、零新依赖）；`SimpleChatMessageRow.tsx` agent avatar `cpu`→`petri`，用户侧 `user` 不动；`simple-chat.css` agent avatar 色 secondary→主文字色（提一档且不占 accent 棘轮）。
+- **验证**：HK-01 静态 4/4（B tint/中栏纯主底/A avatar/A mark）+ theme-token-contract 与消息行邻域 22/22 + 全静态门 10/10（Icon grow 留因）；CDP 实机读三栏背景已分化（左 0.896 / 中 0.929 / 右 0.930，符合 B），agent avatar 当前页未实例化如实记录、契约测试守护；Vite HMR 生效。
+- **状态边界**：观感零代签 pending_human_eye 待 owner 实机确认（左微深/右微浅的层次、logo 缩略观感）；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。

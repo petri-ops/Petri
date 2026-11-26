@@ -493,8 +493,9 @@
 }
 
 .sc-msg-assistant .sc-msg-avatar {
+  /* 试用反馈⑧双裁决：身份标识 A——色提一档（secondary→主文字色），不占 accent 棘轮；用户侧不变 */
   background: var(--petri-accent-bg);
-  color: var(--petri-text-secondary);
+  color: var(--petri-text);
   margin-top: 2px;
 }
 
