@@ -14,6 +14,8 @@ const domainModules = {
   'agent-orchestration': require('./tool-defs/agent-orchestration'),
   'browser': require('./tool-defs/browser'),
   'godot': require('./tool-defs/godot'),
+  // petri-pack-create 内核薄注册面（owner msg_74cac710da35）：provider 无关 generate.*
+  'generate': require('./tool-defs/generate'),
   'computer': require('./tool-defs/computer'),
   'knowledge': require('./tool-defs/knowledge'),
   // QODER-J4 — MCP agent 侧 authenticate（OAuth 发起，不碰 token）
