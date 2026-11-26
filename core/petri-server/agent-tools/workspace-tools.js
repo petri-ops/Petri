@@ -895,6 +895,16 @@ function createWorkspaceTools(options = {}) {
       result.shellSemanticsHint = 'set -e 后跟命令名不会执行该命令（set 把后续词当作位置参数）。需要「错误即停」请单独使用一句 set -e（或 set -o errexit），与命令用 && 或分号分隔，例如 `set -e && <命令>`；本命令的前半段因此没有执行。';
       if (!result.note) result.note = result.shellSemanticsHint;
     }
+    // conv_0d113948-4a2：which/command -v 探测不存在工具返回 exit 1（stdout 已有有用产出、
+    // stderr 空），会被误计为 handler_error。给模型可执行的探测写法，不掩盖真实失败。
+    const exitCode = Number.isInteger(result.exitCode) ? result.exitCode : null;
+    const stdout = typeof result.stdout === 'string' ? result.stdout.trim() : '';
+    const stderr = typeof result.stderr === 'string' ? result.stderr.trim() : '';
+    const command = typeof result.command === 'string' ? result.command : '';
+    if (exitCode === 1 && stdout && !stderr && /(?:^|[;\s])(?:which|command\s+-v)\s+\S/.test(command)) {
+      result.probeExitHint = '探测命令中 which/command -v 对不存在的工具返回 exit 1（即使前半段已成功）；用 `command -v <工具> || true` 或 `2>/dev/null || true` 包裹可选探测，避免把探测误判为失败。';
+      if (!result.note) result.note = result.probeExitHint;
+    }
     return result;
   }
 

@@ -148,10 +148,11 @@ async function tool_read_image(args, ctx) {
   const visionResp = await callVision('', visionBody, telemetry);
 
   if (!visionResp || visionResp.error) {
+    const detail = visionResp ? `${visionResp.error} ${visionResp.message || ''}` : '无响应';
     return {
       ok: false,
       error: 'vision_failed',
-      message: `看图失败: ${visionResp ? visionResp.error + ' ' + (visionResp.message || '') : '无响应'}`,
+      message: `看图失败: ${detail}${/timeout|超时/i.test(detail) ? '（超时属瞬态错误，可重试；建议先缩小图片或拆局部再读，避免整图大尺寸直接重试）' : ''}`,
       fileName: targetName,
     };
   }

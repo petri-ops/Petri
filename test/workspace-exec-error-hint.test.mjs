@@ -122,3 +122,20 @@ test('yield 路径同享：yield_ms 中间档 not-found 同样附提示', async 
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+// conv_0d113948-4a2 新根因：探测命令中 which/command -v 命中不存在工具 → exit 1 被计为 handler_error。
+test('探测命令 exit 1（stdout 有内容、stderr 空）→ probeExitHint 指路 || true，真实失败不误挂', async () => {
+  const root = seedProject();
+  try {
+    const tools = makeTools(root);
+    const r = await tools.executeCommand({ command: 'echo found; which definitely-not-a-real-binary-xyz' }, ctx);
+    assert.equal(r.ok, false);
+    assert.equal(r.exitCode, 1);
+    assert.ok((r.stdout || '').includes('found'), '探测前半段产出保留');
+    assert.ok(r.probeExitHint, 'probe hint 在场');
+    assert.match(r.probeExitHint, /\|\| true/);
+    assert.match(r.note || '', /探测|which/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

@@ -149,9 +149,9 @@
       "path": "core/petri-server/agent-tools/workspace-tools.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 1619,
-      "bytes": 68041,
-      "sha256": "da533c31c6d60bdb472fab9e303773bcc63778213865976a08b81ea13d2496b2"
+      "lines": 1629,
+      "bytes": 69008,
+      "sha256": "da51502ae983ddd70190668a6cf3bce33817ea855e7188503d2badcd9ca882e9"
     },
     {
       "path": "core/petri-server/mcp/registry.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86780,
+  "total": 86790,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1009,6 +1009,19 @@
       "to": {
         "lines": 1996,
         "bytes": 40142
+      }
+    },
+    {
+      "path": "core/petri-server/agent-tools/workspace-tools.js",
+      "reason": "conv_0d113948-4a2 E1 探测命令 exit1 假失败指引（probeExitHint，HK-01 7/7，真实失败不误挂既有负测守护）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 1619,
+        "bytes": 68041
+      },
+      "to": {
+        "lines": 1629,
+        "bytes": 69008
       }
     }
   ]
