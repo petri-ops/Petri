@@ -7126,3 +7126,10 @@ owner 发 y12.7 聚焦态顶栏截图（/tmp/owner-titlebar-y12.7-focused.png，
 ### UI-744 残差像素精修终值（msg_91a73f6f0b84）：y=11.4
 
 owner y9.4 状态截图（/tmp/owner-titlebar-y9.4-residual.png，268×58）。同图逐像素测量：三灯簇中心 y=23.5px（x23-36/68-83）、工具行图标簇中心 y=26.5px（x178-199）→ **灯高 3 截图像素**（D2=-3，从 y12.7 的"低5"反转，说明 9.4 过调）。灯簇宽 14px 与上图一致 → 缩放同≈1.5x → D2≈2 CSS px；y 增大使灯下移（7点实证）→ **y=9.4+2=11.4**。设终值 11.4、HK-01 断言同步、三套 HK 9/9、全静态门 10/10。±0.5 残差属感知噪声、此轮为像素级收尾，owner 终验后 item68 关闭。
+
+## UI-745: 红绿灯行为对齐 Orca——全屏/最大化隐藏、正常态恢复（2026-11-26 **in_progress**；代码完成需重启，观感待 owner 过目）
+
+- **来源**：owner msg_92db4f7b765a（附 Orca 两图基准）——正常态三圆点显示、最大化态红绿灯**整个消失**（顶栏只剩 app 名+侧栏开关+导航）。
+- **改动**：`_window-create.js` 定义 `setTrafficLightsVisible(visible)`（macOS`setWindowButtonVisibility`，API 存在性保护 + try/catch + 窗口销毁保护），挂到 6 处事件：maximize/unmaximize、enter/leave-full-screen、enter/leave-simple-full-screen（隐藏/恢复），另加初始态（最大化/全屏恢复启动时隐藏）。状态机 `_fullscreen-state.js` 与 `publishFullScreen`/`publishMaximizedState` 发布逻辑完全不动——灯隐藏不影响全屏进出。
+- **验证**：HK-01 test/traffic-light-visibility.test.mjs 红 0/4→绿 4/4（六事件钩子+状态机发布不回退+API 保护）+ 全静态门 10/10。
+- **边界**：main 进程改动 HMR 不覆盖——需 owner 重启；macOS maximize 态 `setWindowButtonVisibility` 的实际表现需 owner 实机两形态验证（正常圆点/最大化消失），我零触碰 owner 实例；观感零代签 pending_human_eye。G0 永久 maintained · G1 进行中。

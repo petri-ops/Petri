@@ -443,8 +443,17 @@ async function createWindow({
     }
     win.webContents.send(CHANNELS.window.maximizeChanged, isMaximized);
   };
-  mainWindow.on("maximize", () => publishMaximizedState(true));
-  mainWindow.on("unmaximize", () => publishMaximizedState(false));
+  // 红绿灯行为对齐 Orca（owner msg_92db4f7b765a）：全屏/最大化时隐藏原生红绿灯，
+  // 退出恢复。仅 macOS 有 setWindowButtonVisibility；API 缺失/异常时不阻塞窗口事件。
+  const setTrafficLightsVisible = (visible) => {
+    const win = getMainWindow();
+    if (!win || win.isDestroyed()) return;
+    try {
+      if (typeof win.setWindowButtonVisibility === 'function') win.setWindowButtonVisibility(visible);
+    } catch { /* 平台/窗口状态下 API 不可用：保持默认形态 */ }
+  };
+  mainWindow.on("maximize", () => { setTrafficLightsVisible(false); publishMaximizedState(true); });
+  mainWindow.on("unmaximize", () => { setTrafficLightsVisible(true); publishMaximizedState(false); });
 
   // ── Fullscreen State → Renderer ────────────────────────────────
   // 试用反馈④更新（msg_21d38a84e33b）：native 与 simple 两套事件都监听——
@@ -455,10 +464,13 @@ async function createWindow({
     if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
     win.webContents.send(CHANNELS.window.fullscreenChanged, value);
   };
-  mainWindow.on("enter-full-screen", () => publishFullScreen(true));
-  mainWindow.on("leave-full-screen", () => publishFullScreen(false));
-  mainWindow.on("enter-simple-full-screen", () => publishFullScreen(true));
-  mainWindow.on("leave-simple-full-screen", () => publishFullScreen(false));
+  mainWindow.on("enter-full-screen", () => { setTrafficLightsVisible(false); publishFullScreen(true); });
+  mainWindow.on("leave-full-screen", () => { setTrafficLightsVisible(true); publishFullScreen(false); });
+  mainWindow.on("enter-simple-full-screen", () => { setTrafficLightsVisible(false); publishFullScreen(true); });
+  mainWindow.on("leave-simple-full-screen", () => { setTrafficLightsVisible(true); publishFullScreen(false); });
+
+  // 初始态（窗口以最大化/全屏恢复启动时）同样隐藏，避免与 Orca 形态不一致。
+  setTrafficLightsVisible(!mainWindow.isMaximized() && !mainWindow.isFullScreen());
 
   return mainWindow;
 }
