@@ -173,8 +173,10 @@ describe('TitleBar desktop window controls', () => {
     expect(typeof onMaximizeChanged).toBe('function');
 
     act(() => onMaximizeChanged?.(false));
-    act(() => onMaximizeChanged?.(true));
+    // 方向纠正（msg_11d6f3f38030）：自绘灯正常态显示、最大化态隐藏
     expect(screen.getByRole('button', { name: '全屏' })).toBeTruthy();
+    act(() => onMaximizeChanged?.(true));
+    expect(screen.queryByRole('button', { name: '全屏' })).toBeNull();
 
     view.unmount();
     expect(unsubscribe).toHaveBeenCalledTimes(1);
@@ -270,6 +272,9 @@ describe('TitleBar desktop window controls', () => {
       initialQuery.resolve(false);
       await initialQuery.promise;
     });
+    // live=true 优先于迟到 query=false → 最大化态灯隐藏（方向纠正 msg_11d6f3f38030）
+    expect(screen.queryByRole('button', { name: '全屏' })).toBeNull();
+    act(() => onMaximizeChanged?.(false));
     expect(screen.getByRole('button', { name: '全屏' })).toBeTruthy();
   });
 

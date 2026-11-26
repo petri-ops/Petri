@@ -23,7 +23,9 @@ export function TitleBarLeftZone(): React.ReactElement {
     <div className={`${styles.leftZone}${bare ? ` ${styles.leftZoneBare}` : ''}`}>
       {isMac && (
         <div className={styles.trafficZone}>
-          {isDesktop ? (
+          {/* 方向纠正（owner msg_11d6f3f38030）：参照=页面常驻顶层栏自绘灯——
+              正常态显示、最大化态隐藏（透明占位保持布局不跳），与 owner 25/26 截图一致。 */}
+          {isDesktop && !win.isMaximized ? (
             <>
               {/* tabIndex=-1: 这些窗口控件是 DOM 里最靠前的可聚焦元素，若参与
                   键盘焦点，页面加载后焦点会默认落在「关闭窗口」上，导致用户敲的

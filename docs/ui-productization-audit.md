@@ -7133,3 +7133,11 @@ owner y9.4 状态截图（/tmp/owner-titlebar-y9.4-residual.png，268×58）。�
 - **改动**：`_window-create.js` 定义 `setTrafficLightsVisible(visible)`（macOS`setWindowButtonVisibility`，API 存在性保护 + try/catch + 窗口销毁保护），挂到 6 处事件：maximize/unmaximize、enter/leave-full-screen、enter/leave-simple-full-screen（隐藏/恢复），另加初始态（最大化/全屏恢复启动时隐藏）。状态机 `_fullscreen-state.js` 与 `publishFullScreen`/`publishMaximizedState` 发布逻辑完全不动——灯隐藏不影响全屏进出。
 - **验证**：HK-01 test/traffic-light-visibility.test.mjs 红 0/4→绿 4/4（六事件钩子+状态机发布不回退+API 保护）+ 全静态门 10/10。
 - **边界**：main 进程改动 HMR 不覆盖——需 owner 重启；macOS maximize 态 `setWindowButtonVisibility` 的实际表现需 owner 实机两形态验证（正常圆点/最大化消失），我零触碰 owner 实例；观感零代签 pending_human_eye。G0 永久 maintained · G1 进行中。
+
+## UI-746: 方向纠正——恢复自绘顶层栏红绿灯 + 最大化隐藏（2026-11-26 **in_progress**；渲染层 HMR 即时生效）
+
+- **来源**：owner msg_11d6f3f38030——澄清 25/26 截图参照物=**页面常驻顶层栏**（自绘红绿灯），非 mac 系统标题栏；A 案原生恢复方向跑偏、自绘灯被删。
+- **回退**：从 51ac29530^ 恢复 frame:false + 自绘三按钮（TitleBarLeftZone/TitleBarRightZone/shared.tsx/TitleBar.module.css/ColumnizedTitleBar.*/uiBreakpoints/eslint-suppressions/TitleBar.test.tsx），删除原生路径测试（native-titlebar/hidden-inset-*/traffic-light-tune/traffic-light-visibility）。状态机 `_fullscreen-state.js` 修复保留（它修全屏切换正确性、与自绘/原生无关）。原生 setWindowButtonVisibility 路径随 _window-create.js 回退一并移除（自绘灯不走该 API）。
+- **新增行为**：自绘红绿灯在页面常驻顶层栏——正常态显示、最大化态隐藏（TitleBarLeftZone `isDesktop && !win.isMaximized` 条件，最大化时用 trafficPlaceholder 透明占位保持布局不跳），对照 owner 25/26 截图 Orca 行为。
+- **验证**：HK-01 test/self-drawn-traffic-visibility.test.mjs 红1/4→绿4/4（frame:false/自绘灯在场/最大化隐藏/状态机保留）+ TitleBar.test 等邻域 53/53（两用例更新为验证新显隐契约）+ 全静态门 10/10。
+- **生效**：自绘层是渲染层——Vite HMR 即时落 owner 窗口、无需重启；观感零代签 pending_human_eye 待 owner 对照两图过目。G0 永久 maintained · G1 进行中。
