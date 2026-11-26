@@ -58,8 +58,8 @@ describe('WebAccessPanel', () => {
     vi.stubGlobal('fetch', fetchMock);
     render(<WebAccessPanel />);
     await waitFor(() => expect(screen.getByTestId('web-access-enabled')).toBeTruthy());
+    // conv 裁决①：勾选即持久化（不再需要另点保存按钮）
     fireEvent.click(screen.getByTestId('web-access-enabled'));
-    fireEvent.click(screen.getByText('保存联网设置'));
     await waitFor(() => expect(screen.getByTestId('web-access-notice').textContent).toContain('即时生效'));
     const put = fetchMock.mock.calls.find((call) => call[1]?.method === 'PUT');
     expect(put).toBeTruthy();

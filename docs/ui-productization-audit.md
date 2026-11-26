@@ -7066,3 +7066,12 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **改动**：`TitleBarToolItem` 加可选 `group`；`useWorkspaceTitleBar.ts` 定义 MENU_GROUPS 四组（主工作区/分析治理/审计证据/环境入口），菜单项按组稳定排序（组内顺序不变）、入口不丢；`TitleBarRightZone.tsx` 组变化时插组标题；ColumnizedTitleBar.module.css 加 `.toolMenuGroupTitle`（body 字号+opacity 0.6，避让 small-font 棘轮）。
 - **验证**：HK-01 静态 4/4（组覆盖/入口不丢/渲染标题/样式）+ theme-token 与邻域 26/26 + 全静态门 10/10；CDP 复验时 owner 不在 project 页如实记录、HMR 生效。
 - **状态边界**：观感零代签 pending_human_eye 待 owner 过目；裁决表 4 项未拍板前不合并/移除任何面板；dev Electron 边界内。G0 永久 maintained · G1 进行中。
+
+## UI-741: 联网开关热生效 + 工具契约铁律（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）
+
+- **来源**：conv_25806ab0-fa4 分析三项裁决（owner msg_1d935cbef8a7）。
+- **裁决① 联网开关立即生效**：核真=代码层后端 `web-search-config` 已每次调用现读（即时生效），真实问题=UI 勾选只是内存态、需另点"保存联网设置"；dev 数据 `web-search.json` 实证 03:00:20 保存 patch 只有 `provider` 无 `enabled`（仍默认 false），故 03:06 仍 `web_access_disabled`。改动=`WebAccessPanel` 新增 `toggleEnabled`：checkbox onChange 直接 PUT `{enabled}` 并 applySnapshot（其余字段仍走原保存按钮）；HK-01 红 0/2→绿 2/2，邻域 23/23（含更新"勾选即生效"断言）。
+- **裁决② 工具契约硬约束**：`system-prompt.js` principles 静态缓存段新增三条铁律（a) workspace_write/replace 前必 workspace_read 取 expectedSha256，长链不例外 b) 长任务分步执行、每步检查中间产物再继续 c) 配置类错误如 web_access_disabled 不重试、先告知用户）；HK-01 红 0/4→绿 4/4；零每次调用 token 成本（静态段）。
+- **裁决③ 执行许可消费后保持现状**：owner 裁决记录——执行许可 `execution_admission_consumed` 后由模型自行判断，不改行为；台账登记此裁决即可（代码现状 `agent-tool-interceptor.js:444-467` / `workspace-tools.js:929-934` 保持原样）。
+- **验证**：HK-01 合计 6/6（红→绿）+ 邻域 23/23 + 全静态门 10/10；Vite HMR 生效；CDP 复验时 owner 不在设置页如实记录。
+- **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目（开关勾选反馈 + prompt 行为改善需长链复测）；dev Electron 边界内。G0 永久 maintained · G1 进行中。

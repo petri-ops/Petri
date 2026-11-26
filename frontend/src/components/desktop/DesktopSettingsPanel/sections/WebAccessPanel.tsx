@@ -104,6 +104,35 @@ export function WebAccessPanel(): React.ReactElement {
     }
   }, [form, applySnapshot]);
 
+  // conv 分析裁决①（owner msg_1d935cbef8a7）：开关勾选即持久化——旧实现勾选只是内存态、
+  // 需另点保存按钮，导致 owner 03:00 勾选后 03:06 仍 web_access_disabled。
+  const toggleEnabled = useCallback(async (checked: boolean): Promise<void> => {
+    setForm((prev) => ({ ...prev, enabled: checked }));
+    setBusy(true);
+    setNotice(null);
+    setDiagnostics([]);
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/web-access`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify({ enabled: checked }),
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        status?: string; webAccess?: WebAccessSnapshot; diagnostics?: Array<{ path?: string; message?: string }>; error?: string;
+      };
+      if (response.ok && data.status === 'ok' && data.webAccess) {
+        applySnapshot(data.webAccess);
+        setNotice(checked ? '联网检索已开启并即时生效。' : '联网检索已关闭。');
+      } else {
+        setDiagnostics(data.diagnostics || [{ message: data.error || `HTTP ${response.status}` }]);
+      }
+    } catch (error) {
+      setDiagnostics([{ message: error instanceof Error ? error.message : String(error) }]);
+    } finally {
+      setBusy(false);
+    }
+  }, [applySnapshot]);
+
   return (
     <div className={styles.panel} data-testid="web-access-panel">
       <div className="petri-settings-section__heading">
@@ -122,7 +151,7 @@ export function WebAccessPanel(): React.ReactElement {
             data-testid="web-access-enabled"
             type="checkbox"
             checked={form.enabled}
-            onChange={(event) => setForm((prev) => ({ ...prev, enabled: event.target.checked }))}
+            onChange={(event) => void toggleEnabled(event.target.checked)}
           />
           {' '}允许联网检索与抓取
         </label>
