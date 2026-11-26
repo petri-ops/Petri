@@ -39,12 +39,12 @@ function isPlaintext(value) {
 }
 
 function createCredentialStore(options = {}) {
-  const platform = options.platform || process.platform;
   const settingsDir = options.settingsDir;
   if (!settingsDir) throw new Error('Credential store requires settingsDir');
   const execFileSync = options.execFileSync || childProcess.execFileSync;
-  const backend = options.backend || process.env.PETRI_CREDENTIAL_BACKEND ||
-    (platform === 'darwin' ? 'keychain' : 'file');
+  // owner msg_01cdf649141d 终裁：凭据后端统一 file——面板读写与三插件自调用同一链路，
+  // 消除 keychain/file 两套不一致。env PETRI_CREDENTIAL_BACKEND 仍可显式覆盖（运维逃生口）。
+  const backend = options.backend || process.env.PETRI_CREDENTIAL_BACKEND || 'file';
   const filePath = path.join(settingsDir, 'ai-credentials.json');
 
   // BLOCK-446：读取不再把一切错误压平成「未配置」。三态：
