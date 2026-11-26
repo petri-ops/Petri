@@ -7114,3 +7114,7 @@ CDP 实测（owner 在线 dev 窗口，1385×949）：三处 header（左/中/�
 ### UI-744 终局标定收口（msg_c48247c40782 / 7点目测+CDP反解）
 
 owner 多轮目测数据（y7=高/y13=微高/y13.5=低/y14=低/y15=低/y16=低/y19=更远）完美符合模型：**trafficLightPosition.y=灯顶部坐标、灯中心=y+6**（12px 灯径），7 点无异常、语义已实证确定（不再猜）。CDP 精测侧栏开关 svg 图标中心=18.73、button 中心=18.73、leftZone 中心=18.73（三处一致，图标无偏移）；反解理论最优 y=18.73-6=12.73 → 取 12.7。终局排查"web 顶部预留"：CDP Runtime.evaluate outerHeight=885/innerHeight=949（inner>outer 异常）、devicePixelRatio=1.86、bodyTop/docTop/firstHeaderY 全=0 → **web 内容已铺到 y=0、无顶部预留**，且此 CDP 连的是测试实例隐藏窗（_window-create.js IS_TEST_INSTANCE show:false + backgroundThrottling:false），非 owner 主窗——无法从该窗推断 owner 主窗几何。按令保持 y=12.7 不动、不再多轮试探；6 个临时探针提交（y7/16/15/14/13.5/12.7）收敛为一笔正式提交，HK-01 断言实测标定值 12.7。**诚实边界**：owner 最后反馈"还是低"未经终验确认——已按数据最优值收口，若仍偏差建议 owner 给单一像素差或恢复 A 案 default，不再远程盲调；灰灯属失焦 mac 标准行为，位置以聚焦态目测为准。
+
+### UI-744 终局固定值说明（msg_a3eb8ca79ff6）——一次测量计算、关闭试错
+
+owner 裁决「看 Orca 怎么处理，是固定数值吗」——核真 Orca app.asar：固定 `{x:16,y:12}` + hiddenInset，该数值配 Orca 自身几何（工具行中心≈18）。Petri 几何不同需算自己的：CDP /json/list 仅一个 Petri page（owner 主窗未开调试端口、无法直连；但几何为 CSS 结构常量与窗口实例无关）——实测 header 高 37.996px / align-items:center / 侧栏开关 svg 图标中心 18.726px（button 同值）→ **Petri 固定 y = 18.726 − 灯径/2(6) = 12.726 ≈ 12.7**（当前值即此，无需改数值）；x=20（比 Orca +4，配 padding-left:96px 红灯位）。y 比 Orca +0.7 = 两 app 布局差异，已写入 _window-create.js 注释（固定值+来源，后人可维护）。HK-01 补几何来源断言（header 38px + align-items:center）。试错/语义猜测/像素标定三条路全部关闭。

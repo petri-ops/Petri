@@ -14,6 +14,8 @@ const globalCss = fs.readFileSync(path.join(ROOT, 'frontend/src/styles/global.cs
 
 test('HK-01-1：owner目测7点标定+CDP反解 → y=12.7（灯顶坐标、中心18.7≈工具行18.73）', () => {
   assert.match(globalCss, /--petri-titlebar-height:\s*38px/);
+  // 几何来源：header 38px + align-items:center + 28px 按钮 → 图标中心 18.726（CDP 实measure）
+  assert.match(fs.readFileSync(path.join(ROOT, 'frontend/src/components/desktop/titlebar/ColumnizedTitleBar.module.css'), 'utf8'), /align-items:\s*center/);
   const m = win.match(/trafficLightPosition:\s*\{\s*x:\s*(\d+),\s*y:\s*([\d.]+)/);
   assert.ok(m, 'trafficLightPosition 缺失');
   assert.equal(Number(m[2]), 12.7, 'y=灯顶部坐标、灯中心=y+6≈18.7 对齐 CDP 图标中心 18.73（7点模型+owner目测标定）');

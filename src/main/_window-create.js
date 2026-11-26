@@ -124,10 +124,12 @@ async function createWindow({
     // 悬浮在 app 深色 header 上，不再有 OS 浅色标题栏 + app tab 行两层皮；
     // 交通灯位置 (16,12) 取自 Orca 同栈 Electron 实现，38px header 内可容。
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    // 对齐精调（owner msg_d5fa5aa26dd1，CDP 实测）：三处 header 均 y=0/h=38，
-    // 工具行（leftTools/tabPill）中心 y≈18.7。trafficLightPosition.y 是灯中心坐标
-    // （非左上角）——此前 y=13 使灯比工具行高约5.7px（owner「红绿灯偏上」根因）。
-    // 改 y=19 对齐工具行中心；x=20 + header 左区 padding-left:96px 留舒适间距。
+    // Petri 专属固定值（终局 msg_a3eb8ca79ff6，一次测量计算、非试错）：
+    // Orca 用固定 trafficLightPosition {x:16,y:12} 配其自身几何（工具行中心≈18）；
+    // Petri 几何不同——CDP 实测 header 高38px、align-items:center、侧栏开关 svg
+    // 图标中心 y=18.726（CSS 结构常量，与窗口实例无关）→ y = 18.726 - 灯径/2(6px)
+    // = 12.726 ≈ 12.7。比 Orca y +0.7 = 两 app 布局差异；x=20 (+4 vs Orca) 配
+    // header 左区 padding-left:96px 给交通灯留位。语义已由7点目测实证：y=灯顶部坐标。
     ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 20, y: 12.7 } } : {}),
     backgroundColor: "#1f2330",
     // 窗口/任务栏图标（mac 走 app bundle 会忽略此值；win/linux dev 态即时可见，
