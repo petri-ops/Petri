@@ -129,7 +129,7 @@ async function tool_web_fetch(args = {}, _ctx = {}, deps = {}) {
     return withAudit({
       ok: false,
       code: 'web_access_disabled',
-      message: '联网能力未开启（默认关）。请在 设置 → 网络与联网 里打开「允许联网检索与抓取」后再试。',
+      message: '联网能力未开启（默认关）。这是配置类错误，不要重试或重复调用 web_* 工具；请先告知用户到 设置 → 网络与联网 打开「允许联网检索与抓取」，或改用本地能力完成。',
     }, { tool: 'web_fetch', url: rawUrl.slice(0, 300) });
   }
 
