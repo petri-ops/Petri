@@ -887,7 +887,7 @@ function ConversationItem({
               position: 'fixed',
               left: infoMenu.x,
               top: infoMenu.y,
-              zIndex: 'var(--petri-z-dropdown)',
+              zIndex: 'var(--petri-z-toast)',
               minWidth: 232,
               maxWidth: 320,
               background: 'var(--petri-surface)',

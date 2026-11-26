@@ -7052,3 +7052,9 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **改动**：新 `lib/conversationActions.ts` 单源——`copyText`（clipboard 优先、失败 `execCommand('copy')` fallback、两者皆败返回 false）+ `exportConversation(id, notify)`（抽自原 UI-444 原生另存为：fetch export.md → files.saveTextFile → blob 回退）；LeftPanel 右键复制 ID 改走 copyText 且成功后菜单项文字「✓ 已复制会话 ID」一闪、新增「导出会话」项（异步文字回执：导出中…→✓ 已导出/失败，不弹模态）；SimpleChat 工具栏导出入口与原 handler 撤除（迁移非复制，getBridge import 同步清理）。
 - **验证**：HK-01 静态 5/5（复制 fallback/反馈/右键导出/原入口撤除/helper 单源）+ 行为回归（LeftPanel 19/19，含新 clipboard 拒绝→execCommand fallback 与导出菜单项测试）+ theme-token 与邻域 42/42 + 全静态门 10/10（LeftPanel grow 留因）。HMR 生效；CDP 实机合成右键较复杂，由组件行为测试守护，如实记录。
 - **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目（复制反馈与导出入口位置）；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。
+
+### UI-739 加映：右键菜单 z-index 加固（2026-11-26 in_progress，观感待 owner 过目）
+
+- 来源：试用反馈④后续（msg_890b2d097359）——CDP 实证 owner「复制会话 ID 点击无效」真根因=z=4000 全屏透明瞬态层盖住 z=1000 右键菜单、点击被吞（该层卸载后即正常）；全屏卡死线（双状态机统一 855aff48d+1d420518a）已闭合。
+- 改动：LeftPanel 右键菜单 zIndex 从 `--petri-z-dropdown`(1000) 提到 `--petri-z-toast`(10000，全局最高浮层档)，关闭层仍 overlay(4000)；任意瞬态层挂载时菜单恒在最上。
+- 验证：HK-01 静态 3/3（z-index token/阶梯 toast>overlay/关闭层档）+ CDP 实证——真实右键后注入 z=4000 全屏透明阻断层，elementFromPoint 仍命中 menuitem（menuZ=10000, topIsMenuItem=true）；邻域 19/19、全静态门 10/10。
