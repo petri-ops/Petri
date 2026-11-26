@@ -44,3 +44,14 @@ test('HK-01-5：实际 dev 数据目录 Ark profile 对面板可见（provider �
   assert.equal(ark.credentialRef, 'provider:ark');
   assert.ok(ark.label && ark.label.includes('Ark'), '面板 label 可见');
 });
+
+test('HK-01-6：dev 数据 Ark 凭据可用 file 后端解密并反映到 getAiSettings', async () => {
+  const devDir = path.join(process.cwd(), '.petri-dev-user-data', 'data');
+  if (!fs.existsSync(path.join(devDir, 'ai-settings.json'))) return;
+  process.env.PETRI_LOCAL_DATA_DIR = devDir;
+  const { getAiSettings } = await import(new URL('../core/petri-server/helpers/ai-settings.js', import.meta.url).href + '?hk01=' + Date.now());
+  const s = getAiSettings();
+  assert.equal(s.credential_backend, 'file');
+  assert.equal(s.credential_status.ark, true, 'Ark 凭据须已配置（file 后端解密成功）');
+  assert.equal(s.credential_status.deepseek, true, 'DeepSeek 同为 file 后端');
+});
