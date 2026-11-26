@@ -434,31 +434,18 @@ async function createWindow({
   mainWindow.on("unmaximize", () => publishMaximizedState(false));
 
   // ── Fullscreen State → Renderer ────────────────────────────────
-  // On macOS frameless windows, use simpleFullScreen mode which
-  // automatically hides the Dock and menu bar for true fullscreen.
-  if (process.platform === "darwin") {
-    mainWindow.on("enter-simple-full-screen", () => {
-      const win = getMainWindow();
-      if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
-      win.webContents.send(CHANNELS.window.fullscreenChanged, true);
-    });
-    mainWindow.on("leave-simple-full-screen", () => {
-      const win = getMainWindow();
-      if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
-      win.webContents.send(CHANNELS.window.fullscreenChanged, false);
-    });
-  } else {
-    mainWindow.on("enter-full-screen", () => {
-      const win = getMainWindow();
-      if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
-      win.webContents.send(CHANNELS.window.fullscreenChanged, true);
-    });
-    mainWindow.on("leave-full-screen", () => {
-      const win = getMainWindow();
-      if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
-      win.webContents.send(CHANNELS.window.fullscreenChanged, false);
-    });
-  }
+  // 试用反馈④更新（msg_21d38a84e33b）：native 与 simple 两套事件都监听——
+  // 进入已统一用 native（simple 盖住 mac 菜单栏），但存量 simple 全屏窗口仍要正确上报，
+  // 避免 UI 状态漏判（此前 mac 分支只听 simple、native 进入时前端收不到 true）。
+  const publishFullScreen = (value) => {
+    const win = getMainWindow();
+    if (!win || win.isDestroyed() || !win.webContents || win.webContents.isDestroyed()) return;
+    win.webContents.send(CHANNELS.window.fullscreenChanged, value);
+  };
+  mainWindow.on("enter-full-screen", () => publishFullScreen(true));
+  mainWindow.on("leave-full-screen", () => publishFullScreen(false));
+  mainWindow.on("enter-simple-full-screen", () => publishFullScreen(true));
+  mainWindow.on("leave-simple-full-screen", () => publishFullScreen(false));
 
   return mainWindow;
 }

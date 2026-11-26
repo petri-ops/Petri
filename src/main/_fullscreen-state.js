@@ -1,12 +1,12 @@
 /**
- * _fullscreen-state.js — 全屏状态机统一决策（试用反馈④阻断级修复）。
+ * _fullscreen-state.js — 全屏状态机统一决策（试用反馈④ + 更新 msg_21d38a84e33b）。
  *
  * Electron 有两套互不相通的全屏：
- *  - native：setFullScreen / isFullScreen / Ctrl+Cmd+F / 菜单栏
- *  - simple：setSimpleFullScreen / isSimpleFullScreen / 自绘红绿灯（frameless Mac）
- * 旧实现 toggle 只读 simple、isFullScreen 查询只读 native——两种模式混用时
- * 按钮反复点都退不出来（owner 卡在全屏）。本模块把决策抽成纯函数：
- * 进入统一用 simple（frameless Mac 体验），退出清当前实际置位的模式，双重置位都清。
+ *  - native：setFullScreen / isFullScreen / Ctrl+Cmd+F / 菜单栏（mac 标准，菜单栏隐藏而非被遮挡）
+ *  - simple：setSimpleFullScreen / isSimpleFullScreen（mac 会把窗口顶到 y=0 **盖住菜单栏**）
+ * 旧实现 toggle 只读 simple、isFullScreen 查询只读 native——两种模式混用时退不出来。
+ * 修复：进入一律用 native（不再 simple，避免盖栏）；退出清当前实际置位的模式，
+ * 兼容存量 simple 全屏窗口（双重置位都清）。
  */
 'use strict';
 
@@ -19,12 +19,12 @@ function isEffectivelyFullScreen({ native, simple }) {
  * 下一次 toggle 动作。
  * @returns {{mode:'native'|'simple'|'both', value:boolean}}
  */
-function nextFullScreenAction({ native, simple }, platform) {
-  const isMac = platform === 'darwin';
+function nextFullScreenAction({ native, simple }, _platform) {
   if (native && simple) return { mode: 'both', value: false };
   if (native) return { mode: 'native', value: false };
   if (simple) return { mode: 'simple', value: false };
-  return { mode: isMac ? 'simple' : 'native', value: true };
+  // 进入一律 native：Mac simpleFullScreen 会盖住菜单栏（owner msg_21d38a84e33b）
+  return { mode: 'native', value: true };
 }
 
 /**

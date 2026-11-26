@@ -4,13 +4,15 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   nextFullScreenAction,
   isEffectivelyFullScreen,
 } from '../src/main/_fullscreen-state.js';
 
-test('HK-01-1：非全屏 → 进入 simple 全屏（frameless Mac 体验）', () => {
-  assert.deepEqual(nextFullScreenAction({ native: false, simple: false }, 'darwin'), { mode: 'simple', value: true });
+test('HK-01-1：非全屏 → 进入 native 全屏（Mac 不用 simple：simpleFullScreen 会盖住菜单栏）', () => {
+  assert.deepEqual(nextFullScreenAction({ native: false, simple: false }, 'darwin'), { mode: 'native', value: true });
   assert.deepEqual(nextFullScreenAction({ native: false, simple: false }, 'win32'), { mode: 'native', value: true });
 });
 
@@ -31,4 +33,16 @@ test('HK-01-5：有效全屏态识别两种模式（isFullScreen 查询不再漏
   assert.equal(isEffectivelyFullScreen({ native: true, simple: false }), true);
   assert.equal(isEffectivelyFullScreen({ native: false, simple: true }), true);
   assert.equal(isEffectivelyFullScreen({ native: true, simple: true }), true);
+});
+
+test('HK-01-6：主进程四事件监听齐全（native+simple 都上报）+ 进入不再用 simple（防盖菜单栏回归）', () => {
+  const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+  const create = fs.readFileSync(path.join(root, 'src/main/_window-create.js'), 'utf8');
+  for (const evt of ['enter-full-screen', 'leave-full-screen', 'enter-simple-full-screen', 'leave-simple-full-screen']) {
+    assert.ok(create.includes(`"${evt}"`), `缺少事件监听 ${evt}`);
+  }
+  const state = fs.readFileSync(path.join(root, 'src/main/_fullscreen-state.js'), 'utf8');
+  const entryLine = state.split('\n').find((l) => l.includes("mode: 'native', value: true"));
+  assert.ok(entryLine, '进入路径必须为 native（simple 会盖住 mac 菜单栏）');
+  assert.doesNotMatch(state, /mode: 'simple', value: true/);
 });
