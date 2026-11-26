@@ -7082,3 +7082,10 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **改动**：registry.ts 撤 workflow/evidence core 注册；RightPanel jobs 分支并列渲染 WorkflowRunsPanel（能力不丢）、results 分支内嵌 EvidenceSurface（治理语义与跳转不动）；MENU_GROUPS 四组结构不变、组内移除两项；生成文件无动作（台账记录裁决）。埋点=新轻量表 `panel_usage_events`（结构化 panel_id/action/project/conversation，支持按面板聚合）+ POST `/api/ai/panel-usage` + useWorkSurfaceTabs 三动作 fire-and-forget；**不混 funnel_events 的理由**=那是转化漏斗白名单 6 事件、无 payload 列，塞入会污染 TTFS/首成功口径（取舍已写入 helper 注释）。
 - **验证**：HK-01 静态 4/4（注册撤除/合并能力不丢/菜单组结构/埋点表与三动作）+ 邻域 26/26（含埋点行为断言）+ 后端 helper 实机（建表+插入+非法 action 跳过）+ 全静态门 10/10；CDP 复验时 owner 不在 project 页如实记录、HMR 生效。
 - **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目（合并后面板布局与菜单）；dev Electron 边界内。G0 永久 maintained · G1 进行中。
+
+## UI-743: 恢复原生顶栏（2026-11-26 **in_progress**；代码+HMR 不适用需重启，观感待 owner 实机过目）
+
+- **来源**：owner 裁决 A（msg_812fc13259da）——采纳 TITLEBAR-ASSESSMENT.md 迁移方案，接受视觉回退与迁移成本，根治自绘路径 bug 滋生地。
+- **改动**：①`_window-create.js` frame:false→true + titleBarStyle:'default'（native 红绿灯/拖拽/全屏交 OS）；②`TitleBarLeftZone` 删自绘三按钮（保留左栏开关）、`TitleBarRightZone` 删非 mac WindowControls；③`shared.tsx` 删化石导出（WindowControls/useDesktopWindowControls/DesktopWindowControls/getIsProjection外部化/getIsDesktop）+ 过时测试清理；④自定义元素（通知铃铛/UpdatePill/工具菜单/审阅徽章）本就在内容区列头工具栏（native 标题栏在其上方），功能不丢、无需物理搬移；⑤状态机修复 `_fullscreen-state.js` 保留（native 全屏 Ctrl+Cmd+F 仍走统一状态机）；⑥MOBILE_BREAKPOINT_PX 转模块内私有（knip 零新增）。
+- **验证**：HK-01 test/native-titlebar.test.mjs 红 2/4→绿 4/4（native配置/自绘移除/状态机保留/元素功能不丢）+ TitleBar.test 11/11（过时控件测试清理）+ 邻域 31/31 + 全静态门 10/10（eslint suppressions 已 prune、knip 保留面冻结无新增）。
+- **边界**：main 进程配置改动 Vite HMR 不覆盖——需 owner 重启加载（兴奋执行）；观感零代签 pending_human_eye，待 owner 实机验证红绿灯原生/全屏进出/菜单栏不盖/迁移元素新位置可用。G0 永久 maintained · G1 进行中。

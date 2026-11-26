@@ -116,12 +116,11 @@ async function createWindow({
     minWidth: 720,
     minHeight: 520,
     title: IS_TEST_INSTANCE ? `[TEST] ${BRAND.APP_NAME}` : BRAND.APP_NAME, // BLOCK-61：品牌单一事实源；[TEST] 前缀=BLOCK-100 窗口级标记
-    // Self-drawn traffic-light buttons in TitleBar.tsx — see src/main.js comments
-    // around setupWindowIpc() for the IPC contract (window:minimize/maximize/close).
-    // Frameless on every platform so the renderer owns the window controls; on macOS
-    // TitleBar draws the Cursor-style grey circular capsule (not the native OS lights),
-    // on Windows/Linux it draws the square WindowControls.
-    frame: false,
+    // owner 裁决 A（msg_812fc13259da）— 恢复原生顶栏：native 红绿灯/拖拽/全屏交给 OS，
+    // 移除自绘窗口控制层（bug 滋生地）。状态机修复（_fullscreen-state.js）保留，
+    // 原生全屏（Ctrl+Cmd+F / 绿钮）仍走统一状态机。
+    frame: true,
+    titleBarStyle: 'default',
     backgroundColor: "#1f2330",
     // 窗口/任务栏图标（mac 走 app bundle 会忽略此值；win/linux dev 态即时可见，
     // packaged 态由 electron-builder 的 icon 条目接管）
