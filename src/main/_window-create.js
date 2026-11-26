@@ -124,7 +124,10 @@ async function createWindow({
     // 悬浮在 app 深色 header 上，不再有 OS 浅色标题栏 + app tab 行两层皮；
     // 交通灯位置 (16,12) 取自 Orca 同栈 Electron 实现，38px header 内可容。
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 16, y: 12 } } : {}),
+    // 精调（owner msg_cf676d55d7fe）：Orca 的 {16,12} 是照抄，不适用于 Petri——
+    // Petri header 38px，灯径12 → y=(38-12)/2=13 垂直居中；x=20 避开窗口左缘，
+    // 配合 header 左区 padding-left:96px 给收起按钮留约24px舒适间距。
+    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 20, y: 13 } } : {}),
     backgroundColor: "#1f2330",
     // 窗口/任务栏图标（mac 走 app bundle 会忽略此值；win/linux dev 态即时可见，
     // packaged 态由 electron-builder 的 icon 条目接管）

@@ -7102,3 +7102,7 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 ### UI-744 补正（msg_eb9795b7323d）：no-drag 覆盖逐项核真
 
 逐项核真发现缺口：`.iconBtn`/`.tabPill`/`.tabPillMain`/`.tabClose`/`.leftTools` 未显式 no-drag——hiddenInset 融合下 header 空白区是 drag，这些可点元素会继承 drag 导致点击被吞（正是补正要求防的）。已补入 TitleBar.module.css 的 no-drag 组；button 清单棘轮保持中性（已删化石 `.winBtn` 原位换 `.iconBtn`，定义计数不变）。HK-01 test/hidden-inset-nodrag.test.mjs 红 1/2→绿 2/2；theme-token 19/19、全静态门 10/10。
+
+### UI-744 二次精调（msg_cf676d55d7fe）：红绿灯位置按 Petri header 重算
+
+owner 实机反馈 hiddenInset 后红绿灯太淡/与工具行不齐/离收起按钮太近。核真根因：trafficLightPosition{x:16,y:12} 照抄 Orca，但 Petri header=38px（Orca 不同）——灯径12 → y=(38-12)/2=13 才垂直居中；x=16 + padding-left:72 → 灯与收起按钮仅约8px。精调：x=20、y=13、padding-left=96px（灯右缘约72 → 按钮间距约24px）。"太淡"诚实核真=失焦态 macOS 系统灰灯（标准行为），聚焦态为系统彩灯；主进程不改灯色、不伪造聚焦截图——请 owner 在聚焦窗口复验。暗色下灯色由 OS 绘制、header 背景走 --petri-bg-surface（暗色 #111a2e），位置/间距与亮色同。HK-01 test/traffic-light-tune 红2/3→绿3/3，hiddenInset 三套 HK 合计 9/9、全静态门 10/10。

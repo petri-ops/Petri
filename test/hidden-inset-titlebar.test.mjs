@@ -22,7 +22,8 @@ test('HK-01-1：darwin hiddenInset + trafficLightPosition（保留原生红绿�
 test('HK-01-2：app 顶栏融合布局——左栏 header 给红绿灯留位（isMac class）', () => {
   assert.match(header, /macTitlebar/);
   assert.match(css, /\.macTitlebar/);
-  assert.match(css, /padding-left:\s*6\dpx|padding-left:\s*7\dpx/);
+  const pad = css.match(/padding-left:\s*(\d+)px/);
+  assert.ok(pad && Number(pad[1]) >= 90, '左栏 header 应给红绿灯留≥90px');
 });
 
 test('HK-01-3：app header 可拖拽空白区保留（融合后拖窗）', () => {
