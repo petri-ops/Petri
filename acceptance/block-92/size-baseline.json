@@ -381,9 +381,9 @@
       "path": "frontend/src/components/desktop/TitleBar.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 994,
-      "bytes": 22721,
-      "sha256": "a26ce0c08b135e4497dc31586c7ce442bdacb25f360d290afcb94b74b4cc0a48"
+      "lines": 1000,
+      "bytes": 22948,
+      "sha256": "1b1b65312b75134288e5e618ad3429cba9c6e0565fcf3da21a899ea7b57bb0e7"
     },
     {
       "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86677,
+  "total": 86683,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -970,6 +970,19 @@
       "to": {
         "lines": 1529,
         "bytes": 53942
+      }
+    },
+    {
+      "path": "frontend/src/components/desktop/TitleBar.module.css",
+      "reason": "顶栏精修补正msg_eb9795b7323d：hiddenInset下tab/按钮no-drag选择器+注释（7行，防拖窗吞点击；button清单棘轮已中性替换winBtn→iconBtn）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 994,
+        "bytes": 22721
+      },
+      "to": {
+        "lines": 1000,
+        "bytes": 22948
       }
     }
   ]

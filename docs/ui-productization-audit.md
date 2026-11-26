@@ -7098,3 +7098,7 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **保留**：状态机 `_fullscreen-state.js` 完整（native 全屏仍统一处理）、frame:true 原生红绿灯不回退。
 - **验证**：HK-01 test/hidden-inset-titlebar.test.mjs 红 2/4→绿 4/4（hiddenInset+交通灯位/融合 class+padding/drag/状态机）+ theme/邻域 35/35 + 全静态门 10/10（closure 见 HK）。
 - **边界**：main 配置改动 HMR 不覆盖——需 owner 重启（兴奋执行）；观感零代签 pending_human_eye，待 owner 对照 Orca 截图过目（深色一体/红绿灯悬浮/拖动/tab 不重叠）。G0 永久 maintained · G1 进行中。
+
+### UI-744 补正（msg_eb9795b7323d）：no-drag 覆盖逐项核真
+
+逐项核真发现缺口：`.iconBtn`/`.tabPill`/`.tabPillMain`/`.tabClose`/`.leftTools` 未显式 no-drag——hiddenInset 融合下 header 空白区是 drag，这些可点元素会继承 drag 导致点击被吞（正是补正要求防的）。已补入 TitleBar.module.css 的 no-drag 组；button 清单棘轮保持中性（已删化石 `.winBtn` 原位换 `.iconBtn`，定义计数不变）。HK-01 test/hidden-inset-nodrag.test.mjs 红 1/2→绿 2/2；theme-token 19/19、全静态门 10/10。
