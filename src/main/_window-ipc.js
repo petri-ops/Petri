@@ -11,6 +11,7 @@
 const CHANNELS = require('../ipc/channels');
 
 const { zoomBy, zoomReset } = require("./_zoom.js");
+const { isEffectivelyFullScreen, nextFullScreenAction, applyFullScreenAction } = require("./_fullscreen-state.js");
 
 // BLOCK-100/UI-413 — 测试实例管理模式切换（全局快捷键，仅测试实例注册）。
 // 设计取舍（用户实测反馈「拖拽换位置使用的不是很顺畅」）：悬停自动解锁存在
@@ -143,19 +144,18 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow, globalShortcut }
   // ── Fullscreen (macOS simpleFullScreen / cross-platform) ────
   ipcMain.handle(CHANNELS.window.isFullScreen, (event) => {
     const targetWindow = resolveSenderWindow(event);
-    return targetWindow ? targetWindow.isFullScreen() : false;
+    // 试用反馈④：native(Ctrl+Cmd+F) 与 simple(红绿灯) 两种全屏都算全屏，避免状态查询漏判
+    return targetWindow
+      ? isEffectivelyFullScreen({ native: targetWindow.isFullScreen(), simple: targetWindow.isSimpleFullScreen() })
+      : false;
   });
 
   ipcMain.on(CHANNELS.window.toggleFullScreen, (event) => {
     const targetWindow = resolveSenderWindow(event);
-    if (!targetWindow) return;
-    // For frameless windows on macOS, use simpleFullScreen mode which
-    // automatically hides the Dock and menu bar
-    if (process.platform === "darwin") {
-      targetWindow.setSimpleFullScreen(!targetWindow.isSimpleFullScreen());
-    } else {
-      targetWindow.setFullScreen(!targetWindow.isFullScreen());
-    }
+    if (!targetWindow || targetWindow.isDestroyed()) return;
+    // 试用反馈④阻断修复：统一两套全屏状态机——按实际置位退出，进时用 simple（frameless Mac 体验）
+    const state = { native: targetWindow.isFullScreen(), simple: targetWindow.isSimpleFullScreen() };
+    applyFullScreenAction(targetWindow, nextFullScreenAction(state, process.platform));
   });
 
   // ── Page zoom (frameless: menu accelerators unreachable) ─────

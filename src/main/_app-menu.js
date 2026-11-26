@@ -24,12 +24,13 @@ function setupAppMenu({ app, BrowserWindow, Menu, process }) {
 
   const _toggleFullscreen = () => {
     const win = BrowserWindow.getFocusedWindow();
-    if (!win) return;
-    if (process.platform === "darwin") {
-      win.setSimpleFullScreen(!win.isSimpleFullScreen());
-    } else {
-      win.setFullScreen(!win.isFullScreen());
-    }
+    if (!win || win.isDestroyed()) return;
+    // 试用反馈④阻断修复：菜单栏与红绿灯/Ctrl+Cmd+F 共用统一状态机（见 _fullscreen-state.js）
+    const { nextFullScreenAction, applyFullScreenAction } = require("./_fullscreen-state.js");
+    applyFullScreenAction(win, nextFullScreenAction(
+      { native: win.isFullScreen(), simple: win.isSimpleFullScreen() },
+      process.platform,
+    ));
   };
 
   const template = [
