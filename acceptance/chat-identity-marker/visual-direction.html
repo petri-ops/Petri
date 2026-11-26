@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Petri 试用反馈⑦ · 会话身份标识视觉稿（A/B/C 对照 · 非实现）</title>
+<style>
+  /* 预览 token：值取自 custom.css / design-charter 真值；字面色只在此定义块 */
+  :root{
+    --petri-bg-canvas:#f7f7f8; --petri-bg-surface:#fff; --petri-bg-subtle:#f4f4f5;
+    --petri-text:#18181b; --petri-text-secondary:#52525b; --petri-text-tertiary:#71717a; --petri-text-muted:#a1a1aa;
+    --petri-border:#e4e4e7; --petri-border-strong:#d4d4d8;
+    --petri-accent:#3f6f8f; --petri-accent-bg:color-mix(in srgb,var(--petri-accent) 10%,transparent); --petri-on-accent:#fff;
+    --petri-status-ok:#2e9e6b; --petri-status-warn:#c98a2b; --petri-status-run:#3f6f8f;
+    --petri-radius-md:8px; --petri-font-size-lg:16px; --petri-font-size-body:14px; --petri-font-size-sm:12px; --petri-font-size-xs:11px;
+  }
+  html[data-theme='dark']{
+    --petri-bg-canvas:#0b1220; --petri-bg-surface:#111a2e; --petri-bg-subtle:#182339;
+    --petri-text:#e6edf3; --petri-text-secondary:#9aa7b8; --petri-text-tertiary:#7b8798; --petri-text-muted:#6b7689;
+    --petri-border:#243149; --petri-border-strong:#324466; --petri-accent:#5fa8d3; --petri-on-accent:#0b1220;
+    --petri-status-ok:#5fd39a; --petri-status-warn:#e8b85c; --petri-status-run:#5fa8d3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--petri-bg-canvas);color:var(--petri-text);font:var(--petri-font-size-body)/1.6 system-ui,-apple-system,"PingFang SC",sans-serif}
+  header{position:sticky;top:0;background:var(--petri-bg-surface);border-bottom:1px solid var(--petri-border);padding:12px 24px;z-index:2}
+  header h1{font-size:var(--petri-font-size-lg);margin:0 0 2px}
+  header p{margin:0;color:var(--petri-text-secondary);font-size:var(--petri-font-size-sm)}
+  .toolbar{position:sticky;top:62px;background:var(--petri-bg-surface);padding:8px 24px;border-bottom:1px solid var(--petri-border);z-index:1}
+  .toolbar button{font:inherit;font-size:var(--petri-font-size-sm);padding:5px 12px;margin-right:8px;border:1px solid var(--petri-border-strong);border-radius:6px;background:var(--petri-bg-subtle);color:var(--petri-text);cursor:pointer}
+  main{max-width:1240px;margin:0 auto;padding:24px}
+  section{margin-bottom:46px;scroll-margin-top:110px}
+  section>h2{font-size:var(--petri-font-size-lg);margin:0 0 2px}
+  .lead{color:var(--petri-text-secondary);font-size:var(--petri-font-size-sm);margin:0 0 14px}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .pane{background:var(--petri-bg-surface);border:1px solid var(--petri-border);border-radius:var(--petri-radius-md);overflow:hidden}
+  .pane>figcaption{padding:7px 12px;background:var(--petri-bg-subtle);font-size:var(--petri-font-size-sm);color:var(--petri-text-secondary)}
+  .pane.proposal>figcaption{color:var(--petri-accent);font-weight:600}
+  .chat{padding:14px;min-height:196px}
+  .msg{display:flex;gap:9px;align-items:flex-start;margin:10px 0}
+  .msg.user{flex-direction:row-reverse}
+  .avatar{flex-shrink:0;width:26px;height:26px;border-radius:var(--petri-radius-md);display:grid;place-items:center;font-size:var(--petri-font-size-xs)}
+  .avatar.me{background:var(--petri-accent);color:var(--petri-on-accent)}
+  .avatar.agent{background:var(--petri-accent-bg);color:var(--petri-text-secondary);border:1px solid var(--petri-border-strong)}
+  .avatar.brand{background:var(--petri-accent-bg);color:var(--petri-accent);border:1px solid var(--petri-accent)}
+  .bubble{max-width:82%;padding:8px 11px;border-radius:10px;font-size:var(--petri-font-size-body)}
+  .bubble.me{background:var(--petri-accent);color:var(--petri-on-accent)}
+  .bubble.ai{background:var(--petri-bg-subtle);color:var(--petri-text)}
+  .wordmark{font-size:var(--petri-font-size-xs);color:var(--petri-accent);font-weight:600;white-space:nowrap;margin-top:2px}
+  .dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;margin-top:8px}
+  .dot.run{background:var(--petri-status-run)} .dot.done{background:var(--petri-text-muted)}
+  .status{font-size:var(--petri-font-size-xs);margin-left:6px}
+  .status.run{color:var(--petri-status-run)} .status.ok{color:var(--petri-status-ok)}
+  .note{font-size:var(--petri-font-size-sm);color:var(--petri-text-tertiary);margin:6px 0 0}
+  footer{color:var(--petri-text-muted);font-size:var(--petri-font-size-sm);padding:16px 24px;border-top:1px solid var(--petri-border)}
+  @media(max-width:860px){.cmp{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Petri · 会话身份标识三形态（提案视觉稿）</h1>
+  <p>前提：维持原 UI 风格、不搞大改版。三形态均为「强化既有 agent 标识」，用户侧保持现状。静态稿、非实现、观感零代签。</p>
+</header>
+<div class="toolbar">
+  <button type="button" onclick="document.documentElement.removeAttribute('data-theme')">亮色</button>
+  <button type="button" onclick="document.documentElement.setAttribute('data-theme','dark')">暗色</button>
+  <span class="note">点上方切换亮/暗对照；每屏左=现状、右=提案。</span>
+</div>
+<main>
+
+<section id="shape-a">
+  <h2>形态 A — 品牌缩略（推荐）</h2>
+  <p class="lead">agent 侧既有 26px avatar 的 cpu 图标换成 Petri logo 缩略，色提一档；零结构改动、零新资源。</p>
+  <div class="cmp">
+    <figure class="pane"><figcaption>现状</figcaption><div class="chat">
+      <div class="msg user"><div class="avatar me">我</div><div class="bubble me">帮我整理这段笔记</div></div>
+      <div class="msg"><div class="avatar agent">芯</div><div class="bubble ai">好的，先列要点结构…</div></div>
+    </div></figure>
+    <figure class="pane proposal"><figcaption>A 提案</figcaption><div class="chat">
+      <div class="msg user"><div class="avatar me">我</div><div class="bubble me">帮我整理这段笔记</div></div>
+      <div class="msg"><div class="avatar brand">P</div><div class="bubble ai">好的，先列要点结构…</div></div>
+    </div></figure>
+  </div>
+  <p class="note">侵入面：仅换图标与两条颜色声明；memo/消息契约零变。暗色走 accent-bg/accent 双定义 token。</p>
+</section>
+
+<section id="shape-b">
+  <h2>形态 B — 极小角色字标 + 状态</h2>
+  <p class="lead">agent 头像位改窄字标「Petri」+ 状态字（思考中/执行工具/完成），状态用 status token 着色。</p>
+  <div class="cmp">
+    <figure class="pane"><figcaption>现状</figcaption><div class="chat">
+      <div class="msg user"><div class="avatar me">我</div><div class="bubble me">跑一下这份数据</div></div>
+      <div class="msg"><div class="avatar agent">芯</div><div class="bubble ai">正在执行工具…</div></div>
+    </div></figure>
+    <figure class="pane proposal"><figcaption>B 提案</figcaption><div class="chat">
+      <div class="msg user"><div class="avatar me">我</div><div class="bubble me">跑一下这份数据</div></div>
+      <div class="msg"><div class="wordmark">Petri<span class="status run">·执行中</span></div><div class="bubble ai">正在执行工具…</div></div>
+    </div></figure>
+  </div>
+  <p class="note">侵入面：avatar 位渲染分支 + 一条 CSS；状态可接既有 m.loop/streaming 字段。暗色 status token 双定义。</p>
+</section>
+
+<section id="shape-c">
+  <h2>形态 C — 6-8px 状态点</h2>
+  <p class="lead">agent 头像缩为小圆点，运行态变色、完成态回落中性低权重；极致克制。</p>
+  <div class="cmp">
+    <figure class="pane"><figcaption>现状</figcaption><div class="chat">
+      <div class="msg user"><div class="avatar me">我</div><div class="bubble me">写一份总结</div></div>
+      <div class="msg"><div class="avatar agent">芯</div><div class="bubble ai">已生成总结。</div></div>
+    </div></figure>
+    <figure class="pane proposal"><figcaption>C 提案</figcaption><div class="chat">
+      <div class="msg user"><div class="avatar me">我</div><div class="bubble me">写一份总结</div></div>
+      <div class="msg"><div class="dot done"></div><div class="bubble ai">已生成总结。</div></div>
+      <div class="msg"><div class="dot run"></div><div class="bubble ai">思考中<span class="status run">…</span></div></div>
+    </div></figure>
+  </div>
+  <p class="note">侵入面最小（尺寸+圆角+背景色）；身份辨识也最弱。暗色点用 status token / 完成态 muted。</p>
+</section>
+
+</main>
+<footer>item 试用反馈⑦ · 静态提案稿 · 零产品代码 · pending_user_ruling（owner 回 A/B/C 或都不采纳后定）。token 值仅预览、取自真源；不引入新 token/依赖。</footer>
+</body>
+</html>
