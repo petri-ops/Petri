@@ -12,6 +12,13 @@ import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
 export async function copyText(text: string): Promise<boolean> {
   if (!text) return false;
+  // 试用反馈⑫续（owner msg_67a61cb96b68）：Electron 渲染进程 clipboard/execCommand 均不可靠
+  // （✓ 是假成功）——优先走主进程 IPC，web 环境再退 navigator/execCommand。
+  try {
+    const bridge = getBridge('app');
+    const write: ((value: string) => Promise<boolean>) | undefined = bridge?.writeClipboard;
+    if (typeof write === 'function') return (await write(text)) === true;
+  } catch { /* 非桌面环境无 bridge，走 web 兜底 */ }
   try {
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text);

@@ -28,6 +28,8 @@ const CHANNELS = {
     test: 'ai-settings:test',
   },
   app: {
+    // 试用反馈⑫续（owner msg_67a61cb96b68）：主进程剪贴板写（渲染进程 API 受限根治）
+    writeClipboard: 'app:write-clipboard',
     getActivitySummary: 'app:get-activity-summary',
     getShellStatus: 'app:get-shell-status',
     hideToTray: 'app:hide-to-tray',

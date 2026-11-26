@@ -237,6 +237,8 @@ const desktopBridgeSurface = {
     // BLOCK-223 — 桌面外壳（通知 / 托盘 / 退出摘要）
     getActivitySummary: () => ipcRenderer.invoke('app:get-activity-summary'),
     getShellStatus: () => ipcRenderer.invoke('app:get-shell-status'),
+    // 试用反馈⑫续：主进程剪贴板写（preload 自包含字面量、不 require 本地模块）
+    writeClipboard: (text) => ipcRenderer.invoke('app:write-clipboard', text),
     setShellPrefs: (prefs) => ipcRenderer.invoke('app:set-shell-prefs', prefs),
     notify: (payload) => ipcRenderer.invoke('app:notify', payload),
     respondQuitDecision: (action) => ipcRenderer.invoke('app:quit-decision', action),

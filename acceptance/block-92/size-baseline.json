@@ -341,9 +341,9 @@
       "path": "frontend/src/lib/electron.d.ts",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1051,
-      "bytes": 48776,
-      "sha256": "feb595a7d8d64928d6911336fe75d03e9be37c161d88e96e0a491d0596119761"
+      "lines": 1053,
+      "bytes": 48953,
+      "sha256": "29f9499817c6ff6a3dc4743df1b6893e9eda6f6378cbc49277a6451a939d1443"
     },
     {
       "path": "core/petri-server/agent-runner.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86668,
+  "total": 86670,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -931,6 +931,19 @@
       "to": {
         "lines": 988,
         "bytes": 39934
+      }
+    },
+    {
+      "path": "frontend/src/lib/electron.d.ts",
+      "reason": "试用反馈⑫续 owner msg_67a61cb96b68：新增 app.writeClipboard 桥接类型声明+注释（主进程IPC剪贴板根治，2行）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 1051,
+        "bytes": 48776
+      },
+      "to": {
+        "lines": 1053,
+        "bytes": 48953
       }
     }
   ]

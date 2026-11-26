@@ -11,12 +11,17 @@
 const CHANNELS = require('./channels');
 
 function setupDesktopShellIpc({ desktopShell, isTestInstance = false }) {
-  const { ipcMain } = require('electron');
+  const { ipcMain, clipboard } = require('electron');
   const testOnly = (fn) => () => {
     if (!isTestInstance) return { ok: false, reason: 'test_instance_only' };
     return fn();
   };
 
+  // 试用反馈⑫续：主进程剪贴板写——Electron 主进程无渲染进程权限限制，返回布尔供 UI 真反馈
+  ipcMain.handle(CHANNELS.app.writeClipboard, (_event, text) => {
+    if (typeof text !== 'string' || !text) return false;
+    try { clipboard.writeText(text); return true; } catch { return false; }
+  });
   ipcMain.handle(CHANNELS.app.getActivitySummary, () => desktopShell.getActivitySummary());
   ipcMain.handle(CHANNELS.app.getShellStatus, () => desktopShell.getStatus());
   ipcMain.handle(CHANNELS.app.setShellPrefs, (_event, payload) => desktopShell.updatePrefs(payload));
