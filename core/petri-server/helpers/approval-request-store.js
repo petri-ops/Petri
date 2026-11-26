@@ -32,7 +32,29 @@ const DEFAULT_TTL_MS = 10 * 60 * 1000;
 const MAX_PREVIEW_CHARS = 4000;
 const VALID_SCOPES = new Set(['once', 'task', 'always']);
 
-const stores = new Map(); // taskId -> { requests: Map<requestId, request>, approvedFingerprints: Set }
+const { loadAll, saveState, deleteState } = require('./approval-persistence');
+
+// M4：启动时从 DB 恢复审批态（Map/Set 反序列化）；对外 API 不变。
+function restoreStore(taskId, raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  return {
+    __taskId: taskId,
+    requests: new Map(raw.requests || []),
+    approvedFingerprints: new Set(raw.approvedFingerprints || []),
+    overrides: new Map(raw.overrides || []),
+    callHistory: Array.isArray(raw.callHistory) ? raw.callHistory : [],
+  };
+}
+function writeThrough(store) {
+  if (!store || !store.__taskId) return;
+  saveState(store.__taskId, 'approval', 'state', {
+    requests: [...store.requests.entries()],
+    approvedFingerprints: [...store.approvedFingerprints],
+    overrides: [...store.overrides.entries()],
+    callHistory: store.callHistory,
+  });
+}
+const stores = new Map([...loadAll('approval')].map(([taskId, m]) => [taskId, restoreStore(taskId, m.get('state'))]).filter(([, v]) => v));
 
 function callFingerprint(toolName, args) {
   const canonical = (() => {
@@ -78,6 +100,7 @@ function getStore(taskId) {
 function createApprovalRequests(taskId) {
   if (!taskId) return null;
   const store = {
+    __taskId: taskId,
     requests: new Map(),
     approvedFingerprints: new Set(),
     // BLOCK-243 — 编辑参数批准后的一次性替换：原始指纹 → 生效参数。
@@ -86,8 +109,11 @@ function createApprovalRequests(taskId) {
     // BLOCK-244 — 同参连续调用历史（循环防护；只存指纹+时刻，不存参数）。
     callHistory: [],
   };
-  stores.set(taskId, store);
-  return store;
+  const restored = stores.get(taskId);
+  const active = restored || store;
+  stores.set(taskId, active);
+  writeThrough(active);
+  return active;
 }
 
 /** 查找（并惰性过期）本次调用的参数替换。 */
@@ -116,6 +142,7 @@ function recordToolCall(ctx, toolName, args) {
   const fingerprint = callFingerprint(toolName, args);
   store.callHistory.push({ fingerprint, at: Date.now() });
   if (store.callHistory.length > 50) store.callHistory.splice(0, store.callHistory.length - 50);
+  writeThrough(store);
   return fingerprint;
 }
 
@@ -160,6 +187,7 @@ function approveTaskFingerprint(taskId, fingerprint) {
   const store = getStore(taskId);
   if (!store || !fingerprint) return { ok: false, error: 'task_required' };
   store.approvedFingerprints.add(fingerprint);
+  writeThrough(store);
   return { ok: true, fingerprint };
 }
 
@@ -244,6 +272,7 @@ function registerApprovalRequest(store, {
     effectiveInputTruncated: false,
   };
   store.requests.set(request.requestId, request);
+  writeThrough(store);
   return { ok: true, request, created: true, pendingCount: pendingCount(store) };
 }
 
@@ -320,6 +349,7 @@ function decideApprovalRequest({
         createdAt: Date.now(),
         expiresAt: Date.now() + DEFAULT_TTL_MS,
       });
+      writeThrough(store);
       override = true;
     } else {
       fingerprint = request.fingerprint;
@@ -399,7 +429,7 @@ function consumeFingerprint(ctx, fingerprint) {
 
 /** 任务结束清理（对齐 releaseGuardAcks 接线点）。 */
 function releaseApprovalRequests(taskId) {
-  if (taskId) stores.delete(taskId);
+  if (taskId) { stores.delete(taskId); deleteState(taskId, 'approval', 'state'); }
 }
 
 /**

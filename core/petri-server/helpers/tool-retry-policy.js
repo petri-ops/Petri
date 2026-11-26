@@ -53,12 +53,13 @@ function classifyToolJobFailure(input = {}) {
 }
 
 /**
- * 重试额度上限；未设 / 非法 / 负数一律 0（=重试关闭）。
+ * 重试额度上限（harness M2：owner msg_8640320d302e 裁决默认 0→1）。
+ * 未设默认 1（瞬态失败自动重试一次）；显式 0 仍可关闭；非法/负数 0。
  * 每次调用实时读 env（测试需在 import 后设置仍生效）。
  */
 function getRetryMax() {
   const raw = process.env.PETRI_TOOL_RETRY_MAX;
-  if (raw === undefined || raw === '') return 0;
+  if (raw === undefined || raw === '') return 1;
   const parsed = Number.parseInt(raw, 10);
   if (!Number.isFinite(parsed) || parsed < 0) return 0;
   return parsed;

@@ -234,8 +234,14 @@ function summarizeProviderUsage({ userId = null, since = null, limit = 20 } = {}
 }
 
 // Pricing in CNY per 1M tokens.
-const AI_PRICING = {  'deepseek-chat':           {input: 0.5, output: 8.0,  cacheHit: 0.1},
+// harness M5（owner msg_8640320d302e）：覆盖当前活跃模型集。
+// 诚实边界：无外部定价源——deepseek-flash 按同族 deepseek-chat 估算；qwen-vl-max 按公开档估算；
+// 两者标 estimated:true（账单对账时以 ai_usage.cost_status='estimated' 可见），待 owner 用真实账单校准。
+const AI_PRICING = {
+  'deepseek-chat':           {input: 0.5, output: 8.0,  cacheHit: 0.1},
+  'deepseek-flash':          {input: 0.5, output: 8.0,  cacheHit: 0.1, estimated: true},
   'deepseek-reasoner':       {input: 0.5, output: 8.0,  cacheHit: 0.1},
+  'qwen-vl-max':             {input: 0.8, output: 2.0,  estimated: true},
   'text-embedding-v3':       {input: 0.7, output: 0.0},
 };
 

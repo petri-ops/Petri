@@ -470,6 +470,10 @@ try {
   db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_created ON tool_jobs(created_at)');
   // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作 run_tool 强制确认列
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN ack_token TEXT'); } catch {}
+  // harness M1（owner msg_8640320d302e）：ack_token 并发保护。
+  // 迁移前备份说明：本索引为幂等部分唯一索引（NULL 不参与），首次创建前请备份 petri.db；
+  // 若历史 DB 存在重复非空 ack_token，CREATE 会失败——需先人工去重，不以吞错方式放行。
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS uq_tool_jobs_ack_token ON tool_jobs(ack_token) WHERE ack_token IS NOT NULL');
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN ack_status TEXT'); } catch {}
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN ack_expires_at BIGINT'); } catch {}
   // 7.3: project_id column for project-scoped tool jobs

@@ -1295,16 +1295,19 @@ function ackToolJob(ackToken, approve, scope = {}) {
   const row = db.prepare('SELECT * FROM tool_jobs WHERE ack_token=?').get(ackToken);
   if (!row) return null;
   if (!toolJobMatchesScope(row, scope)) return null;
+  // harness M1：CAS——仅当 ack_status 仍为 NULL（未被处理）才生效；并发重入返回 null。
   if (approve) {
-    db.prepare('UPDATE tool_jobs SET ack_status=? WHERE id=?').run('approved', row.id);
+    const changed = db.prepare('UPDATE tool_jobs SET ack_status=? WHERE id=? AND ack_status IS NULL').run('approved', row.id);
+    if (!changed.changes) return null;
   } else {
-    db.prepare('UPDATE tool_jobs SET ack_status=?, status=?, error=?, completed_at=? WHERE id=?').run(
+    const changed = db.prepare('UPDATE tool_jobs SET ack_status=?, status=?, error=?, completed_at=? WHERE id=? AND ack_status IS NULL').run(
       'rejected',
       'failed',
       '用户取消了该重操作',
       Date.now(),
       row.id
     );
+    if (!changed.changes) return null;
   }
   return getToolJob(row.id);
 }

@@ -14,11 +14,13 @@
  * 跨会话持久化=用户规则面（ORC-1）职责，不在此越权。
  */
 
-const stores = new Map(); // taskId -> Set<guardKey>
+const { loadAll, saveState, deleteState } = require('./approval-persistence');
+// M4：启动时从 DB 恢复（loadAll 的 value 是序列化的数组）
+const stores = new Map([...loadAll('guard-ack')].map(([taskId, m]) => [taskId, new Set(m.get('acked') || [])]));
 
 function createGuardAcks(taskId) {
   if (!taskId) return null;
-  const set = new Set();
+  const set = stores.get(taskId) || new Set();
   stores.set(taskId, set);
   return set;
 }
@@ -34,11 +36,12 @@ function ackGuard(taskId, guardKey) {
   if (!set) set = createGuardAcks(taskId);
   if (!set) return { ok: false, error: 'task_required' };
   set.add(key);
+  saveState(taskId, 'guard-ack', 'acked', [...set]);
   return { ok: true, guardKey: key, total: set.size };
 }
 
 function releaseGuardAcks(taskId) {
-  if (taskId) stores.delete(taskId);
+  if (taskId) { stores.delete(taskId); deleteState(taskId, 'guard-ack', 'acked'); }
 }
 
 module.exports = {
