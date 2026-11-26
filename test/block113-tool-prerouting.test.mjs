@@ -187,6 +187,16 @@ test('收窄器：未知域/缺映射 → 原样全量（保守）', () => {
   assert.equal(narrowToolDefsByFamily(TOOL_DEFS, 'workspace', undefined), TOOL_DEFS);
 });
 
+test('创作包内置回归钉：任何域收窄下 generate.* 恒在场（未映射域保守保留）', () => {
+  // owner 裁决包内置后，generate 域在 DOMAIN_TOOL_DEFS 但不在 TOOL_FAMILIES 九域；
+  // 路由收窄须遵守「宁全勿缺」——只剔明确属于其他域的工具，未映射域工具恒保留。
+  for (const family of Object.keys(DOMAIN_TOOL_DEFS)) {
+    const narrowed = narrowToolDefsByFamily(TOOL_DEFS, family, DOMAIN_TOOL_DEFS);
+    const names = new Set(narrowed.filter((t) => t.function && t.function.name).map((t) => t.function.name));
+    assert.ok(names.has('generate.image'), `family=${family} 收窄后 generate.image 缺席——生图能力不得被路由剔除`);
+  }
+});
+
 test('BLOCK-121 回归钉：任何域收窄下 run_tool（分析执行入口）恒在场', () => {
   // 实机抓真（2026-09-26，block121-result-loop flow）：run_tool 原归属 remote 域，
   // 「请运行 DESeq2 差异分析」被 tool_route 以 conf 0.86 判 workspace → 执行入口被

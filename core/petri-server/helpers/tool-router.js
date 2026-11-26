@@ -88,8 +88,13 @@ function narrowToolDefsByFamily(allDefs, family, domainToolDefs) {
   if (!domainToolDefs || !domainToolDefs[family]) return allDefs; // 未知域/缺映射保守回退全量（宁全勿缺）
   const routedDefs = domainToolDefs[family];
   const baselineDefs = domainToolDefs[BASELINE_DOMAIN] || [];
-  const allowedNames = new Set([...routedDefs, ...baselineDefs].map((t) => t.function.name));
-  // 71 工具中不属于 allowedNames 的按名剔除；schema 内无名的防御保留
+  // 未映射到 TOOL_FAMILIES 九域的域（如内置创作包 generate、svg/model3d 等）不参与
+  // 「明确属于其他域」的判定——按 D-1 宁全勿缺原则恒保留，避免新域工具被路由静默剔除。
+  const unmappedDefs = Object.entries(domainToolDefs)
+    .filter(([domain]) => domain !== BASELINE_DOMAIN && !Object.prototype.hasOwnProperty.call(TOOL_FAMILIES, domain))
+    .flatMap(([, defs]) => defs);
+  const allowedNames = new Set([...routedDefs, ...baselineDefs, ...unmappedDefs].map((t) => t.function.name));
+  // 不属于 allowedNames 的按名剔除；schema 内无名的防御保留
   return allDefs.filter((t) => !t.function || !t.function.name || allowedNames.has(t.function.name));
 }
 
