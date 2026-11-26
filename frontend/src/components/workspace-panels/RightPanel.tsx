@@ -235,7 +235,8 @@ export function RightPanel({
                     emptyText="本项目暂无作业——运行一个分析后，瓦片会出现在这里。"
                   />
                 )}
-                {tab === 'workflow' && <WorkflowRunsPanel />}
+                {/* 右栏裁决②（owner msg_44b2179358ea）：工作流并入指挥中心，能力不丢 */}
+                {tab === 'jobs' && <WorkflowRunsPanel />}
                 {tab === 'model3d' && (
                   <Model3DSurface
                     key={ctx.projectId || 'no-project'}
@@ -272,6 +273,19 @@ export function RightPanel({
                       openRevisionWorkspaceFile: ctx.openRevisionWorkspaceFile,
                       openResultBrowser: ctx.openResultBrowser,
                     }}
+                  />
+                )}
+                {/* 右栏裁决③（owner msg_44b2179358ea）：证据并入结果面板呈现，治理语义不动 */}
+                {tab === 'results' && (
+                  <EvidenceSurface
+                    activeJob={ctx.activeJob}
+                    activeWorkflow={ctx.activeWorkflow}
+                    activeArtifact={ctx.activeArtifact}
+                    conversationId={ctx.activeConvId}
+                    onOpenResults={() => ctx.openRightPanel('results')}
+                    onOpenReview={() => ctx.openRightPanel('review')}
+                    onOpenPlan={() => ctx.openRightPanel('plan')}
+                    onOpenTrace={() => ctx.openRightPanel('trace')}
                   />
                 )}
                 {tab === 'files' && (
@@ -350,18 +364,7 @@ export function RightPanel({
                 {tab === 'plan' && (
                   <PlanSurface conversationId={ctx.activeConvId} onAskAgent={ctx.handleAskAgent} />
                 )}
-                {tab === 'evidence' && (
-                  <EvidenceSurface
-                    activeJob={ctx.activeJob}
-                    activeWorkflow={ctx.activeWorkflow}
-                    activeArtifact={ctx.activeArtifact}
-                    conversationId={ctx.activeConvId}
-                    onOpenResults={() => ctx.openRightPanel('results')}
-                    onOpenReview={() => ctx.openRightPanel('review')}
-                    onOpenPlan={() => ctx.openRightPanel('plan')}
-                    onOpenTrace={() => ctx.openRightPanel('trace')}
-                  />
-                )}
+
                 {surfaceDescriptor?.kind === 'pack-view' && (
                   <PackSurfaceFrame
                     descriptor={surfaceDescriptor}

@@ -7075,3 +7075,10 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **裁决③ 执行许可消费后保持现状**：owner 裁决记录——执行许可 `execution_admission_consumed` 后由模型自行判断，不改行为；台账登记此裁决即可（代码现状 `agent-tool-interceptor.js:444-467` / `workspace-tools.js:929-934` 保持原样）。
 - **验证**：HK-01 合计 6/6（红→绿）+ 邻域 23/23 + 全静态门 10/10；Vite HMR 生效；CDP 复验时 owner 不在设置页如实记录。
 - **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目（开关勾选反馈 + prompt 行为改善需长链复测）；dev Electron 边界内。G0 永久 maintained · G1 进行中。
+
+## UI-742: 右栏四裁决落地（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）
+
+- **来源**：owner 四裁决（msg_44b2179358ea）——①生成文件保留独立面板 ②工作流并入指挥中心 ③证据并入结果（owner 裁决与 seat 建议不同、以 owner 为准；证据数据与治理语义不动、仅 UI 归属调整）④补面板打开埋点。
+- **改动**：registry.ts 撤 workflow/evidence core 注册；RightPanel jobs 分支并列渲染 WorkflowRunsPanel（能力不丢）、results 分支内嵌 EvidenceSurface（治理语义与跳转不动）；MENU_GROUPS 四组结构不变、组内移除两项；生成文件无动作（台账记录裁决）。埋点=新轻量表 `panel_usage_events`（结构化 panel_id/action/project/conversation，支持按面板聚合）+ POST `/api/ai/panel-usage` + useWorkSurfaceTabs 三动作 fire-and-forget；**不混 funnel_events 的理由**=那是转化漏斗白名单 6 事件、无 payload 列，塞入会污染 TTFS/首成功口径（取舍已写入 helper 注释）。
+- **验证**：HK-01 静态 4/4（注册撤除/合并能力不丢/菜单组结构/埋点表与三动作）+ 邻域 26/26（含埋点行为断言）+ 后端 helper 实机（建表+插入+非法 action 跳过）+ 全静态门 10/10；CDP 复验时 owner 不在 project 页如实记录、HMR 生效。
+- **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目（合并后面板布局与菜单）；dev Electron 边界内。G0 永久 maintained · G1 进行中。

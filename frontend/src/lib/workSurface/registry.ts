@@ -59,12 +59,10 @@ export const CORE_WORK_SURFACES: readonly WorkSurfaceDescriptor[] = Object.freez
   coreSurface('analyze', '分析', 'sparkles', 40),
   coreSurface('review', '审阅', 'git-branch', 50),
   coreSurface('jobs', '指挥中心', 'command', 60),
-  coreSurface('workflow', '工作流', 'layers', 62, { emptyState: '还没有工作流运行。先 dryRun 预览，确认后执行。' }),
   coreSurface('trace', '轨迹', 'layers', 65, { emptyState: '当前会话还没有可回放的执行记录。' }),
   coreSurface('io', '模型 I/O', 'list-details', 70),
   coreSurface('agent', '智能体', 'bot', 80),
   coreSurface('plan', '计划', 'list-details', 90, { emptyState: '当前会话还没有计划。' }),
-  coreSurface('evidence', '证据', 'shield', 100, { emptyState: '当前没有可展示的产物或核验证据。' }),
 ]);
 
 export interface PackViewContribution {

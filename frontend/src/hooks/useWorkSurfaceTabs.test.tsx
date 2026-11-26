@@ -87,4 +87,24 @@ describe('useWorkSurfaceTabs (host integration)', () => {
     await waitFor(() => expect(screen.getByTestId('tabs').textContent).toBe('home,files,pack:bio:lab'));
     expect(screen.getByTestId('active').textContent).toBe('pack:bio:lab');
   });
+
+  it('右栏裁决④：面板 open/close/switch 三动作均上报埋点', async () => {
+    const fetchMock = vi.fn((_url: string, _init?: RequestInit) => Promise.resolve({ ok: true } as Response));
+    vi.stubGlobal('fetch', fetchMock);
+    render(<Harness />);
+    fireEvent.click(screen.getByText('open-files'));
+    fireEvent.click(screen.getByText('open-pack'));
+    fireEvent.click(screen.getByText('close-pack'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const actions = fetchMock.mock.calls.map((call) => {
+      const init = call[1];
+      const body = init && typeof init.body === 'string' ? init.body : '{}';
+      const parsed = JSON.parse(body) as { action?: string };
+      return parsed.action;
+    });
+    expect(actions).toContain('open');
+    expect(actions).toContain('close');
+    vi.unstubAllGlobals();
+  });
+
 });

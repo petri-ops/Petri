@@ -119,8 +119,8 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
 /** 右侧栏审计（owner msg_26327e7a3def）：工具菜单四组呈现（纯分组、不改面板去留/顺序语义） */
 const MENU_GROUPS = [
   { title: '主工作区', ids: ['results', 'files', 'generated', 'model3d', 'browser'] },
-  { title: '分析治理', ids: ['analyze', 'review', 'jobs', 'workflow'] },
-  { title: '审计证据', ids: ['trace', 'io', 'agent', 'plan', 'evidence'] },
+  { title: '分析治理', ids: ['analyze', 'review', 'jobs'] },
+  { title: '审计证据', ids: ['trace', 'io', 'agent', 'plan'] },
   { title: '环境入口', ids: ['host:terminal', 'host:side-chat'] },
 ] as const;
 function menuGroupFor(id: string): string {

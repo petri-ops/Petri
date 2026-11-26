@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import { usePackContributions } from '@/lib/workSurface/packContributionsClient';
 import {
   activateWorkSurfaceTab,
@@ -28,6 +29,18 @@ import type {
 } from '@/lib/workSurface/types';
 
 const STORAGE_PREFIX = 'petri.workSurfaceTabs.v1';
+
+/** 右栏裁决④：面板使用埋点（fire-and-forget best-effort，失败不影响面板行为）。 */
+function trackPanelUsage(panelId: string, action: 'open' | 'close' | 'switch', projectId: string | null | undefined): void {
+  try {
+    const token = getToken();
+    void fetch(`${getPlatformApiPrefix()}/ai/panel-usage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ panelId, action, projectId: projectId || null }),
+    }).catch(() => undefined);
+  } catch { /* 埋点失败静默 */ }
+}
 
 function storageKey(projectId: string | null | undefined): string {
   return `${STORAGE_PREFIX}.${projectId || 'global'}`;
@@ -122,10 +135,12 @@ export function useWorkSurfaceTabs(projectId: string | null | undefined): UseWor
   const openRightPanel = React.useCallback((surfaceId: string) => {
     const descriptor = descriptorFor(surfaceId);
     if (!descriptor) return;
+    trackPanelUsage(surfaceId, 'open', projectId);
     setState((current) => openWorkSurfaceTab(withHome(current, home), descriptor, { surfaceId }));
   }, [descriptorFor, home]);
 
   const setRightTab = React.useCallback((surfaceId: string) => {
+    trackPanelUsage(surfaceId, 'switch', projectId);
     const descriptor = descriptorFor(surfaceId);
     setState((current) => {
       if (current.tabs.some((tab) => tab.id === surfaceId)) {
@@ -137,6 +152,7 @@ export function useWorkSurfaceTabs(projectId: string | null | undefined): UseWor
   }, [descriptorFor, home]);
 
   const closeRightPanelTab = React.useCallback((surfaceId: string) => {
+    trackPanelUsage(surfaceId, 'close', projectId);
     setState((current) => closeWorkSurfaceTab(current, surfaceId, descriptorFor));
   }, [descriptorFor]);
 

@@ -8,8 +8,21 @@
 const express = require('express');
 const dbMod = require('../db');
 const adb = dbMod.getAsyncDatabase();
+const { recordPanelUsage } = require('../helpers/panel-usage');
 
 module.exports = function mountMisc(app) {
+
+  // 右栏裁决④（owner msg_44b2179358ea）：面板使用埋点（best-effort、本机台账、零外发）
+  app.post('/api/ai/panel-usage', express.json({ limit: '2kb' }), (req, res) => {
+    const body = req.body && typeof req.body === 'object' ? req.body : {};
+    void recordPanelUsage({
+      panelId: body.panelId,
+      action: body.action,
+      projectId: body.projectId,
+      conversationId: body.conversationId,
+    });
+    res.json({ status: 'ok' });
+  });
 
   app.get('/api/ai/health', (req, res) => {
     res.json({status: 'ok', timestamp: new Date().toISOString()});
