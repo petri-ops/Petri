@@ -125,7 +125,8 @@
 
 /* ── 左栏：搜索 + 分组导航同处一列（ZCode 规范），整块浅底、不画竖线 ── */
 [role='dialog'][aria-label='设置'] :global(.petri-settings-sidebar) {
-  flex: 0 0 264px;
+  /* 试用反馈⑪：宽度由内联 flexBasis/width 控制（默认 264），CSS 不再写死 */
+  flex: 0 0 auto;
   width: 264px;
   min-width: 0;
   min-height: 0;
@@ -133,6 +134,26 @@
   flex-direction: column;
   background: var(--petri-bg-canvas);
   padding-top: 56px;
+}
+
+[role='dialog'][aria-label='设置'] :global(.settings-resize-handle) {
+  flex: 0 0 8px;
+  width: 8px;
+  margin: 0 -4px;
+  cursor: ew-resize;
+  background: transparent;
+  position: relative;
+  z-index: var(--petri-z-base);
+  touch-action: none;
+}
+[role='dialog'][aria-label='设置'] :global(.settings-resize-handle::after) {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 1px;
+  background: var(--petri-border-card);
 }
 
 [role='dialog'][aria-label='设置'] :global(.petri-settings-nav) {

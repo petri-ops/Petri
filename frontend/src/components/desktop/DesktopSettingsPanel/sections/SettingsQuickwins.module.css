@@ -148,11 +148,17 @@
   flex: 1 1 220px;
   min-width: 160px;
   padding: var(--petri-space-2) var(--petri-space-3);
-  border: 1px solid var(--petri-border-card);
+  /* 试用反馈⑪：边框柔化——去 1px 描边改用底色区分；focus 用输入焦点环语义 box-shadow */
+  border: 0;
   border-radius: var(--petri-radius-sm);
-  background: var(--petri-bg-base);
+  background: var(--petri-bg-elevated);
   color: var(--petri-text);
   font-size: var(--petri-font-size-body);
+}
+
+.searchInput:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--petri-border-input);
 }
 
 .toolbarMeta {

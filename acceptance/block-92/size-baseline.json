@@ -69,9 +69,9 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 588,
-      "bytes": 30356,
-      "sha256": "dd18a653def1a7b08fe58d2b0cdde80c7d0120d4355cbc6db421148ca6e49cdf"
+      "lines": 609,
+      "bytes": 31428,
+      "sha256": "75d15561472fa519e8efb2b4feb8f2e9c9d53a95aae0b5c965fd187a210ef067"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86666,
+  "total": 86687,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -905,6 +905,19 @@
       "to": {
         "lines": 5525,
         "bytes": 134972
+      }
+    },
+    {
+      "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+      "reason": "试用反馈⑪ owner msg_e5dee7523be8：左右分区可拖拽调宽——sidebar 宽度 state 化+resize handle 交互（200-480px 约束，不持久化）",
+      "date": "2026-11-26",
+      "from": {
+        "lines": 588,
+        "bytes": 30356
+      },
+      "to": {
+        "lines": 609,
+        "bytes": 31428
       }
     }
   ]

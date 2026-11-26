@@ -68,6 +68,17 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
     normalizeInitialSection(initialSection) ?? 'appearance',
   );
   const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
+  // 试用反馈⑪（owner msg_e5dee7523be8）：左右分区可拖拽调宽（200-480px，不持久化——简单优先）
+  const [sidebarWidth, setSidebarWidth] = useState(264);
+  const resizeSidebar = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }, []);
+  const resizeSidebarMove = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+    setSidebarWidth(Math.max(200, Math.min(480, event.clientX)));
+  }, []);
   // BLOCK-201 W2 — 搜索/分区过滤/按区重置（状态机外置：面板已贴 code-size 预算，见钩子注释）
   const {
     query: settingsQuery,
@@ -183,7 +194,7 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
       </div>
 
       <div className="petri-settings-layout">
-        <div className="petri-settings-sidebar">
+        <div className="petri-settings-sidebar" style={{ flexBasis: sidebarWidth, width: sidebarWidth }}>
           <SettingsToolbar
             query={settingsQuery}
             onQueryChange={setSettingsQuery}
@@ -200,6 +211,16 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
             onSelect={setActiveSection}
           />
         </div>
+        <div
+          className="settings-resize-handle"
+          data-testid="settings-resize-handle"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="调整设置导航区宽度"
+          title="拖拽调整导航区宽度"
+          onPointerDown={resizeSidebar}
+          onPointerMove={resizeSidebarMove}
+        />
         <div className="petri-desktop-panel__body petri-settings-content">
         {activeSection === 'appearance' && <AppearanceSection />}
         {activeSection === 'desktop' && <DesktopSection />}

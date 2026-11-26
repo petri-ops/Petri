@@ -7036,3 +7036,11 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **model_output_empty 核真（另立修复项，不混本 UX 单）**：前端 `PromptEnhanceControls.tsx:41` 对空 optimizedPrompt 抛错；后端真源 `core/petri-server/helpers/task-spec.js:49 cleanText` 把模型返回内容折叠/清洗后为空 → `:219` 返回 `model_output_empty`。GLM 类模型有 `quickThinkingParams` 显式关思考（gemini/zhipuai），owner 当前 deepseek-flash 不在匹配内——模型若返回空正文（思考段吞正文/工具调用空回）即报此错。待 owner 决定是否另立"空输出诊断+重试"修复项。
 - **验证**：组件测试 3/3（空输入无按钮/点击覆盖/失败 alert）+ theme-token 与邻域 22/22 + 全静态门 10/10（CSS grow 留因）；CDP 复验时 owner 在 settings 页、composer 未实例化如实记录，由组件测试守护，Vite HMR 生效。
 - **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。
+
+## UI-738: 设置页边框柔化 + 左右分区可拖拽调宽（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）
+
+- **来源**：owner 试用反馈⑪（msg_e5dee7523be8，附截图）：「左侧返回和输入框边框不该那么明显；两区中间线条不能鼠标调宽」。
+- **改动①柔化**：`global-page.module.css .backBtn` 去 1px 描边改 `background: var(--petri-bg-subtle)`；`SettingsQuickwins.module.css .searchInput` 去 1px 描边改 `background: var(--petri-bg-elevated)`、focus 用 `box-shadow: inset 0 0 0 1px var(--petri-border-input)`（焦点环语义，不触 1px/无语义门与 accent 棘轮）。
+- **改动②resize**：DesktopSettingsPanel.tsx `sidebarWidth` state（默认 264）+ pointer 拖拽 handle（200-480px 钳制，setPointerCapture，不持久化——简单优先、避免新增存储）；sidebar 内联 flexBasis/width 覆盖原固定 264px；settings-redesign.module.css 加 handle 样式（8px 命中区、cursor ew-resize、border-card 语义细线）。
+- **验证**：HK-01 静态 4/4（柔化×2/宽度 state+handle+min-max/CSS 不写死）+ theme-token 与设置邻域 20/20 + 全静态门 10/10（DesktopSettingsPanel grow 留因）；CDP 复验时 owner 未停留在设置页、如实记录，由测试守护，Vite HMR 生效。
+- **状态边界**：观感零代签 pending_human_eye 待 owner 实机过目（边框柔化程度 + 拖拽手感）；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。

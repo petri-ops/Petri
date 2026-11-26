@@ -25,9 +25,10 @@
   gap: var(--petri-space-3);
   height: 30px;
   padding: 0 10px;
-  border: 1px solid var(--petri-border-card);
+  /* 试用反馈⑪（owner msg_e5dee7523be8）：边框柔化——去硬描边，改用极淡底色区分 */
+  border: 0;
   border-radius: var(--petri-radius-lg);
-  background: var(--petri-surface);
+  background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
   font-weight: 500;
   cursor: pointer;
