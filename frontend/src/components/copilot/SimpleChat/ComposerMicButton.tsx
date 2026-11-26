@@ -37,7 +37,7 @@ export function ComposerMicButton({ onTranscript, disabled = false }: ComposerMi
         aria-label="麦克风输入"
         aria-pressed={mic.recording}
       >
-        <Icon name={mic.recording ? 'square' : 'play'} size={14} />
+        <Icon name={mic.recording ? 'square' : 'mic'} size={14} />
       </button>
       {mic.error && (
         <span className="sc-mic-error" role="status" data-testid="composer-mic-error">{mic.error}</span>

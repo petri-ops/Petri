@@ -1715,10 +1715,6 @@ export function SimpleChat({
                   )}
                 </div>
                 {!slimComposer && <PromptEnhanceControls prompt={input} hasProject={Boolean(projectId)} contextItems={composerContext.items} onApplyText={handleInsertComposerText} />}
-                {/* BLOCK-519 阶段二 — 麦克风输入：转写文本追加进输入框，不自动发送 */}
-                <ComposerMicButton
-                  onTranscript={(text) => handleInsertComposerText(input ? `${input}${text}` : text)}
-                />
                 {/* BLOCK-69 / UI-318 — 知识空间大脑开关（独立 icon 开关，不挂已移除的 ⋯ 菜单） */}
                 <button
                   type="button"
@@ -1840,6 +1836,10 @@ export function SimpleChat({
                 </div>
                 {/* BLOCK-246 C13 — 速记板入口（引用结果入同一条 ContextItem 通道） */}
                 <ScratchpadDock onQuote={composerContext.addItem} projectId={projectId} />
+                {/* BLOCK-519 阶段二 + 试用反馈⑨（msg_91d38f2e2664）— mic 与速记板位置对换；转写追加输入框不自动发送 */}
+                <ComposerMicButton
+                  onTranscript={(text) => handleInsertComposerText(input ? `${input}${text}` : text)}
+                />
                 {/* BLOCK-171 CP-1 Stop 复出（级联取消）；BLOCK-178 运行中发送可点
                     （转向/排队路由）；UI-628 单钮态机：流式无新输入=停止，有新输入=发送。 */}
                 <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>

@@ -7020,3 +7020,11 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **改动②（身份标识 A）**：`Icon.tsx` 新增自有 `petri` 品牌缩略 mark（内联 SVG、currentColor 随主题、零新依赖）；`SimpleChatMessageRow.tsx` agent avatar `cpu`→`petri`，用户侧 `user` 不动；`simple-chat.css` agent avatar 色 secondary→主文字色（提一档且不占 accent 棘轮）。
 - **验证**：HK-01 静态 4/4（B tint/中栏纯主底/A avatar/A mark）+ theme-token-contract 与消息行邻域 22/22 + 全静态门 10/10（Icon grow 留因）；CDP 实机读三栏背景已分化（左 0.896 / 中 0.929 / 右 0.930，符合 B），agent avatar 当前页未实例化如实记录、契约测试守护；Vite HMR 生效。
 - **状态边界**：观感零代签 pending_human_eye 待 owner 实机确认（左微深/右微浅的层次、logo 缩略观感）；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。
+
+## UI-736: composer 麦克风图标修正 + 与速记板位置对换（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）
+
+- **来源**：owner 试用反馈⑨（msg_91d38f2e2664，附 composer 截图）：「语音输入按钮图标不对，位置应该和速记板图标对换一下」。
+- **核真**：`ComposerMicButton.tsx` 空闲态用 `<Icon name="play">`（三角/圆圈竖线形态）即错图标来源——实现时用了播放语义而非麦克风语义；composer 工具栏中 mic 在 PromptEnhanceControls 之后、ScratchpadDock（速记板）在模型选择器之后，两者对换。
+- **改动**：空闲态 `play`→`mic`（Icon 组件既有 mic mark、零新依赖）、录音中仍 `square` 停止；JSX 中把 ComposerMicButton 块移到 ScratchpadDock 之后（位置对换，中间知识/模型按钮不动）；aria/title/onTranscript/onQuote 语义零变。
+- **验证**：HK-01 静态 4/4（图标 mic/录音 square/位置顺序/语义未删）+ 组件行为 2/2 + theme-token 与邻域 22/22 + 全静态门 10/10；CDP 实机确认 mic 按钮在场且 SVG 加载、Vite HMR 生效。
+- **状态边界**：观感零代签 pending_human_eye，待 owner 实机过目（麦克风图标形态 + 新位置）；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。
