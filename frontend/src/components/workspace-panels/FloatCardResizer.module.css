@@ -1,7 +1,6 @@
-/* FloatCardResizer — UI-448 加映 v25 — 浮卡左缘拖宽把手
-   BLOCK-273 统一规范：默认 2px 低存在感常驻线（v25 可发现性约束保留——「只有悬浮时
-   才可以拖宽吗」用户抓真在案：只降视觉重量，不删暗示），悬停转 accent 细线 + 渐隐
-   glow（取代 v25 的整块 16% tint——固定宽度实心条带按 BLOCK-272/273 评审退场）。 */
+/* FloatCardResizer — 浮卡左缘拖宽把手
+   试用反馈⑥（owner msg_baec84bd5c5a）覆盖旧 v25 常驻线约束：摘要卡左缘灰线影响美观，
+   改为常态不可见（transparent）、hover/active 才显 token 化极淡线 + glow——拖拽命中区不变。 */
 .handle {
   position: absolute;
   top: 0;
@@ -41,8 +40,13 @@
   bottom: 14px;
   width: 2px;
   border-radius: var(--petri-radius-pill);
-  background: color-mix(in srgb, var(--petri-text-tertiary) 22%, transparent);
+  background: transparent;
   transition: background var(--petri-duration-base) ease;
+}
+
+.handle:hover::after,
+.handle:active::after {
+  background: var(--petri-border-strong);
 }
 
 .handle:hover::before,

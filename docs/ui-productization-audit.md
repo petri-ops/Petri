@@ -7004,3 +7004,11 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **改动**：`.resizeHandleV::after` 改用单一真源 `var(--petri-border-strong)`、去掉 opacity（暗色 token 已双套 #d4d4d8/#324466）；两栏共用同一规则、天然统一，零新 token/依赖、非布局几何改动。
 - **验证**：HK-01 静态 3/3（含暗色双定义断言）+ theme-token-contract 19/19 + 全静态门（含 knip/code-size）绿；CDP 复验两处均变为 `color(srgb ... / 0.36)` × opacity 1（可见度约 5× 提升、两处一致），Vite HMR 已生效。
 - **状态边界**：观感零代签 pending_human_eye，待 owner 实机过目认可；dev Electron 边界内，不外推 packaged/Provider/GA。G0 永久 maintained · G1 进行中。
+
+## UI-734: 摘要浮卡左缘灰线清理（2026-11-26 **in_progress**；代码+HMR 完成，观感待 owner 过目）
+
+- **来源**：owner 试用反馈⑥（msg_baec84bd5c5a，附截图）：「项目摘要卡片左边缘有一条灰色竖线（拖拽调宽把手指示），影响美观」。
+- **核真**：`FloatCardResizer.module.css` 的 `.handle::after` 常驻 2px `color-mix(text-tertiary 22%, transparent)` 灰线即来源（v25 可发现性约束；新 owner 裁决覆盖旧约束）。
+- **改动**：`.handle::after` 常态 `transparent`（不可见），新增 `:hover/:active::after` 用 `var(--petri-border-strong)` 显 token 化极淡线；拖拽命中区 10px + `col-resize` + `touch-action:none` 零变化，hover glow（::before）保留；暗色 token 已双定义。
+- **验证**：HK-01 静态 3/3（命中区保留/常态透明/hover token 反馈）+ theme-token-contract 19/19 + 全静态门 10/10 绿；Vite HMR 已生效。CDP 实机复验时该浮卡未挂载于当前页（组件按悬浮态挂载），如实记录未取到 live 样式，改由契约测试守护。
+- **状态边界**：观感零代签 pending_human_eye，待 owner 实机过目；dev Electron 边界内不外推。G0 永久 maintained · G1 进行中。
