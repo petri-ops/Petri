@@ -12,11 +12,11 @@ const win = fs.readFileSync(path.join(ROOT, 'src/main/_window-create.js'), 'utf8
 const css = fs.readFileSync(path.join(ROOT, 'frontend/src/components/desktop/titlebar/ColumnizedTitleBar.module.css'), 'utf8');
 const globalCss = fs.readFileSync(path.join(ROOT, 'frontend/src/styles/global.css'), 'utf8');
 
-test('HK-01-1：Petri header 38px → 灯径12px 垂直居中 y=13（非照抄 Orca y=12）', () => {
+test('HK-01-1：CDP实测工具行中心y≈18.7 → 灯中心y=19 同线对齐（非照抄Orca y=12）', () => {
   assert.match(globalCss, /--petri-titlebar-height:\s*38px/);
   const m = win.match(/trafficLightPosition:\s*\{\s*x:\s*(\d+),\s*y:\s*(\d+)/);
   assert.ok(m, 'trafficLightPosition 缺失');
-  assert.equal(Number(m[2]), 13, 'y 应按 Petri 38px header 居中=(38-12)/2');
+  assert.equal(Number(m[2]), 19, 'trafficLightPosition.y 是灯中心坐标，须对齐 CDP 实测工具行中心 y≈18.7');
 });
 
 test('HK-01-2：x 与左栏收起按钮留舒适间距（x=20 + padding-left≥90px）', () => {

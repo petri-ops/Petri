@@ -7106,3 +7106,7 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 ### UI-744 二次精调（msg_cf676d55d7fe）：红绿灯位置按 Petri header 重算
 
 owner 实机反馈 hiddenInset 后红绿灯太淡/与工具行不齐/离收起按钮太近。核真根因：trafficLightPosition{x:16,y:12} 照抄 Orca，但 Petri header=38px（Orca 不同）——灯径12 → y=(38-12)/2=13 才垂直居中；x=16 + padding-left:72 → 灯与收起按钮仅约8px。精调：x=20、y=13、padding-left=96px（灯右缘约72 → 按钮间距约24px）。"太淡"诚实核真=失焦态 macOS 系统灰灯（标准行为），聚焦态为系统彩灯；主进程不改灯色、不伪造聚焦截图——请 owner 在聚焦窗口复验。暗色下灯色由 OS 绘制、header 背景走 --petri-bg-surface（暗色 #111a2e），位置/间距与亮色同。HK-01 test/traffic-light-tune 红2/3→绿3/3，hiddenInset 三套 HK 合计 9/9、全静态门 10/10。
+
+### UI-744 三次精调（msg_d5fa5aa26dd1）：CDP 实测红绿灯/工具行同线对齐
+
+CDP 实测（owner 在线 dev 窗口，1385×949）：三处 header（左/中/右）均 y=0/h=38、paddingTop=0（无残留标题条高度，"上层太宽"假设被数据排除）；leftTools（侧栏开关）y=4.7/h=28 → 中心 y=18.7；tabPill（文件 tab）y=7.7/h=22 → 中心 y=18.7；三处工具行视觉中心统一（无需分别调整）。Electron d.ts 仅声明 `trafficLightPosition?: Point`，未写坐标语义；依 owner 视觉反馈（灯偏上）+ CDP 工具行中心 18.7 推断 y 为灯中心坐标——旧 y=13 使灯比工具行高约5.7px，改 y=19（对齐 18.7）。**诚实边界**：坐标语义未经官方文档证实，两种语义下 y 增大都使灯下移（与 owner 反馈方向一致），需 owner 重启后按 Orca 截图复验；若仍偏则按截图像素差再微调。HK-01 test/traffic-light-tune 红1/3→绿3/3 + hiddenInset 三套 HK 合计9/9 + 全静态门10/10。
