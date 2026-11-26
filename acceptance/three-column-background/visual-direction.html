@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Petri 试用反馈⑧ · 三栏背景分区视觉稿（A/B/C 对照 · 非实现）</title>
+<style>
+  /* 预览 token：取自 custom.css 真值；字面色只在此定义块。tint 用 color-mix 从既有 token 派生，零新 token */
+  :root{
+    --petri-bg-canvas:#fff; --petri-bg-surface:#fff; --petri-bg-subtle:#f4f4f5;
+    --petri-text:#18181b; --petri-text-secondary:#52525b; --petri-text-muted:#a1a1aa;
+    --petri-border-strong:#d4d4d8; --petri-accent:#3f6f8f; --petri-accent-soft:color-mix(in srgb,var(--petri-accent) 10%,transparent);
+    --tint-deep:color-mix(in srgb, var(--petri-bg-surface) 96%, var(--petri-text) 4%);
+    --tint-cool:color-mix(in srgb, var(--petri-bg-surface) 96%, var(--petri-accent) 4%);
+    --tint-light:color-mix(in srgb, var(--petri-bg-surface) 80%, var(--petri-bg-subtle) 20%);
+    --petri-radius-md:8px; --petri-font-size-lg:16px; --petri-font-size-body:14px; --petri-font-size-sm:12px; --petri-font-size-xs:11px;
+  }
+  html[data-theme='dark']{
+    --petri-bg-canvas:#0b1220; --petri-bg-surface:#111a2e; --petri-bg-subtle:#182339;
+    --petri-text:#e6edf3; --petri-text-secondary:#9aa7b8; --petri-text-muted:#6b7689;
+    --petri-border-strong:#324466; --petri-accent:#5fa8d3; --petri-accent-soft:color-mix(in srgb,var(--petri-accent) 12%,transparent);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--petri-bg-canvas);color:var(--petri-text);font:var(--petri-font-size-body)/1.6 system-ui,-apple-system,"PingFang SC",sans-serif}
+  header{position:sticky;top:0;background:var(--petri-bg-surface);border-bottom:1px solid var(--petri-border-strong);padding:12px 24px;z-index:2}
+  header h1{font-size:var(--petri-font-size-lg);margin:0 0 2px}
+  header p{margin:0;color:var(--petri-text-secondary);font-size:var(--petri-font-size-sm)}
+  .toolbar{position:sticky;top:62px;background:var(--petri-bg-surface);padding:8px 24px;border-bottom:1px solid var(--petri-border-strong);z-index:1}
+  .toolbar button{font:inherit;font-size:var(--petri-font-size-sm);padding:5px 12px;margin-right:8px;border:1px solid var(--petri-border-strong);border-radius:6px;background:var(--petri-bg-subtle);color:var(--petri-text);cursor:pointer}
+  main{max-width:1280px;margin:0 auto;padding:24px}
+  section{margin-bottom:44px;scroll-margin-top:108px}
+  section>h2{font-size:var(--petri-font-size-lg);margin:0 0 2px}
+  .lead{color:var(--petri-text-secondary);font-size:var(--petri-font-size-sm);margin:0 0 12px}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .pane{background:var(--petri-bg-surface);border:1px solid var(--petri-border-strong);border-radius:var(--petri-radius-md);overflow:hidden}
+  .pane>figcaption{padding:7px 12px;background:var(--petri-bg-subtle);font-size:var(--petri-font-size-sm);color:var(--petri-text-secondary)}
+  .pane.proposal>figcaption{color:var(--petri-accent);font-weight:600}
+  .grid{display:grid;grid-template-columns:70px 1fr 86px;min-height:188px;font-size:var(--petri-font-size-xs)}
+  .col{padding:10px 8px;background:var(--petri-bg-surface);border-right:1px solid var(--petri-border-strong);color:var(--petri-text-secondary)}
+  .col:last-child{border-right:0}
+  .col.leftA{background:var(--tint-deep)} .col.rightA{background:var(--tint-cool)} .col.rightB{background:var(--tint-light)}
+  .col.grad{background:linear-gradient(180deg, var(--tint-deep) 0, var(--petri-bg-surface) 110px)}
+  .col.gradC{background:linear-gradient(180deg, var(--tint-cool) 0, var(--petri-bg-surface) 110px)}
+  .bubble{background:var(--petri-bg-subtle);color:var(--petri-text);border-radius:8px;padding:5px 7px;margin:6px 0;font-size:var(--petri-font-size-xs)}
+  .bubble.me{background:var(--petri-accent);color:var(--petri-bg-surface)}
+  .bar{height:6px;background:var(--petri-bg-subtle);border-radius:3px;margin:7px 0}
+  .bar.short{width:60%}
+  .note{font-size:var(--petri-font-size-sm);color:var(--petri-text-muted);margin:6px 0 0}
+  .statusdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--petri-accent);margin-right:3px}
+  footer{color:var(--petri-text-muted);font-size:var(--petri-font-size-sm);padding:16px 24px;border-top:1px solid var(--petri-border-strong)}
+  @media(max-width:880px){.cmp{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Petri · 三栏背景分区三方案（提案视觉稿）</h1>
+  <p>三栏现状均为同一种背景色；以下方案用既有 token 的 color-mix 派生 2-4% 极淡 tint。静态稿、非实现、观感零代签。</p>
+</header>
+<div class="toolbar">
+  <button type="button" onclick="document.documentElement.removeAttribute('data-theme')">亮色</button>
+  <button type="button" onclick="document.documentElement.setAttribute('data-theme','dark')">暗色</button>
+  <span class="note">切换亮/暗看双模式表现；每屏左=现状、右=提案。</span>
+</div>
+<main>
+
+<section id="shape-a">
+  <h2>方案 A — 极淡单色差分区（三栏各一层 tint）</h2>
+  <p class="lead">左略深 / 中主底 / 右略冷，分界处渐变淡出避免硬边。</p>
+  <div class="cmp">
+    <figure class="pane"><figcaption>现状（三栏同色）</figcaption><div class="grid">
+      <div class="col">项目树<div class="bar"></div><div class="bar short"></div></div>
+      <div class="col"><div class="bubble me">写份总结</div><div class="bubble">好的，先列要点…</div><div class="bar"></div></div>
+      <div class="col">文件预览<div class="bar"></div></div>
+    </div></figure>
+    <figure class="pane proposal"><figcaption>A 提案（左深 / 中主 / 右冷）</figcaption><div class="grid">
+      <div class="col leftA">项目树<div class="bar"></div><div class="bar short"></div></div>
+      <div class="col"><div class="bubble me">写份总结</div><div class="bubble">好的，先列要点…</div><div class="bar"></div></div>
+      <div class="col rightA">文件预览<div class="bar"></div></div>
+    </div></figure>
+  </div>
+  <p class="note">token：color-mix(bg-surface 96%, text/accent 4%)，中栏不动；暗色随双定义自动适配。分隔线（border-strong）保留可见。</p>
+</section>
+
+<section id="shape-b">
+  <h2>方案 B — 仅左右两侧 tint（推荐）</h2>
+  <p class="lead">中栏（对话主体）纯主底完全不动；左栏微深、右栏微浅，建立「外围辅助 / 中心主内容」。</p>
+  <div class="cmp">
+    <figure class="pane"><figcaption>现状（三栏同色）</figcaption><div class="grid">
+      <div class="col">项目树<div class="bar"></div></div>
+      <div class="col"><div class="bubble me">跑一下数据</div><div class="bubble"><span class="statusdot"></span>正在执行…</div><div class="bar"></div></div>
+      <div class="col">文件预览<div class="bar"></div></div>
+    </div></figure>
+    <figure class="pane proposal"><figcaption>B 提案（中栏零改动）</figcaption><div class="grid">
+      <div class="col leftA">项目树<div class="bar"></div></div>
+      <div class="col"><div class="bubble me">跑一下数据</div><div class="bubble"><span class="statusdot"></span>正在执行…</div><div class="bar"></div></div>
+      <div class="col rightB">文件预览<div class="bar"></div></div>
+    </div></figure>
+  </div>
+  <p class="note">token：左 color-mix(bg-surface 96%, text 4%)、右 color-mix(bg-surface 80%, bg-subtle 20%)；暗色下 subtle 更亮→右栏微亮，方向自然反转。中栏消息气泡/卡片可读性零影响。</p>
+</section>
+
+<section id="shape-c">
+  <h2>方案 C — 顶部纵向渐变 tint</h2>
+  <p class="lead">每栏从顶部极淡渐变到主底，无横向硬边；更柔和但分区信号最弱。</p>
+  <div class="cmp">
+    <figure class="pane"><figcaption>现状（三栏同色）</figcaption><div class="grid">
+      <div class="col">项目树<div class="bar"></div></div>
+      <div class="col"><div class="bubble me">写一份总结</div><div class="bubble">已生成总结。</div></div>
+      <div class="col">文件预览<div class="bar"></div></div>
+    </div></figure>
+    <figure class="pane proposal"><figcaption>C 提案（顶部渐变）</figcaption><div class="grid">
+      <div class="col grad">项目树<div class="bar"></div></div>
+      <div class="col"><div class="bubble me">写一份总结</div><div class="bubble">已生成总结。</div></div>
+      <div class="col gradC">文件预览<div class="bar"></div></div>
+    </div></figure>
+  </div>
+  <p class="note">token：linear-gradient(180deg, color-mix(bg-surface 94%, accent/text 6%), bg-surface 110px)；长列表滚动时渐变锚容器顶部、分区感随内容滚动减弱。</p>
+</section>
+
+</main>
+<footer>试用反馈⑧ · 静态提案稿 · 零产品代码 · pending_user_ruling（owner 回 A/B/C 或都不采纳后定）。tint 全由既有 --petri-* token 的 color-mix 派生、零新 token/依赖；与反馈⑤分隔线统一修复兼容。</footer>
+</body>
+</html>
