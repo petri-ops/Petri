@@ -53,6 +53,14 @@
 ### 2.4 owner 强参与原则产品化
 - 生成是"对话式迭代"而非"一锤子买卖"：每轮生成返回多候选 + 可反馈"保留/重做/调整"；挑选结果落 artifact-truth 并可在 Result Studio 继续加工。此循环形态由包定义，内核只提供 artifact 与事件通道。
 
+## §2.4 薄包纪律（owner msg_b6d77565f11e 裁决）
+
+owner 关切「领域包很重吗，不想过重」——创作域天然是**薄包**：今日 logo 生成铁证=一个 HTTP POST 出全部能力，零本地模型/零依赖；bio 包的重是科研历史形态（休眠插件/示例数据/本地模型引用），create 包**不复制该形态**。
+
+六条纪律：①零本地模型（生成/编辑全走云端 Ark Seedream/Seedance HTTP）②零重资产（不打包示例图库/预置素材/数据集，示例在线拉取或用户本地提供）③provider 适配器=纯 HTTP+参数映射+产物登记（curl 即完整能力证明）④预设=KB 级小 JSON⑤**体积预算门**：代码+配置<10MB（不含 node_modules/.git/evidence），CI `node scripts/size-budget.cjs` 超限即红⑥休眠插件仅确有离线需求时启用（创作域暂无）。
+
+边界：bio 包现有形态不动（历史包不追溯改）；`pack-registry` 包验收清单可加体积预算作新包通用规范。验收证据 `evidence/` 不计入体积预算。
+
 ## §2.5 设计宪法（owner msg_a9c7bc882f84 裁决 · 融入蓝图与 P0）
 
 **第一层 · 展示宪法（格式即插件，通用走内核）**：通用格式（mp4/glTF/图片/SVG）由内核原生 viewer 展示（3D 面板/生成文件面板已承接），领域专属格式才由包注册渲染器（artifactTypes 声明→展示层自动路由）。判例=bio 包 P6「resultSurfaces 退役回 core viewer，放宽验收=假绿」——领域渲染器只用于真领域专属格式，不为通用格式造第二 viewer。
