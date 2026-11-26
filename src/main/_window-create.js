@@ -124,13 +124,17 @@ async function createWindow({
     // 悬浮在 app 深色 header 上，不再有 OS 浅色标题栏 + app tab 行两层皮；
     // 交通灯位置 (16,12) 取自 Orca 同栈 Electron 实现，38px header 内可容。
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    // Petri 专属固定值（终局 msg_a3eb8ca79ff6，一次测量计算、非试错）：
-    // Orca 用固定 trafficLightPosition {x:16,y:12} 配其自身几何（工具行中心≈18）；
-    // Petri 几何不同——CDP 实测 header 高38px、align-items:center、侧栏开关 svg
-    // 图标中心 y=18.726（CSS 结构常量，与窗口实例无关）→ y = 18.726 - 灯径/2(6px)
-    // = 12.726 ≈ 12.7。比 Orca y +0.7 = 两 app 布局差异；x=20 (+4 vs Orca) 配
-    // header 左区 padding-left:96px 给交通灯留位。语义已由7点目测实证：y=灯顶部坐标。
-    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 20, y: 12.7 } } : {}),
+    // Petri 专属固定值（终局 msg_f40c267460b2，ground truth 像素标定）：
+    // Orca 固定 {x:16,y:12} 配其自身几何（标杆 D≈0）；Petri owner 聚焦截图实测
+    // 灯中心 y=33.5px / 工具行图标中心 y=28.5px（D=5 截图像素低），缩放≈1.5x
+    // → D≈3.3 CSS px → y = 12.7 - 3.3 ≈ 9.4（灯顶坐标语义已7点实证、灯中心=y+6）。
+    // 早期 12.7 来自 CDP 测试隐藏窗几何反解（18.73-6），与实际主窗不符——ground truth 修正。
+    // x=20 配 header 左区 padding-left:96px 给交通灯留位（比 Orca x16 +4）。
+    // 终值 y=11.4（残差像素精修 msg_91a73f6f0b84）：y9.4 截图同图内量得灯中心 y=23.5px、
+    // 工具行图标中心 y=26.5px → 灯高 3 截图像素（缩放≈1.5x→2CSS）；y增大使灯下移 → 9.4+2=11.4。
+    // 历史：Orca固定{16,12}配其几何；Petri先CDP反解12.7（测试隐藏窗失准）、ground truth修正9.4（过调）、
+    // 本轮残差收敛11.4。灯顶坐标语义已7点实证；x=20配96px红灯位。
+    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 20, y: 11.4 } } : {}),
     backgroundColor: "#1f2330",
     // 窗口/任务栏图标（mac 走 app bundle 会忽略此值；win/linux dev 态即时可见，
     // packaged 态由 electron-builder 的 icon 条目接管）

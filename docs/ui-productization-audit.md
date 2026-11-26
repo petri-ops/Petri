@@ -7118,3 +7118,11 @@ owner 多轮目测数据（y7=高/y13=微高/y13.5=低/y14=低/y15=低/y16=低/y
 ### UI-744 终局固定值说明（msg_a3eb8ca79ff6）——一次测量计算、关闭试错
 
 owner 裁决「看 Orca 怎么处理，是固定数值吗」——核真 Orca app.asar：固定 `{x:16,y:12}` + hiddenInset，该数值配 Orca 自身几何（工具行中心≈18）。Petri 几何不同需算自己的：CDP /json/list 仅一个 Petri page（owner 主窗未开调试端口、无法直连；但几何为 CSS 结构常量与窗口实例无关）——实测 header 高 37.996px / align-items:center / 侧栏开关 svg 图标中心 18.726px（button 同值）→ **Petri 固定 y = 18.726 − 灯径/2(6) = 12.726 ≈ 12.7**（当前值即此，无需改数值）；x=20（比 Orca +4，配 padding-left:96px 红灯位）。y 比 Orca +0.7 = 两 app 布局差异，已写入 _window-create.js 注释（固定值+来源，后人可维护）。HK-01 补几何来源断言（header 38px + align-items:center）。试错/语义猜测/像素标定三条路全部关闭。
+
+### UI-744 ground truth 像素标定（msg_f40c267460b2）：y=12.7→9.4
+
+owner 发 y12.7 聚焦态顶栏截图（/tmp/owner-titlebar-y12.7-focused.png，248×68）。内部一致性反证来源：若图为 Orca（owner 认可的对齐标杆）灯/工具行 D 应≈0；实测三灯中心 y≈33.5px、工具行图标中心 y≈28.5px → **D=5 截图像素低**，与 owner「还是低」反馈吻合 → 图即 Petri y12.7 真状态、测量有效。缩放估算：工具行 svg 截图高≈23px / CSS 15px ≈1.5x → D≈3.3 CSS px → y=12.7−3.3≈**9.4**（灯顶坐标语义已7点实证、灯中心=y+6）。早期 12.7 基于 CDP 测试隐藏窗几何反解（18.73−6），与主窗不符——ground truth 修正。HK-01 test/traffic-light-tune 断言 9.4、三套合计9/9、全静态门10/10。±0.5残差属感知噪声、此轮后收口。
+
+### UI-744 残差像素精修终值（msg_91a73f6f0b84）：y=11.4
+
+owner y9.4 状态截图（/tmp/owner-titlebar-y9.4-residual.png，268×58）。同图逐像素测量：三灯簇中心 y=23.5px（x23-36/68-83）、工具行图标簇中心 y=26.5px（x178-199）→ **灯高 3 截图像素**（D2=-3，从 y12.7 的"低5"反转，说明 9.4 过调）。灯簇宽 14px 与上图一致 → 缩放同≈1.5x → D2≈2 CSS px；y 增大使灯下移（7点实证）→ **y=9.4+2=11.4**。设终值 11.4、HK-01 断言同步、三套 HK 9/9、全静态门 10/10。±0.5 残差属感知噪声、此轮为像素级收尾，owner 终验后 item68 关闭。
