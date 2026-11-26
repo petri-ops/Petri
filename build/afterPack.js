@@ -114,6 +114,13 @@ exports.default = async function afterPack(context) {
     throw new Error(`rebuilt better-sqlite3 binary not found: ${source}`);
   }
 
+  // 品牌图标全套集成（owner msg_22bba0ea1f99）：packaged 模式 resolveResource('icons',...)
+  // 指向 process.resourcesPath/icons/（env-coordinator.js:47-52）；不复制则 tray 只走兜底
+  // 且文件不存在。把 icons/ 全套随包复制（4.2MB，含 tray template/icns/ico/iconset）。
+  const iconsSrc = path.join(__dirname, '..', 'icons');
+  const iconsDst = path.join(resourcesDir, 'icons');
+  if (fs.existsSync(iconsSrc)) fs.cpSync(iconsSrc, iconsDst, { recursive: true, force: true });
+
   // BLOCK-353（packaged 回归）— 把 asar 内生产依赖解出到 Resources/node_modules：
   // 打包后端（Resources/core/petri-server/server.js，ELECTRON_RUN_AS_NODE）的模块解析
   // 上溯链为 petri-server/node_modules → core/node_modules → Resources/node_modules → …，

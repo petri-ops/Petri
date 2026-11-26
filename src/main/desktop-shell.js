@@ -66,9 +66,10 @@ function createDesktopShell({
   }
 
   function trayIconPath() {
-    // 换标批（v4 定稿）：主版 icon.png 带宣纸底，直接缩到 16px 会在菜单栏
-    // 糊成米色方块。托盘改用透明底紧凑版；缺失时仍回退主图标，保证不空托盘。
-    const candidates = ['icon-tray.png', 'icon.png'];
+    // 品牌 B 案：主版 icon.png 带浅米底，缩到 16px 会在菜单栏糊成米色方块。
+    // 优先单色剪影 template（透明底黑 P，setTemplateImage 由系统反转），
+    // 再退彩色 tray、主图标，保证任何构建下都不空托盘。
+    const candidates = ['icon-tray-template.png', 'icon-tray.png', 'icon.png'];
     try {
       if (typeof resolveResource === 'function') {
         for (const name of candidates) {
