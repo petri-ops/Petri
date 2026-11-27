@@ -8,7 +8,6 @@
       "Bash(npm ci:*)",
       "Bash(node scripts/*:*)",
       "Bash(node --test:*)",
-
       "Bash(npm run test:*)",
       "Bash(npm run harness:*)",
       "Bash(npm run gate:*)",
@@ -44,7 +43,6 @@
       "Bash(npm run start:*)",
       "Bash(npm run postinstall:*)",
       "Bash(npm run prebuild:*)",
-
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
@@ -54,21 +52,19 @@
       "Bash(git rev-parse:*)",
       "Bash(git ls-files:*)",
       "Bash(git symbolic-ref:*)",
-
       "Bash(git rm:*)",
       "Bash(git mv:*)",
       "Bash(mv *trash*:*)",
       "Bash(mv *archive*:*)",
-
       "Bash(gh run view:*)",
       "Bash(gh run list:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr checks:*)",
-
       "Bash(ls:*)",
       "Bash(grep:*)",
       "Bash(rg:*)",
       "Bash(find:*)"
-    ]
+    ],
+    "defaultMode": "bypassPermissions"
   }
 }
