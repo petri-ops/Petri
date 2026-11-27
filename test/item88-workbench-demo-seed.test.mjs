@@ -44,7 +44,10 @@ function counts(dbPath) {
   const result = {
     goals: one("SELECT COUNT(*) c FROM wb_goals WHERE id LIKE 'demo_wb_%'"),
     tasks: one("SELECT COUNT(*) c FROM wb_tasks WHERE id LIKE 'demo_wb_%'"),
-    events: one("SELECT COUNT(*) c FROM task_events WHERE task_id LIKE 'demo_wb_%'"),
+    // attempt2 ③：轨迹事件挂 primary 主任务 id（trace 走 getLatestPrimaryTaskForConversation）
+    events: one("SELECT COUNT(*) c FROM task_events WHERE task_id = 'demo_agent_task_primary'"),
+    tasksRow: one("SELECT COUNT(*) c FROM tasks WHERE id = 'demo_agent_task_primary'"),
+    msgs: one("SELECT COUNT(*) c FROM copilot_messages WHERE conversation_id = 'conv_demo_wb88'"),
     loopRuns: one("SELECT COUNT(*) c FROM loop_runs WHERE loop_run_id LIKE 'demo_loop_%'"),
     runningSubagents: one("SELECT COUNT(*) c FROM loop_runs WHERE loop_run_id LIKE 'demo_loop_%' AND kind='subagent' AND loop_status='running'"),
     convs: one("SELECT COUNT(*) c FROM copilot_conversations WHERE title = '演示：产品宣传素材包'"),
@@ -60,9 +63,21 @@ test('HK-88d-1：seed 幂等——重跑计数不变；五态/任务书/依赖/�
   const again = runSeed(['--db', dbPath]);
   assert.equal(again.code, 0, '重跑应成功（幂等）');
   const c1 = counts(dbPath);
-  assert.deepEqual(c1, { goals: 1, tasks: 5, events: 18, loopRuns: 6, runningSubagents: 5, convs: 1 });
+  assert.deepEqual(c1, { goals: 1, tasks: 5, events: 30, tasksRow: 1, msgs: 3, loopRuns: 7, runningSubagents: 6, convs: 1 });
 
   const db = new Database(dbPath, { readonly: true });
+  // attempt2 ②：会话 user_id 必须 = auth LOCAL_USER.id（'local-user'），否则侧栏按用户过滤不可见
+  const conv = db.prepare("SELECT user_id FROM copilot_conversations WHERE id = 'conv_demo_wb88'").get();
+  assert.equal(conv.user_id, 'local-user');
+  // attempt2 ③：主任务行绑会话（trace 的 getLatestPrimaryTaskForConversation 判据）
+  const taskRow = db.prepare("SELECT params, user_id FROM tasks WHERE id = 'demo_agent_task_primary'").get();
+  assert.equal(taskRow.user_id, 'local-user');
+  assert.equal(JSON.parse(taskRow.params).conversationId, 'conv_demo_wb88');
+  const eventTypes = db.prepare("SELECT event_type, COUNT(*) c FROM task_events WHERE task_id = 'demo_agent_task_primary' GROUP BY event_type").all();
+  const byType = Object.fromEntries(eventTypes.map((r) => [r.event_type, r.c]));
+  assert.ok(byType.input_queued >= 1, '任务下发事件在场');
+  assert.equal(byType['workbench.transition:accept'] ?? 0, 1, 'wb 状态链事件在场');
+  assert.ok(byType.tool_call >= 3, '工具调用样例在场');
   const statuses = db.prepare("SELECT status FROM wb_tasks WHERE id LIKE 'demo_wb_%' ORDER BY id").all().map((r) => r.status);
   assert.deepEqual(statuses.sort(), ['accepted', 'blocked', 'needs-user', 'queued', 'running'], '五态齐');
   const blocked = db.prepare("SELECT dependencies_json, spec_json FROM wb_tasks WHERE id = 'demo_wb_task_3'").get();
@@ -85,7 +100,7 @@ test('HK-88d-2：--clean 清零且不碰 demo 前缀以外的行', () => {
   const cleaned = runSeed(['--db', dbPath, '--clean']);
   assert.equal(cleaned.code, 0, `clean 应成功：${cleaned.stdout.slice(-400)}`);
   const c = counts(dbPath);
-  assert.deepEqual(c, { goals: 0, tasks: 0, events: 0, loopRuns: 0, runningSubagents: 0, convs: 0 });
+  assert.deepEqual(c, { goals: 0, tasks: 0, events: 0, tasksRow: 0, msgs: 0, loopRuns: 0, runningSubagents: 0, convs: 0 });
   const db2 = new Database(dbPath, { readonly: true });
   assert.equal(db2.prepare("SELECT COUNT(*) c FROM wb_goals WHERE id='real_goal_keep'").get().c, 1, '非演示哨兵保留');
   db2.close();

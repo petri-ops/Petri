@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **item 88 演示数据 attempt 2（2026-11-27，owner 实测三差距已修）**：会话可见性（user_id='local-user' + 3 条聊天消息）/轨迹绑定（primary 任务行+30 事件）/连线（root subagent run + parent 指针）三修；CDP 预览实例端到端实证（聊天下发摘要双亮、总览 13 节点 11 连线、轨迹 18 条 transition+13 提及），截图 6 张存 acceptance/item88-workbench-demo-attempt2/。owner 实机确认可行，**收工**。**状态**：in_progress（演示数据保留 owner 库，--clean 可清）。
+
 > **item 88 演示数据令同批登记（2026-11-27，owner 选 B）**：工作台总览灌活演示——seed 脚本 `scripts/item88-workbench-demo-seed.mjs`（幂等+`--clean` 一键清，写前 `db.backup` .bak 安全垫）：①wb_* 目标+5 任务状态机五态（appendWorkbenchEvent 真 API 落 18 条轨迹；**wb store API 尚不存在、overview 尚未读 wb 表——INSERT 按 DDL 形状如实标注，等 wave3 接线**）②loop_runs 1 primary+5 running subagent（persistLoopRun 真 API，parent_loop_run_id 置空镜像 resume 兜底连线现实）。数据源核真如实报：总览目标树/协作图实际数据源=会话子代理快照（loop_runs resume），非 wb 表。HK-01：node 3/3（幂等/clean 不误删/五态+依赖+咨询选项）+ 前端投影 2/2（6 节点 5 连线/空输入诚实空）。**状态**：in_progress（演示数据已灌 dev 库，观感待 owner 打开演示会话过目）。
 
 > **item 90 阶段一 Result Studio 可逆下架同批登记（2026-11-27）**：结果面/证据面加 flag 包装层（`resultStudio` 决策点默认 off）——off 时渲染「已下架」诚实态（data-testid=results-surface-off/evidence-surface-off），Inner 组件逐字未动；on 时行为零变化（既有 13 测补 flag-on mock 全绿）。**零观感变化声明**：flag on（默认关闭前的老用户路径=从未开启）像素级不变；off 态为新出现的诚实空态。HK-01：ResultsSurface.flag.test.tsx 3/3 + item90 后端 4/4。**状态**：in_progress（flag 默认 off，owner 无感；观感无 pending_human_eye 项）。缺口感：编辑链退役/血缘承接/跨会话产物浏览/交互表格查看器 4 项已报备（见 acceptance/item90-result-studio-phase1/IMPACT-INVENTORY.md 双表面映射表）。

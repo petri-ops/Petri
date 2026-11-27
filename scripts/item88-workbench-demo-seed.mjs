@@ -127,12 +127,42 @@ async function backup(db) {
   }
 }
 
+function ensureCompatSchema(db) {
+  // tasks/task_events DDL 归 agent-task-store（模块加载期建 + 会 sweep 线上 running 任务
+  // ——脚本绝不 require 它）。此处放同形防御 DDL：dev/owner 库已存在则 no-op。
+  db.exec(`CREATE TABLE IF NOT EXISTS tasks (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    params TEXT DEFAULT '{}',
+    status TEXT NOT NULL DEFAULT 'running',
+    created_at TEXT NOT NULL,
+    finished_at TEXT,
+    error TEXT,
+    user_id TEXT,
+    agent_status TEXT,
+    retry_count INTEGER DEFAULT 0,
+    next_retry_at TEXT,
+    max_retries INTEGER DEFAULT 0
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS task_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_id TEXT NOT NULL,
+    seq INTEGER NOT NULL,
+    event_type TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS uq_task_events_task_seq ON task_events(task_id, seq)');
+}
+
 function seedClean(db) {
+  ensureCompatSchema(db);
   const wipe = db.transaction(() => {
-    db.prepare("DELETE FROM task_events WHERE task_id LIKE 'demo_wb_%'").run();
+    db.prepare("DELETE FROM task_events WHERE task_id LIKE 'demo_wb_%' OR task_id = 'demo_agent_task_primary'").run();
     db.prepare("DELETE FROM wb_tasks WHERE id LIKE 'demo_wb_%'").run();
     db.prepare("DELETE FROM wb_goals WHERE id LIKE 'demo_wb_%'").run();
     db.prepare("DELETE FROM loop_runs WHERE loop_run_id LIKE 'demo_loop_%'").run();
+    db.prepare("DELETE FROM tasks WHERE id = 'demo_agent_task_primary'").run();
     db.prepare("DELETE FROM copilot_messages WHERE conversation_id IN (SELECT id FROM copilot_conversations WHERE title = ?)").run(DEMO.convTitle);
     db.prepare('DELETE FROM copilot_conversations WHERE title = ?').run(DEMO.convTitle);
     db.prepare('DELETE FROM projects WHERE id = ?').run(DEMO.projectId);
@@ -144,8 +174,12 @@ function seedClean(db) {
 
 function seedInsert(db) {
   const { transitionRun, appendWorkbenchEvent } = require_(path.join(ROOT, 'core', 'petri-server', 'helpers', 'workbench-state-machine.js'));
-  // appendWorkbenchEvent 落 task_events；该表 DDL 归 agent-task-store（模块加载期建），
-  // 脚本上下文不 require 整个 store——这里放同形防御性 DDL（dev 库已存在则 no-op）。
+  ensureCompatSchema(db);
+  const dbStore = require_(path.join(ROOT, 'core', 'petri-server', 'db.js'));
+  const conversations = require_(path.join(ROOT, 'core', 'petri-server', 'helpers', 'conversations.js'));
+  // appendWorkbenchEvent/轨迹都落 task_events；该表 DDL 归 agent-task-store（模块加载期建，
+  // 且其模块加载会 sweep 线上 running 任务——脚本绝不 require 它）。这里放同形防御性 DDL
+  // + 唯一索引（dev 库已存在则 no-op）。
   db.exec(`CREATE TABLE IF NOT EXISTS task_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_id TEXT NOT NULL,
@@ -154,65 +188,100 @@ function seedInsert(db) {
     payload TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
-  const dbStore = require_(path.join(ROOT, 'core', 'petri-server', 'db.js'));
-  const conversations = require_(path.join(ROOT, 'core', 'petri-server', 'helpers', 'conversations.js'));
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS uq_task_events_task_seq ON task_events(task_id, seq)');
 
-  // 阶段1（本连接事务）：wb_* / 项目 / 会话；阶段2（db.js 连接）：loop store API。
-  // 不把 store API 嵌进本事务——两连接各自持写锁会互锁（WAL 单写者）。
+  const PRIMARY_TASK = 'demo_agent_task_primary';
+  const USER_ID = 'local-user'; // auth.js LOCAL_USER.id——侧栏按 req.user.id 过滤， attempt1 误用 'local' 被藏
+
+  const nextSeqStmt = db.prepare('SELECT COALESCE(MAX(seq),0) + 1 AS s FROM task_events WHERE task_id = ?');
+  const emit = db.transaction((taskId, eventType, payload) => {
+    const seq = nextSeqStmt.get(taskId).s;
+    db.prepare('INSERT INTO task_events (task_id, seq, event_type, payload, created_at) VALUES (?,?,?,?,?)')
+      .run(taskId, seq, eventType, JSON.stringify(payload), nowIso());
+    return seq;
+  });
+
+  // 阶段1（本连接事务）：项目/会话/聊天消息/wb_*/轨迹事件。loop_runs 走阶段2 store API（独立连接）。
   const insert = db.transaction(() => {
-    // 项目（幂等）
     const nowMs = Date.now();
     db.prepare('INSERT INTO projects (id, name, created_at, updated_at) VALUES (?,?,?,?) ON CONFLICT(id) DO NOTHING')
       .run(DEMO.projectId, DEMO.convTitle, nowMs, nowMs);
 
-    // 演示会话（幂等：同名即复用）——owner 打开它即可看到总览活形态
+    // 演示会话（幂等：同名即复用）——user_id 必须是 auth LOCAL_USER.id，否则侧栏按用户过滤不可见
     let conv = db.prepare('SELECT id FROM copilot_conversations WHERE title = ?').get(DEMO.convTitle);
-    let isNewConv = false;
     if (!conv) {
-      const convId = `conv_demo_wb88`;
       db.prepare('INSERT INTO copilot_conversations (id, user_id, title, status, project_id, message_count, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)')
-        .run(convId, 'local', DEMO.convTitle, 'active', DEMO.projectId, 1, nowIso(), nowIso());
-      db.prepare('INSERT INTO copilot_messages (id, conversation_id, role, content, ts) VALUES (?,?,?,?,?)')
-        .run(`msg_demo_wb88`, convId, 'user', '演示会话：工作台总览灌数据验收（item 88）。演示数据可用 seed 脚本 --clean 一键清除。', nowIso());
-      conv = { id: convId };
-      isNewConv = true;
+        .run('conv_demo_wb88', USER_ID, DEMO.convTitle, 'active', DEMO.projectId, 1, nowIso(), nowIso());
+      conv = { id: 'conv_demo_wb88' };
     }
     const conversationId = conv.id;
 
-    // 重灌幂等：演示事件链重置（appendWorkbenchEvent 是纯追加，重跑会翻倍）
-    db.prepare("DELETE FROM task_events WHERE task_id LIKE 'demo_wb_%'").run();
+    // 重灌幂等：演示事件链重置（事件是纯追加，重跑会翻倍）
+    db.prepare("DELETE FROM task_events WHERE task_id = 'demo_agent_task_primary'").run();
+
+    // 轨迹主任务（attempt2 ③）：trace 走 getLatestPrimaryTaskForConversation——
+    // tasks 行 params.conversationId 绑会话，task_events 挂该 task id 即入轨迹时间轴。
+    // status='done'：running 会被 fetchInFlightPrimaryTasks 捞走 → 聊天区挂「上次运行未正常结束」横幅
+    // （attempt2 首验实测）。done 不进在途清单，trace 的 latest-primary 查询不过滤状态——两全。
+    db.prepare(`INSERT INTO tasks (id, type, params, status, created_at, finished_at, user_id, agent_status)
+      VALUES (?,?,?,?,?,?,?,?)
+      ON CONFLICT(id) DO UPDATE SET params=excluded.params, status='done', agent_status='done', finished_at=excluded.finished_at`)
+      .run(PRIMARY_TASK, 'agent_loop',
+        JSON.stringify({ conversationId, goalId: DEMO.goalId, demo: true, title: DEMO.convTitle }),
+        'done', nowIso(), nowIso(), USER_ID, 'done');
+
+    // ①任务下发（user 组）
+    emit(PRIMARY_TASK, 'input_queued', {
+      content: '【演示下发】制作产品宣传素材包：主视觉海报 / 宣传短视频 / 落地页文案 / 品牌口播稿 / 素材打包（五任务编排，演示数据）',
+    });
+    emit(PRIMARY_TASK, 'run_started', { status: 'started', message: '编排开始：5 个子任务入工作台' });
 
     // A. wb_* 目标 + 5 任务（schema DDL 形状；wb store API 尚不存在——脚本头注释已声明）
     db.prepare('INSERT INTO wb_goals (id, project_id, description, budget_cny, status, acceptance_json, created_at) VALUES (?,?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING')
       .run(DEMO.goalId, DEMO.projectId, '演示数据，可一键清除——产品宣传素材包（海报/视频/文案/口播/打包）', 12.5, 'active',
         JSON.stringify({ 验收标准: ['五任务全部 delivered 后 accepted', '素材齐全且 README 清单完整'] }), nowIso());
 
+    const chainByStatus = {
+      accepted: ['confirm', 'queue', 'start', 'review', 'accept'],
+      running: ['confirm', 'queue', 'start'],
+      blocked: ['confirm', 'queue', 'start', 'block'],
+      'needs-user': ['confirm', 'queue', 'start', 'needs-user'],
+      queued: ['confirm', 'queue'],
+    };
     for (const task of DEMO.tasks) {
-      db.prepare('INSERT INTO wb_tasks (id, goal_id, spec_json, status, worker_task_id, priority, dependencies_json, created_at) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING')
+      db.prepare('INSERT INTO wb_tasks (id, goal_id, spec_json, status, worker_task_id, priority, dependencies_json, created_at) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET spec_json=excluded.spec_json, status=excluded.status, dependencies_json=excluded.dependencies_json')
         .run(task.id, DEMO.goalId, JSON.stringify(task.spec), task.status, null, task.priority,
           JSON.stringify(task.dependencies || []), nowIso());
-      // 状态链经真 API 落 task_events（append-only 演示轨迹）
-      const chain = {
-        accepted: ['confirm', 'queue', 'start', 'review', 'accept'],
-        running: ['confirm', 'queue', 'start'],
-        blocked: ['confirm', 'queue', 'start', 'block'],
-        'needs-user': ['confirm', 'queue', 'start', 'needs-user'],
-        queued: ['confirm', 'queue'],
-      }[task.status] || [];
+      // 状态链经真 API 落 task_events（挂主任务 id → 轨迹时间轴可见；payload 带子任务名）
+      const chain = chainByStatus[task.status] || [];
       let state = 'draft';
       for (const event of chain) {
         const step = transitionRun(state, event);
         if (!step.ok) throw new Error(`状态链断：${task.id} ${state}+${event}（${step.error}）`);
-        appendWorkbenchEvent({ db, taskId: task.id, from: state, to: step.state, event });
+        appendWorkbenchEvent({ db, taskId: PRIMARY_TASK, from: state, to: step.state, event, payload: { wbTask: task.label } });
         state = step.state;
       }
       if (state !== task.status) throw new Error(`状态机终态不符：${task.id} 期望 ${task.status} 实际 ${state}`);
+      // ②执行过程（text 组，每子任务一条摘要）
+      emit(PRIMARY_TASK, 'agent_progress', { content: `${task.label}：状态 ${task.status}（${(task.spec.产物类型 || '').split('（')[0]}）` });
     }
 
-    return conversationId;
+    // ③工具调用样例（tool 组）
+    emit(PRIMARY_TASK, 'tool_call', { name: 'workspace_write', args: { path: 'campaign/README.md', created: true } });
+    emit(PRIMARY_TASK, 'tool_call', { name: 'workspace_exec', args: { command: 'zip -r campaign/素材包.zip campaign/*' } });
+    emit(PRIMARY_TASK, 'tool_call', { name: 'read_image', args: { path: 'campaign/poster-1080x1920.png' } });
+
+    // ④计量（system 组）
+    const tokenUsed = DEMO.tasks.reduce((sum, task) => sum + (task.spec.计量?.tokenUsed || 0), 0);
+    const costCny = DEMO.tasks.reduce((sum, task) => sum + (task.spec.计量?.costCny || 0), 0);
+    emit(PRIMARY_TASK, 'usage', { usage: { prompt_tokens: Math.round(tokenUsed * 0.6), completion_tokens: Math.round(tokenUsed * 0.4), total_cost_cny: costCny } });
+
+    emit(PRIMARY_TASK, 'done', { status: 'done', message: '演示编排收尾：素材包就绪（演示数据）' });
+
+    return { conversationId, PRIMARY_TASK };
   });
 
-  const conversationId = insert();
+  const { conversationId } = insert();
 
   // 阶段2：loop_runs（真 store API，db.js 连接）——总览树/协作图的实际数据源
   const now = nowIso();
@@ -229,8 +298,26 @@ function seedInsert(db) {
     updatedAt: now,
     kind: 'primary',
   });
+  // 连线构造（attempt2 实测）：投影的边=child.parentTaskId ∈ 快照 taskId 集。
+  // resume 快照 parentTaskId=run.parentLoopRunId——故根节点本身也要是一个 running
+  // subagent run（parent_loop_run_id=null，task_id 即子任务们的 parent）。
+  dbStore.persistLoopRun({
+    loopRunId: 'demo_loop_root',
+    projectId: DEMO.projectId,
+    conversationId,
+    taskSpecRef: null,
+    automationMode: 'demo',
+    loopStatus: 'running',
+    hash: 'demo-root-hash',
+    isPartial: false,
+    createdAt: now,
+    updatedAt: now,
+    kind: 'subagent',
+    parentLoopRunId: null,
+    taskId: 'demo_primary_root',
+  });
   for (const task of DEMO.tasks) {
-    // 5 个子代理全部 running：刷新后经 resume 恢复，总览树/协作图 5 节点 5 连线可见。
+    // 5 个子代理全部 running：刷新后经 resume 恢复，总览树/协作图 节点+连线可见。
     // （loop 词汇无 wb 五态投影；wb_tasks 表才承载 accepted/blocked/needs-user/queued 演示态。）
     dbStore.persistLoopRun({
       loopRunId: `demo_loop_${task.id}`,
@@ -244,22 +331,27 @@ function seedInsert(db) {
       createdAt: now,
       updatedAt: now,
       kind: 'subagent',
-      // parentLoopRunId 留空：resume 快照 parentTaskId=undefined → 投影走 root 兜底连线
-      // （真实链路 primary 不在子代理快照列表，挂 parent 会得 0 连线——镜像现实形态）。
-      parentLoopRunId: null,
+      parentLoopRunId: 'demo_primary_root',
       taskId: `demo_agent_${task.id}`,
     });
   }
+
+  // 阶段3：聊天区可见性（attempt2 ①②）——任务下发 + 执行摘要消息（真 store API，会更新 message_count）。
+  // 幂等：仅当演示会话还没有消息时追加（重跑不翻倍）。
+  const msgCount = db.prepare('SELECT COUNT(*) c FROM copilot_messages WHERE conversation_id = ?').get(conversationId).c;
+  if (msgCount === 0) {
+  conversations.appendMessageToConversation(conversationId, 'user',
+    '【演示下发】制作产品宣传素材包：主视觉海报 / 宣传短视频 / 落地页文案 / 品牌口播稿 / 素材打包（五任务编排，演示数据可一键清除）',
+    { demo: true });
+  conversations.appendMessageToConversation(conversationId, 'assistant',
+    '编排完成：5 个子任务已入工作台。\n① 主视觉海报 —— accepted\n② 宣传短视频 —— running\n③ 落地页文案 —— blocked（依赖①）\n④ 品牌口播稿 —— needs-user（等你选语气）\n⑤ 素材打包 —— queued',
+    { demo: true });
+  conversations.appendMessageToConversation(conversationId, 'assistant',
+    '计量合计：token ≈31,200 / 成本 ≈¥0.81 / 累计 156s。打开右栏「项目总览」tab 看目标树与协作图（演示数据）。',
+    { demo: true });
+  }
+
   console.log(`[demo-seed] 灌入完成。演示会话：${DEMO.convTitle}（id=${conversationId}）`);
-  const report = {
-    wbGoals: db.prepare("SELECT COUNT(*) c FROM wb_goals WHERE id LIKE 'demo_wb_%'").get().c,
-    wbTasks: db.prepare("SELECT COUNT(*) c FROM wb_tasks WHERE id LIKE 'demo_wb_%'").get().c,
-    wbEvents: db.prepare("SELECT COUNT(*) c FROM task_events WHERE task_id LIKE 'demo_wb_%'").get().c,
-    loopRuns: db.prepare("SELECT COUNT(*) c FROM loop_runs WHERE loop_run_id LIKE 'demo_loop_%'").get().c,
-    runningSubagents: db.prepare("SELECT COUNT(*) c FROM loop_runs WHERE loop_run_id LIKE 'demo_loop_%' AND kind='subagent' AND loop_status='running'").get().c,
-  };
-  console.log('[demo-seed] 数据清单：', JSON.stringify(report));
-  console.log('[demo-seed] owner 操作：刷新页面 → 打开会话「演示：产品宣传素材包」→ 右栏「项目总览」tab → 目标树 5 节点 + 协作图 5 连线 + 运行态任务卡（loop 词汇可见态=running/done；wb 五态在 wb_tasks 表，等 wave3 接线投影）。');
 }
 
 async function main() {
