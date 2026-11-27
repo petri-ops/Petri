@@ -18,6 +18,7 @@ import { getProject, listProjectJobs, listDatasetsByProject } from '@/lib/projec
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { resolveActiveConversationId } from '@/lib/conversationSelection';
+import { useResultStudioEnabled } from '@/lib/resultStudioFlag';
 import {
   isConversationRunning,
   useConversationRun,
@@ -367,7 +368,13 @@ export function ProjectWorkspace(): React.ReactElement {
   // BLOCK-334 — 打开结果的唯一落点：绑定任务 + 右栏「结果」tab + URL `?job=` 同步。
   // 原四条路径（标题栏结果选择器 / 右栏结果入口 / 摘要卡 / handleOpenResult）各自
   // 再 updateWorkspaceMode('result') 的分支随中央四态退役一并消失。
+  // item 90 阶段一完善 — flag off 时结果面入口全部闭合（tab 隐藏 + 自动打开 no-op）。
+  // 用同步 ref 桥接异步 flag：初值 false（fail-closed），fetch 回来后更新。
+  const resultStudioEnabledRef = useRef(false);
+  const resultStudioEnabled = useResultStudioEnabled();
+  resultStudioEnabledRef.current = resultStudioEnabled;
   const openResultInRail = useCallback((jobId: string) => {
+    if (!resultStudioEnabledRef.current) return;
     beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.openStart);
     bindActiveJob(jobId);
     setRightOpen(true);
@@ -493,6 +500,7 @@ export function ProjectWorkspace(): React.ReactElement {
       openResultInRail(nextJobId);
       return;
     }
+    if (!resultStudioEnabledRef.current) return;
     openRightPanel('results');
   }, [activeJobId, conversationJobs, openResultInRail, openRightPanel]);
   const handleOpenRightBrowser = useCallback(() => {
@@ -899,6 +907,7 @@ export function ProjectWorkspace(): React.ReactElement {
       openResultInRail(nextJobId);
       return;
     }
+    if (!resultStudioEnabledRef.current) return;
     setRightOpen(true);
     openRightPanel('results');
   }, [activeJobId, conversationJobs, openResultInRail, openRightPanel, setRightOpen]);

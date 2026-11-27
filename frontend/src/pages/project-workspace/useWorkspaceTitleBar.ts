@@ -7,6 +7,7 @@ import type { WorkSurfaceDescriptor, WorkSurfaceTab } from '@/lib/workSurface/ty
 import { isTabSurface } from '@/lib/workSurface/registry';
 // UI-446 — 审阅 tab 未读圆点数据源（当前会话工作区改动索引）
 import { useConversationUnreviewedCount, useConversationShortstat } from '@/components/copilot/conversationChangesStore';
+import { useResultStudioEnabled } from '@/lib/resultStudioFlag';
 
 // BLOCK-92 Wave B-1 — TitleBar 注册 effect 簇外迁（原 ProjectWorkspace 内联，纯搬运零行为变化）。
 // TitleBar 注册 —— 8f3d55a5 曾误删整段（右侧工具菜单「+」/ 标签 pills / 结果
@@ -55,6 +56,19 @@ interface UseWorkspaceTitleBarOptions {
   onToggleSideChat: () => void;
 }
 
+/**
+ * item 90 阶段一完善 — resultStudio flag off 时「结果」tab 从 pills/工具菜单直接隐藏
+ * （不再显示 off 态占位）；flag on 恢复显示（回滚能力不变）。纯函数单源可测。
+ */
+export function filterResultStudioTabs<T extends { surfaceId?: string; id?: string }>(
+  items: readonly T[],
+  enabled: boolean,
+  surfaceIdOf: (item: T) => string,
+): T[] {
+  if (enabled) return [...items];
+  return items.filter((item) => surfaceIdOf(item) !== 'results');
+}
+
 export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void {
   const {
     updateTitleBar,
@@ -92,10 +106,14 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
   // UI-449（C-16）— ±行数（权威源=git shortstat；有未审改动才拉，TTL 节流）
   const reviewStat = useConversationShortstat(activeConvId, projectId ?? null, reviewCount > 0);
 
+  const resultStudioEnabled = useResultStudioEnabled();
   const titleBarTabs = useMemo(
     () =>
-      tabs
-        .filter((tab) => tab.surfaceId !== 'home')
+      filterResultStudioTabs(
+        tabs.filter((tab) => tab.surfaceId !== 'home'),
+        resultStudioEnabled,
+        (tab) => tab.surfaceId,
+      )
         .map((tab) => {
           const descriptor = surfaces.find((candidate) => candidate.id === tab.surfaceId);
           return {
@@ -110,11 +128,16 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
                 : undefined,
           };
         }),
-    [tabs, surfaces, reviewCount, reviewStat]
+    [tabs, surfaces, reviewCount, reviewStat, resultStudioEnabled]
   );
   const toolSurfaceItems = useMemo(
-    () => surfaces.filter((surface) => surface.id !== 'home' && isTabSurface(surface)),
-    [surfaces]
+    () =>
+      filterResultStudioTabs(
+        surfaces.filter((surface) => surface.id !== 'home' && isTabSurface(surface)),
+        resultStudioEnabled,
+        (surface) => surface.id,
+      ),
+    [surfaces, resultStudioEnabled]
   );
 /** 右侧栏审计（owner msg_26327e7a3def）：工具菜单四组呈现（纯分组、不改面板去留/顺序语义） */
 const MENU_GROUPS = [

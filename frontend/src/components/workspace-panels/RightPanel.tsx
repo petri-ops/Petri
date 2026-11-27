@@ -8,6 +8,7 @@ import type { ResultEditSubmission } from '@/components/result-studio/ResultEdit
 import type { ResultAgentComposerContext } from '@/components/result-studio/ResultAgentComposer';
 import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
 import { trackResizeGlow } from '@/lib/resize-glow';
+import { useResultStudioEnabled } from '@/lib/resultStudioFlag';
 import {
   type ActiveArtifact,
   type ActiveWorkspaceFile,
@@ -161,6 +162,9 @@ export function RightPanel({
 }: RightPanelProps): React.ReactElement | null {
   // item88 第二波：总览三视图只读投影；数据来自既有子任务快照，零新账本。
   const overviewTasks = useSubAgentTasksForConversation(ctx.activeConvId);
+  // item 90 阶段一完善 — resultStudio flag off 时「结果」tab 内容也不渲染
+  // （tab pill 已在 useWorkspaceTitleBar 过滤；此处兜住持久化 tab 的内容面）。
+  const resultStudioEnabled = useResultStudioEnabled();
   const handleBrowserNavigationStateChange = React.useCallback(
     ({ canGoBack, canGoForward }: { canGoBack: boolean; canGoForward: boolean }) => {
       ctx.setBrowserCanGoBack(canGoBack);
@@ -249,7 +253,7 @@ export function RightPanel({
                     active={ctx.rightTab === tab}
                   />
                 )}
-                {tab === 'results' && (
+                {tab === 'results' && resultStudioEnabled && (
                   <ResultsSurface
                     active={ctx.rightTab === tab}
                     onBackToChat={ctx.handleBackToChat}
@@ -280,7 +284,7 @@ export function RightPanel({
                   />
                 )}
                 {/* 右栏裁决③（owner msg_44b2179358ea）：证据并入结果面板呈现，治理语义不动 */}
-                {tab === 'results' && (
+                {tab === 'results' && resultStudioEnabled && (
                   <EvidenceSurface
                     activeJob={ctx.activeJob}
                     activeWorkflow={ctx.activeWorkflow}

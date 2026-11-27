@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **item 90 阶段一完善 右栏「结果」tab 隐藏同批登记（2026-11-27）**：flag off 时「结果」tab 从右栏 tab 条直接隐藏（不再显示 off 占位）：pills/工具菜单经 filterResultStudioTabs 纯函数过滤 + RightPanel results 内容渲染门控 + 三处自动打开入口 no-op；flag on 恢复显示（回滚不变）。HK-01 4/4（HK-90b-1~4）。**状态**：in_progress（代码级完成；CDP 实证留 owner 实机，观感零代签）。
+
 > **item 87 第二波教练循环同批登记（2026-11-27）**：总览面新增教练条（data-testid=coaching-strip，相位/决策讲解数/复盘分歧数只读展示，仅 bio 试点域有 run 时出现——诚实隐匿）；wb 目标树/协作图保持既有形状。**状态**：in_progress（引擎+路由+总览条代码级完成；CDP 实证以 attempt2 同实例链路为准，本波新面待 owner 实机过目，观感零代签）。
 
 > **item 88 第三波 wb 投影接线+总览独立入口同批登记（2026-11-27，转派自 seat 工具集故障）**：①wb 五态投影接线——`routes/wb-overview.js` 只读面（GET /api/wb/overview?projectId=，五态/依赖/任务书/计量透传）+ WorkbenchOverviewSurface wb 目标树合并去重（wb 节点优先）+ OrchestrationGraph STATUS_COLOR §4.4 五态扩展（accepted 绿/blocked 红/needs-user 琥珀/queued 灰）+ RightPanel 传 projectId；HK-01 真集成 4/4（真 express+迁移库+真路由五态逐断言）+ 前端 2/2（六节点五态色/诚实回退）。②总览升一级导航独立入口——/overview 全局页（global-page 壳）+ AppRail「项目总览」按钮（routeActiveKey 派生 aria-current）+ 右栏 tab 短入口保留。③快照测试——产物卡三形态（轻量/图片/视频）+ 生成文件面联动（视频段/工作区行）snapshot 5/5。④mock 差距清单 acceptance/item88-wave3/MOCK-GAP-INVENTORY.md（今日三案根因模式 + 四类审计 + 建议报 coordinator）。**状态**：in_progress（代码级完成；CDP 实证以 attempt2 同实例为准，本波新面待 owner 实机过目，观感零代签）。
