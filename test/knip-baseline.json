@@ -365,6 +365,8 @@
     "types::frontend/src/components/result-studio/resultStudioClient.ts::ChangeSetStatus",
     "types::frontend/src/components/result-studio/resultStudioClient.ts::ResultStudioTaskResourceSummary",
     "types::frontend/src/components/result-studio/resultSurface.ts::ResultTruthTone",
+    "types::frontend/src/components/work-surface/WorkbenchOverviewSurface.tsx::CoachingRunSummary",
+    "types::frontend/src/components/work-surface/WorkbenchOverviewSurface.tsx::CoachingSummary",
     "types::frontend/src/components/workspace-panels/ResultView/types.ts::DeliveryManifestSummary",
     "types::frontend/src/components/workspace-panels/ResultView/types.ts::JobDetailMeta",
     "types::frontend/src/components/workspace-panels/WorkspaceFileIcon.tsx::WorkspaceFileKind",
@@ -547,6 +549,16 @@
     {
       "key": "types::frontend/src/lib/wbOverviewClient.ts::WbOverviewTask",
       "reason": "item88-wave3 同上（任务形状）",
+      "date": "2026-11-27"
+    },
+    {
+      "key": "types::frontend/src/components/work-surface/WorkbenchOverviewSurface.tsx::CoachingRunSummary",
+      "reason": "item87 教练循环摘要契约类型（总览教练条消费面形状）",
+      "date": "2026-11-27"
+    },
+    {
+      "key": "types::frontend/src/components/work-surface/WorkbenchOverviewSurface.tsx::CoachingSummary",
+      "reason": "item87 同上（runs+divergences 摘要形状）",
       "date": "2026-11-27"
     }
   ]

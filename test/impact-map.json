@@ -10533,6 +10533,20 @@
         "test/item91-release-mac.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "item87-coaching-loop",
+      "note": "item 87 第二波教练循环（方案 §3 四阶段）——do-coaching-schema.js（027_do_coaching.sql 字节一致：do_sample_libraries/do_coaching_runs/do_competence_profiles 三表）+ do-coaching.js 引擎（影子决策讲解落 task_events 可回放/渐进放权滑移纯函数 shadowing→scaffolding→independent 与 88 方向相反引擎同源/复盘分歧五字段结构化 append-only 画像/反馈对照逐维度结构化只呈现事实终审归人/PILOT_DOMAINS 只 bio 白名单）+ routes/do-coaching.js（runs/decisions/reviews/samples/seed/summary 六端点）+ 总览教练条（相位/决策数/分歧数）。HK-01 四钉 7/7（真 HTTP 全链集成 runs→decisions→reviews→samples/seed→summary）。顺笔修：bodyJson 双解析器「stream is not readable」自记。",
+      "patterns": [
+        "core/shared-backend/do-coaching-schema.js",
+        "core/shared-backend/do-coaching.js",
+        "core/petri-server/routes/do-coaching.js",
+        "src/migrations/027_do_coaching.sql",
+        "frontend/src/components/work-surface/WorkbenchOverviewSurface.tsx"
+      ],
+      "tests": [
+        "test/item87-coaching.test.mjs"
+      ]
     }
   ]
 }

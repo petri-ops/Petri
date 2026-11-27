@@ -72,6 +72,8 @@ module.exports = async function registerRoutes(app) {
     ['Generated file', () => require('./generated-file').registerGeneratedFileRoutes(app)],
     // item 88 第三波 — wb 目标/任务只读投影面（总览目标树数据源；只读，写入面归 store）。
     ['Wb overview', () => require('./wb-overview').registerWbOverviewRoutes(app)],
+    // item 87 第二波 — 教练循环记录面（只 bio 试点域白名单；分歧/讲解 append-only）。
+    ['Do coaching', () => require('./do-coaching').registerDoCoachingRoutes(app)],
     ['Storage capabilities', () => require('./storage-capabilities').registerStorageCapabilitiesRoute(app)],
     ['Result Studio', () => require('./result-studio')(app)],
     // NEXT-04A — 3D/Blender 只读能力探测（构建/渲染/导出仍走 agent tools）

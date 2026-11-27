@@ -6,6 +6,43 @@ import {
 } from '@/components/workspace-panels/OrchestrationGraph';
 import { TraceSurface } from './TraceSurface';
 import { fetchWbOverview, type WbOverview } from '@/lib/wbOverviewClient';
+import { getApiPrefix } from '@/lib/env';
+
+// item 87 第二波 — 教练循环摘要（只读）：phase/决策数/分歧数，bio 试点域白名单在后端。
+export interface CoachingRunSummary {
+  runId: string;
+  goalId: string;
+  taskId?: string | null;
+  domain: string;
+  userId: string;
+  phase: string;
+  handover_ratio: number;
+  decision_count: number;
+  accepted_count: number;
+  total_count: number;
+}
+
+export interface CoachingSummary {
+  ok: boolean;
+  projectId: string;
+  pilotDomains: string[];
+  runs: CoachingRunSummary[];
+  divergences: Array<{ profileId: string; runId: string; divergences: Array<Record<string, string>>; createdAt: string }>;
+}
+
+async function fetchCoachingSummary(projectId: string): Promise<CoachingSummary | null> {
+  try {
+    const response = await fetch(
+      `${getApiPrefix()}/do/coaching/summary?projectId=${encodeURIComponent(projectId)}`,
+      { signal: AbortSignal.timeout(5000) },
+    );
+    if (!response.ok) return null;
+    const data: unknown = await response.json();
+    return (data as CoachingSummary)?.ok === true ? (data as CoachingSummary) : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * item88 第二波：2D 专业皮肤总览三视图（目标树 / 协作关系图 / 审计流水）。
@@ -36,6 +73,19 @@ export function WorkbenchOverviewSurface({
     let alive = true;
     void fetchWbOverview(projectId).then((overview) => {
       if (alive) setWbOverview(overview);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [projectId]);
+
+  // item 87 第二波 — 教练循环摘要（影子/交接相位 + 决策/分歧计数）
+  const [coaching, setCoaching] = React.useState<CoachingSummary | null>(null);
+  React.useEffect(() => {
+    if (!projectId) return;
+    let alive = true;
+    void fetchCoachingSummary(projectId).then((summary) => {
+      if (alive) setCoaching(summary);
     });
     return () => {
       alive = false;
@@ -85,6 +135,11 @@ export function WorkbenchOverviewSurface({
           <>目标树 · {projection.nodes.length} 节点</>
         )}
       </div>
+      {coaching && coaching.runs.length > 0 && (
+        <div data-testid="coaching-strip" data-coaching-phase={coaching.runs[0]?.phase ?? ''}>
+          教练 · 相位 {coaching.runs[0]?.phase} · 决策讲解 {coaching.runs.reduce((sum, run) => sum + (run.decision_count || 0), 0)} 条 · 复盘分歧 {coaching.divergences.reduce((sum, d) => sum + d.divergences.length, 0)} 点
+        </div>
+      )}
       <OrchestrationGraph tasks={mergedTasks} rootTaskId={effectiveRoot} />
       <TraceSurface conversationId={conversationId} />
     </div>
