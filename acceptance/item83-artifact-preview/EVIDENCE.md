@@ -68,7 +68,14 @@ owner 截图反馈（`/Users/zhangdiandian/Library/Application Support/orca/agen
 - 接线：`ConversationTimeline` 折叠态与 `ToolActivityList` 展开/独立态均渲染网格卡；不同轮次按 iteration 各自成卡，不跨轮合并。
 - HK-01 `ChatArtifactGridCard.test.tsx` 3/3：auto-fit 列数写法、视频跨整行与图片混排、批次头、跨轮分组（iteration 5/8 → 2 卡）；旧 `ChatArtifactCard.auto-trigger.test.tsx` 多候选断言由「单卡 tabs」更新为「3 个网格瓦片」。邻域 10 文件 107/107，11 静态门绿。
 
-## §9 安全边界与待办
+## §9 返工：落盘路径三症（owner 终验）
+
+症状=生成 2 图+1 视频+1 HTML 后，视频/HTML 未进文件面板且落默认路径、HTML 查看乱码。
+核真：HTML 原无 `generate.html` 工具，agent 用 `workspace_write`/脚本写到 `dist/wave-rocks.html`（7.5MB，内嵌 base64 视频）；视频描述符本身正确（`/api/generated/file/video/...`），面板只读当前 run 快照的活动，跨会话/截断时漏项。
+修复：①新增 `generate.html` 内核工具，UTF-8 写 `generated/generate-html`，返回受控读面描述符；②`generate-tools.js::verifyGeneratedDescriptor` 强制 `path` 在受控 outDir 且 `url`↔basename 一致，默认路径红；③HTML 读面 `Content-Type: text/html; charset=utf-8`（generated-file 与 files 两路）；④`generatedArtifactsFromActivities` 四类归一化进文件面板，视频保留原预览。
+HK-01 `test/item83-artifact-path.test.mjs` 3/3 + `generatedArtifactPanel.test.ts` 1/1；回归节点 14/14、前端 43/43、工具计数 20/20；11 静态门绿。
+
+## §10 安全边界与待办
 
 - HTML sandbox 为 opaque origin，不能凭同源凭据调后端——预期安全边界，非缺陷。
 - 产物文件与元信息继续本地留存（dataDir/generated），会话预览不替代落盘；artifact-truth 契约未改。

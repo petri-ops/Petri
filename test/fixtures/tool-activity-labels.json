@@ -95,6 +95,10 @@
     "label": "已生成模型",
     "icon": "square-stack"
   },
+  "generate.html": {
+    "label": "已生成HTML",
+    "icon": "file"
+  },
   "mcp_authenticate": {
     "label": "已发起授权",
     "icon": "key"

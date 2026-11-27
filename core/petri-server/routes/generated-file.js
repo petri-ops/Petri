@@ -18,7 +18,9 @@ function registerGeneratedFileRoutes(app) {
   app.get('/api/generated/file/:kind/:filename', (req, res) => {
     const filePath = resolveGeneratedArtifactPath(req.params.kind, req.params.filename);
     if (!filePath) return res.status(404).json({ error: 'generated_file_not_found' });
-    res.setHeader('Content-Type', contentTypeFor(filePath));
+    // item83 返工：HTML 必须显式 UTF-8，否则文件查看面按系统默认编码 guesses → 中文乱码。
+    const contentType = contentTypeFor(filePath);
+    res.setHeader('Content-Type', contentType === 'text/html' ? 'text/html; charset=utf-8' : contentType);
     res.setHeader('Cache-Control', 'private, no-store');
     return res.sendFile(filePath);
   });

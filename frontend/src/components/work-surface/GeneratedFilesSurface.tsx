@@ -13,6 +13,7 @@ import {
 import { useConversationRun } from '@/components/copilot/conversationRunStore';
 import {
   absoluteGeneratedFileUrl,
+  generatedArtifactsFromActivities,
   generatedVideoArtifactsFromActivities,
   resolveGeneratedFileSource,
   resolveGeneratedFilesPanelState,
@@ -71,11 +72,12 @@ export function GeneratedFilesSurface({
   // item 85 — 生成视频产物：来源是 generate.* 活动的描述符（非 workspace 写入），
   // 预览走 /api/generated 受控读面（83 落的单一真值），一键系统播放器走 file:open-path。
   const videoArtifacts = generatedVideoArtifactsFromActivities(run?.toolActivities ?? []);
+  const generatedArtifacts = generatedArtifactsFromActivities(run?.toolActivities ?? []);
   const panelState = resolveGeneratedFilesPanelState({
     loading,
     error,
     fileCount: changes.length,
-    generatedArtifactCount: videoArtifacts.length,
+    generatedArtifactCount: generatedArtifacts.length,
   });
   const sources = changes.map((change) => resolveGeneratedFileSource({
     change,
@@ -159,6 +161,31 @@ export function GeneratedFilesSurface({
                 >
                   系统播放器打开
                 </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {/* item83 返工：图/3D/HTML 与视频一样进面板，统一走受控读面 URL。 */}
+      {panelState === 'ready' && generatedArtifacts.some((a) => a.kind !== 'video') && (
+        <div className={styles.list} data-testid="generated-artifacts">
+          {generatedArtifacts.filter((a) => a.kind !== 'video').map((artifact) => (
+            <article key={artifact.url} className={styles.row} data-testid="generated-artifact" data-kind={artifact.kind}>
+              <div className={styles.rowHeader}>
+                <Icon name="file" size={13} />
+                <span className={styles.path} title={artifact.path}>{artifact.name}</span>
+                <span className={styles.badge}>{artifact.kind === 'html' ? 'HTML' : artifact.kind === 'model3d' ? '3D' : '图片'}</span>
+              </div>
+              <div className={styles.actions}>
+                <a
+                  className="petri-btn petri-btn--ghost petri-btn--sm"
+                  href={absoluteGeneratedFileUrl(artifact.url, getApiPrefix())}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  打开预览
+                </a>
               </div>
             </article>
           ))}

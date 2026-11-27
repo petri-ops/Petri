@@ -10342,6 +10342,8 @@
         "test/provider-tool-name-sanitize.test.mjs",
         "test/generated-file-route.test.mjs",
         "test/item84-model3d-fallback.test.mjs",
+        "test/item83-artifact-path.test.mjs",
+        "frontend/src/lib/workSurface/generatedArtifactPanel.test.ts",
         "test/item88-workbench-wave1.test.mjs",
         "frontend/src/components/work-surface/WorkbenchMetricsCard.test.tsx",
         "frontend/src/components/copilot/ChatArtifactCard.generate.test.tsx",

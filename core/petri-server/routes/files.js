@@ -6,6 +6,12 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+
+// item83 返工：文本/html 显式 UTF-8，避免文件查看面按系统默认编码猜出乱码。
+function contentTypeWithCharset(filePath) {
+  const ct = contentTypeFor(filePath);
+  return ct === 'text/html' ? 'text/html; charset=utf-8' : ct;
+}
 const multer = require('multer');
 
 const config = require('../config');
@@ -317,7 +323,7 @@ module.exports = function registerFileRoutes(app) {
               });
             }
             const data = await backend.read(abs, { length: MAX_PREVIEW_BYTES });
-            res.setHeader('Content-Type', contentTypeFor(abs));
+            res.setHeader('Content-Type', contentTypeWithCharset(abs));
             return res.send(data);
           } catch (e) {
             if (e.remoteError === 'not_found') return res.status(404).json({ status: 'error', error: '文件不存在' });
@@ -331,7 +337,7 @@ module.exports = function registerFileRoutes(app) {
         if (!target || !fs.existsSync(target) || !fs.statSync(target).isFile()) {
           return res.status(404).json({ status: 'error', error: '文件不存在' });
         }
-        res.setHeader('Content-Type', contentTypeFor(target));
+        res.setHeader('Content-Type', contentTypeWithCharset(target));
         res.send(fs.readFileSync(target));
       } catch (e) {
         res.status(500).json({ status: 'error', error: e.message });
@@ -636,7 +642,7 @@ module.exports = function registerFileRoutes(app) {
         }
         const buf = storage.read(key);
         // 根据扩展名设置 Content-Type
-        res.setHeader('Content-Type', contentTypeFor(key));
+        res.setHeader('Content-Type', contentTypeWithCharset(key));
         res.send(buf);
       } catch (e) {
         res.status(500).json({ status: 'error', error: e.message });

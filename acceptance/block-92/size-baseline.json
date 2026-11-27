@@ -405,9 +405,9 @@
       "path": "frontend/src/components/copilot/toolActivity.ts",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 948,
-      "bytes": 40226,
-      "sha256": "57d91081bc41c2a3e27cc093a439762f13bc2c7846b3432938698ecd3dce8d01"
+      "lines": 950,
+      "bytes": 40289,
+      "sha256": "74fc88a5f58579ba5ba947a299bfea04c65844650b2cabb3e01aca11c33a694e"
     },
     {
       "path": "src/main.js",
@@ -501,9 +501,9 @@
       "path": "core/petri-server/agent-tools/tool-events.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 807,
-      "bytes": 36046,
-      "sha256": "5cb56701bef49ef02d186e6941486b28c4673c933dfd7e7fcb8830f4f3f5117f"
+      "lines": 808,
+      "bytes": 36082,
+      "sha256": "1dcc8828a37df042b4f2c8f55721c49cf4571e6f34c6a1350fd8cb0948b26426"
     },
     {
       "path": "frontend/src/components/icons/Icon.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86833,
+  "total": 86836,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1113,6 +1113,32 @@
       "to": {
         "lines": 1204,
         "bytes": 63485
+      }
+    },
+    {
+      "path": "frontend/src/components/copilot/toolActivity.ts",
+      "reason": "item83返工：generate.html 工具活动标签/图标注册（HK-01四类进面板）",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 948,
+        "bytes": 40226
+      },
+      "to": {
+        "lines": 950,
+        "bytes": 40289
+      }
+    },
+    {
+      "path": "core/petri-server/agent-tools/tool-events.js",
+      "reason": "item83返工：generate.html 后端动词注册",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 807,
+        "bytes": 36046
+      },
+      "to": {
+        "lines": 808,
+        "bytes": 36082
       }
     }
   ]

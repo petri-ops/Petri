@@ -120,6 +120,35 @@ export interface GeneratedVideoArtifact {
 }
 
 const GENERATED_VIDEO_URL_RE = /^\/api\/generated\/file\/video\//;
+const GENERATED_ARTIFACT_URL_RE = /^\/api\/generated\/file\/(image|video|model3d|html)\//;
+
+type GeneratedArtifactKind = 'image' | 'video' | 'model3d' | 'html';
+
+export interface GeneratedArtifact {
+  kind: GeneratedArtifactKind;
+  name: string;
+  path: string;
+  url: string;
+}
+
+/** item83 返工：四类 generate.* 产物统一从受控读面描述符归一化进文件面板。 */
+export function generatedArtifactsFromActivities(activities: readonly ToolActivityItem[]): GeneratedArtifact[] {
+  const byUrl = new Map<string, GeneratedArtifact>();
+  for (const activity of activities || []) {
+    if (activity.status !== 'success') continue;
+    const items = Array.isArray(activity.resultData) ? activity.resultData : [activity.resultData];
+    for (const raw of items) {
+      if (!raw || typeof raw !== 'object') continue;
+      const d = raw as Record<string, unknown>;
+      if (typeof d.path !== 'string' || typeof d.url !== 'string') continue;
+      const match = GENERATED_ARTIFACT_URL_RE.exec(d.url);
+      if (!match || byUrl.has(d.url)) continue;
+      const name = d.path.split(/[\\/]/).pop() || '';
+      byUrl.set(d.url, { kind: match[1] as GeneratedArtifactKind, name, path: d.path, url: d.url });
+    }
+  }
+  return [...byUrl.values()];
+}
 const VIDEO_FILE_EXTENSIONS = new Set(['.mp4', '.webm', '.mov', '.m4v']);
 
 function videoExtensionOf(name: string): string {

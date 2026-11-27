@@ -452,6 +452,7 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "generate.image": "已生成图",
   "generate.video": "已生成视频",
   "generate.model3d": "已生成模型",
+  "generate.html": "已生成HTML",
   // 存量域 mcp/notebook 的动词补登记（白名单/计数同步时一并补齐，fixture 恒等守护）。
   "mcp_authenticate": "已发起授权",
   "notebook_edit": "已编辑笔记",

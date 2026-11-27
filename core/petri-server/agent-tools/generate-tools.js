@@ -60,6 +60,22 @@ async function resolveReferenceImage(input = {}, options = {}) {
   return encoded.dataUrl;
 }
 
+/** item83 返工：描述符 path 必须落在受控 outDir 且 url 与 basename 强一致，否则红。 */
+function verifyGeneratedDescriptor(descriptor, outDir, kind) {
+  if (!descriptor || typeof descriptor !== 'object') return descriptor;
+  const filePath = typeof descriptor.path === 'string' ? descriptor.path : '';
+  const root = path.resolve(outDir);
+  if (!filePath || !path.resolve(filePath).startsWith(`${root}${path.sep}`)) {
+    throw new Error('generated_path_out_of_controlled_dir');
+  }
+  const expectedUrl = buildGeneratedArtifactUrl(kind, path.basename(filePath));
+  // url 由上层 withUrl 补；已存在时必须与实际 basename 一致，缺失不算漂移。
+  if (expectedUrl && typeof descriptor.url === 'string' && descriptor.url !== expectedUrl) {
+    throw new Error('generated_descriptor_url_mismatch');
+  }
+  return descriptor;
+}
+
 function resolveCredential(provider, options) {
   if (Object.prototype.hasOwnProperty.call(options, 'apiKey')) return options.apiKey;
   const { createCredentialStore } = require('../helpers/credential-store');
@@ -73,6 +89,23 @@ function resolveCredential(provider, options) {
  */
 function createGenerateHandler(toolId, options = {}) {
   return async function generateHandler(input = {}) {
+    // item83 返工：HTML 是本地静态产物（无云 provider），统一走受控目录 + UTF-8 写入。
+    if (toolId === 'generate.html') {
+      const content = typeof input.content === 'string' ? input.content : '';
+      if (!content) throw new Error('html_content_required');
+      const filename = String(input.filename || 'artifact.html').split(/[\\/]/).pop() || 'artifact.html';
+      const htmlDir = options.outDir || path.join(options.dataDir || resolveDataDir(), 'generated', 'generate-html');
+      fs.mkdirSync(htmlDir, { recursive: true });
+      const filePath = path.join(htmlDir, filename);
+      fs.writeFileSync(filePath, content, { encoding: 'utf8' });
+      return {
+        path: filePath,
+        sha256: sha256File(filePath),
+        mime: 'text/html',
+        source: { provider: 'local', model: 'html-static', kind: 'generate.html', filename },
+        url: buildGeneratedArtifactUrl('html', filename),
+      };
+    }
     const packRoot = path.resolve(options.packRoot || resolveBuiltInPackRoot());
     const entry = readToolRegistry(packRoot).tools.find((t) => t && t.id === toolId);
     if (!entry) throw new Error('generate_tool_not_found');
@@ -100,16 +133,19 @@ function createGenerateHandler(toolId, options = {}) {
     if (toolId === 'generate.model3d' && input.referenceArtifactId && !input.referenceImage) {
       resolvedInput.referenceImage = await resolveReferenceImage(input, { dataDir: options.dataDir });
     }
-    const result = await fn(resolvedInput, deps);
-    // item 83：给产物描述符补受控读面 url（单一真值在 route 模块），落盘 path/sha256/mime/source 不改。
+    const rawResult = await fn(resolvedInput, deps);
+    // item83 返工：先校验落盘路径强一致，再补受控读面 url。
     const kind = String(toolId).split('.')[1] || '';
+    const checked = Array.isArray(rawResult)
+      ? rawResult.map((d) => verifyGeneratedDescriptor(d, outDir, kind))
+      : verifyGeneratedDescriptor(rawResult, outDir, kind);
     const withUrl = (descriptor) => {
       if (!descriptor || typeof descriptor !== 'object' || typeof descriptor.path !== 'string') return descriptor;
       const url = buildGeneratedArtifactUrl(kind, path.basename(descriptor.path));
       return url ? { ...descriptor, url } : descriptor;
     };
-    return Array.isArray(result) ? result.map(withUrl) : withUrl(result);
+    return Array.isArray(checked) ? checked.map(withUrl) : withUrl(checked);
   };
 }
 
-module.exports = { createGenerateHandler, resolveBuiltInPackRoot, readToolRegistry, resolveReferenceImage };
+module.exports = { createGenerateHandler, resolveBuiltInPackRoot, readToolRegistry, resolveReferenceImage, verifyGeneratedDescriptor };
