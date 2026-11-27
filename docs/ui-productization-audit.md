@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **item83 第三轮同批登记（2026-11-27 · owner 13:xx CDP 实测细节）**：四类进面板/面板视频回归/网格聚合三症。核真真实执行流：同一次请求的 image(iter2) 与 video(iter6) `iteration` 不同但 `traceId` 相同 → 网格改按 traceId 聚合；85 面板视频供给链 `generatedVideoArtifactsFromActivities` 只认 legacy `/api/generated/file/video/`，新 workspace URL 进不来 → 回归修复；四类 workspace URL 归一化已由第二轮覆盖。验证升级=真实 DB 同形描述符（同 traceId/不同 iteration/workspace URL）+ 真实渲染集成（`GeneratedFilesSurface` 出 `<video src>` 与四类卡），不靠 mock 级单测。mock/real 差距清单落 `acceptance/item83-mock-real-gap/REPORT.md`，作为 86 快照测试输入。HK-01 3/3 + 集成 1/1。**状态**：in_progress（观感 pending_human_eye 零代签）。
+
 > **item89 attempt2 同批登记（2026-11-27）**：上笔只修命令面板预选，真实左栏会话列表点击仍不切。根因=跨项目点击同 tick 先 `switchToProject`(导航) + `handleSwitchConversation`(setActiveConvId)，随后 currentProjectId effect 清空并自动选 conversations[0]，被点会话被冲掉。修复=`switchConversationInProject` 先写一次性 preselect 再导航，`AppRailContext` 种子 effect 用 `resolveActiveConversationId` 消费 preselect，LeftPanel 三处跨项目点击改走新入口。验证升级=真实 AppRailProvider + 真实 LeftPanel 点击集成测试（导航/文件根/activeConvId 三断言），不靠 mock handler；CDP 开发实例由 crinoid 工作区供码，不在本工作区，未直接改其工作区。HK-01 6/6 + 集成 1/1，邻域 36/36。**状态**：in_progress（观感 pending_human_eye 零代签）。
 
 > **item83 第二轮返工同批登记（2026-11-27）**：owner 拍板产物归属改当前项目工作区（可见 `generated/<kind>/`），`/api/generated/` 留历史兼容；3D 双路径核真 `params.mode='ark'/'local'` 从不被读取导致两次都打 Ark，修 local→model3d_recipe（render:false 写 SceneSpec + 本地近似标注）、Ark 401/403 稳定 code、失败原因原文进 event/活动行；生成类工具补 ai_usage 记账（cost_status='unknown'、禁伪造费用）。HK-01 节点 4/4 + 前端 1/1，回归 14/14 + 56/56。**状态**：in_progress（观感 pending_human_eye 零代签）。

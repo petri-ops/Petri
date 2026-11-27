@@ -9,6 +9,8 @@ import type { ToolActivityItem } from '@/components/copilot/toolActivity';
 
 export interface GeneratedArtifactGroup {
   iteration: number;
+  /** item83 第三轮：真实执行流同一 traceId 的多轮产物属于同一次请求，聚合一张网格卡。 */
+  traceId?: string;
   artifacts: ChatArtifact[];
   durationMs: number | null;
 }
@@ -60,7 +62,7 @@ function model3dArtifactsFromResult(activity: ToolActivityItem): ChatArtifact[] 
 }
 
 export function groupGeneratedActivities(activities: ToolActivityItem[]): GeneratedArtifactGroup[] {
-  const groups = new Map<number, GeneratedArtifactGroup>();
+  const groups = new Map<string, GeneratedArtifactGroup>();
   for (const activity of activities) {
     if (activity.status !== 'success') continue;
     const isGenerate = activity.name.startsWith('generate.');
@@ -71,12 +73,19 @@ export function groupGeneratedActivities(activities: ToolActivityItem[]): Genera
       : model3dArtifactsFromResult(activity);
     if (!artifacts) continue;
     const iteration = typeof activity.iteration === 'number' ? activity.iteration : -1;
-    const group = groups.get(iteration) || { iteration, artifacts: [], durationMs: null };
+    // 真实执行流里同一请求的不同产物落在不同 iteration；traceId 才是同轮真值。
+    const key = activity.traceId || `iteration:${iteration}`;
+    const group = groups.get(key) || {
+      iteration,
+      ...(activity.traceId ? { traceId: activity.traceId } : {}),
+      artifacts: [],
+      durationMs: null,
+    };
     group.artifacts.push(...artifacts);
     if (typeof activity.durationMs === 'number' && Number.isFinite(activity.durationMs)) {
       group.durationMs = (group.durationMs || 0) + activity.durationMs;
     }
-    groups.set(iteration, group);
+    groups.set(key, group);
   }
   return [...groups.values()];
 }

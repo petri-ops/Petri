@@ -187,8 +187,11 @@ export function generatedVideoArtifactsFromActivities(
       if (!raw || typeof raw !== 'object') continue;
       const descriptor = raw as Record<string, unknown>;
       if (typeof descriptor.path !== 'string' || typeof descriptor.url !== 'string') continue;
-      if (!GENERATED_VIDEO_URL_RE.test(descriptor.url) || byUrl.has(descriptor.url)) continue;
       const name = descriptor.path.split(/[\\/]/).pop() || '';
+      // item83 第三轮：85 面板供给链必须同时认 legacy /api/generated 与新项目工作区 URL。
+      const isWorkspaceVideo = descriptor.url.startsWith('/api/workspaces/')
+        && VIDEO_FILE_EXTENSIONS.has(videoExtensionOf(name));
+      if ((!GENERATED_VIDEO_URL_RE.test(descriptor.url) && !isWorkspaceVideo) || byUrl.has(descriptor.url)) continue;
       if (!VIDEO_FILE_EXTENSIONS.has(videoExtensionOf(name))) continue;
       byUrl.set(descriptor.url, { name, path: descriptor.path, url: descriptor.url });
     }
