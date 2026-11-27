@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-26",
+  "updatedAt": "2026-11-27",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -161,7 +161,6 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block99-knowledge-multispace.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/cultural-watermark-ai.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/cultural-watermark.cjs",
-    "files::.agents/skills/petri-dev-infra/dev-verify/flows/e02-delegated-walk.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/form-grammar.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/mainwindow-handler-contract.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/next01-workflow-live.cjs",
@@ -281,12 +280,9 @@
     "files::acceptance/block503-outputs/yi-rest/_tools/yi7b-h03h04.cjs",
     "files::acceptance/block503-outputs/yi-rest/_tools/yi7c-h05h06.cjs",
     "files::acceptance/block503-outputs/yi-rest/_tools/yi8-e01e02.cjs",
-    "files::acceptance/cleanup-retirement/pen-stroke/GlobalWatermark.tsx",
     "files::acceptance/cultural-watermark/minimal-variant-preserved/GlobalWatermark.tsx",
     "files::acceptance/cultural-watermark/minimal-variant-preserved/cultural-watermark.cjs",
-    "files::acceptance/stall-live-2026-11-19/run-live-leg.mjs",
-    "files::acceptance/stall-live-2026-11-19/run-mock-leg.mjs",
-    "files::acceptance/stall-verify-2026-11-19/flow-507-508-stall-live.cjs",
+    "files::acceptance/item87-phase1/live-ingest.mjs",
     "files::acceptance/ui-276/resume-verify-script.mjs",
     "files::acceptance/ui-711-live/run-ui711-live.cjs",
     "files::acceptance/ui-ledger-closeout/ui156-uiattch-verify.cjs",
@@ -529,6 +525,11 @@
       "key": "files::resources/built-in-packs/petri-pack-create/scripts/ark-credential.cjs",
       "reason": "内置包凭据读取脚本：供宿主/自调用按需 require，动态入口",
       "date": "2026-11-26"
+    },
+    {
+      "key": "files::acceptance/item87-phase1/live-ingest.mjs",
+      "reason": "item 87 真源实测采集管线证据脚本：一次性动态入口（node 直跑留证），非生产依赖也非死代码，同 acceptance/stall-live-* 先例",
+      "date": "2026-11-27"
     }
   ]
 }

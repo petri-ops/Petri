@@ -1,0 +1,57 @@
+# petri-pack-bio 真理源清单（草案 · 2026-11-27）
+#
+# ⚠️ 待领域专家（owner）确认 —— 本清单为 item 87 第一阶段草案，逐条权威等级是
+# Agent 按通行学术惯例预标的，未经领域专家拍板；确认前 status 保持 draft，
+# 定稿时由 owner 逐条改判/增删并翻 confirmed。
+#
+# 「可信」是领域内判断，模型排不出来（方案 §5.2）——本文件是请求专家拍板的候选池。
+# authority_level：official=官方文档/手册/教材库，peer-reviewed=同行评审，
+#                  preprint=预印本，community=社区/经验
+# freshness：stable=稳定知识，fast=快变知识（版本/流程类，必须走 L2 重采）
+meta:
+  domain: bioinformatics
+  status: draft
+  updated: 2026-11-27
+sources:
+  - id: ncbi-bookshelf
+    name: NCBI Bookshelf
+    url: https://www.ncbi.nlm.nih.gov/books/
+    authority_level: official
+    freshness: stable
+    verified_date: 2026-11-27
+    notes: NIH 官方教材库，分子生物学背景底盘（L1 候选）
+  - id: ensembl-docs
+    name: Ensembl 官方文档
+    url: https://www.ensembl.org/info/index.html
+    authority_level: official
+    freshness: fast
+    verified_date: 2026-11-27
+    notes: 参考基因组/注释版本权威源，版本迭代快（L1+L2 双通道候选）
+  - id: bioconductor-deseq2
+    name: DESeq2 官方 vignette（Bioconductor）
+    url: https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html
+    authority_level: official
+    freshness: stable
+    verified_date: 2026-11-27
+    notes: 差异分析方法权威面；方法论文 Love et al. 2014 (DOI 10.1186/s13059-014-0550-8) 互为表里
+  - id: star-manual
+    name: STAR 官方手册（GitHub alexdobin/STAR）
+    url: https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+    authority_level: official
+    freshness: fast
+    verified_date: 2026-11-27
+    notes: 比对参数与算法行为以作者手册为准（L2 候选）
+  - id: deseq2-paper
+    name: Love, Huber & Anders 2014, Genome Biology
+    url: https://doi.org/10.1186/s13059-014-0550-8
+    authority_level: peer-reviewed
+    freshness: stable
+    verified_date: 2026-11-27
+    notes: DESeq2 方法学论文，Crossref 已核真（DOI 10.1186/s13059-014-0550-8）
+  - id: bioc-release-announces
+    name: Bioconductor Release Announcements
+    url: https://bioconductor.org/about/release-announcements/
+    authority_level: official
+    freshness: fast
+    verified_date: 2026-11-27
+    notes: R/Bioconductor 版本节奏权威源，半年一版（L2 候选）

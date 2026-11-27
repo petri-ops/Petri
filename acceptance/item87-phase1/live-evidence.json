@@ -1,0 +1,119 @@
+{
+  "startedAt": "2026-11-27T06:10:19.299Z",
+  "sources": [
+    {
+      "label": "bioconductor-deseq2",
+      "ms": 2705,
+      "result": {
+        "ok": true,
+        "cardId": "docard_6aa7b254-060c-4333-91a0-dfcb9b56c2d6",
+        "citationId": null
+      }
+    },
+    {
+      "label": "star-manual",
+      "ms": 634,
+      "result": {
+        "ok": true,
+        "cardId": "docard_b421c326-823f-4df2-8341-cca781972cc4",
+        "citationId": null
+      }
+    }
+  ],
+  "citation": {
+    "label": "crossref-love-2014",
+    "ms": 1005,
+    "result": {
+      "status": "verified",
+      "via": "crossref",
+      "record": {
+        "doi": "10.1186/s13059-014-0550-8",
+        "title": "Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2",
+        "authors": [
+          "Michael I Love",
+          "Wolfgang Huber",
+          "Simon Anders"
+        ],
+        "year": 2014,
+        "container": "Genome Biology",
+        "publisher": "Springer Science and Business Media LLC"
+      },
+      "checkedAt": "2026-11-27T06:10:22.639Z"
+    },
+    "inserted": {
+      "ok": true,
+      "citationId": "docite_ff3a2cb3-7ef0-4630-b896-5ac72954213f"
+    }
+  },
+  "cards": [
+    {
+      "cardId": "docard_b421c326-823f-4df2-8341-cca781972cc4",
+      "contractVersion": 1,
+      "domain": "bioinformatics",
+      "topic": "剪接读段比对（STAR README）",
+      "conclusion": "【摘录·STAR 官方手册（GitHub alexdobin/STAR）】STAR 2.7.11b ========== Spliced Transcripts Alignment to a Reference © Alexander Do…",
+      "evidenceLevel": "official",
+      "sourceId": "star-manual",
+      "sourceName": "STAR 官方手册（GitHub alexdobin/STAR）",
+      "sourceUrl": "https://raw.githubusercontent.com/alexdobin/STAR/master/README.md",
+      "sourceDate": "2026-11-27",
+      "validUntil": "2027-02-25",
+      "freshnessClass": "fast",
+      "provenanceJson": {
+        "pipeline": "do-ingest-mvp",
+        "fetchedAt": "2026-11-27T06:10:22.004Z",
+        "summarizeMode": "injected",
+        "citationId": null,
+        "notes": "MVP 摘录式总结：conclusion 均为原文摘录，非生成"
+      },
+      "revisionOf": null,
+      "createdAt": "2026-11-27T06:10:22.004Z"
+    },
+    {
+      "cardId": "docard_6aa7b254-060c-4333-91a0-dfcb9b56c2d6",
+      "contractVersion": 1,
+      "domain": "bioinformatics",
+      "topic": "差异分析（DESeq2 vignette）",
+      "conclusion": "【摘录·DESeq2 官方 vignette（Bioconductor）】Analyzing RNA-seq data with DESeq2 Analyzing RNA-seq data with DESeq2 Michael I. Lo…",
+      "evidenceLevel": "official",
+      "sourceId": "bioconductor-deseq2",
+      "sourceName": "DESeq2 官方 vignette（Bioconductor）",
+      "sourceUrl": "https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html",
+      "sourceDate": "2026-11-27",
+      "validUntil": "2028-11-26",
+      "freshnessClass": "stable",
+      "provenanceJson": {
+        "pipeline": "do-ingest-mvp",
+        "fetchedAt": "2026-11-27T06:10:19.299Z",
+        "summarizeMode": "injected",
+        "citationId": null,
+        "notes": "MVP 摘录式总结：conclusion 均为原文摘录，非生成"
+      },
+      "revisionOf": null,
+      "createdAt": "2026-11-27T06:10:19.299Z"
+    }
+  ],
+  "citations": [
+    {
+      "citationId": "docite_ff3a2cb3-7ef0-4630-b896-5ac72954213f",
+      "contractVersion": 1,
+      "doi": "10.1186/s13059-014-0550-8",
+      "title": "Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2",
+      "authors": [
+        "Michael I Love",
+        "Wolfgang Huber",
+        "Simon Anders"
+      ],
+      "year": 2014,
+      "container": "Genome Biology",
+      "registry": "crossref",
+      "verifyStatus": "verified",
+      "verifyDetail": {
+        "via": "crossref",
+        "checkedAt": "2026-11-27T06:10:22.639Z"
+      },
+      "createdAt": "2026-11-27T06:10:23.643Z"
+    }
+  ],
+  "finishedAt": "2026-11-27T06:10:23.644Z"
+}

@@ -10321,6 +10321,7 @@
         "frontend/src/components/copilot/ToolActivityList.tsx",
         "frontend/src/components/copilot/ConversationTimeline.tsx",
         "acceptance/item83-artifact-preview/**",
+        "acceptance/item85-video-file-panel/**",
         "frontend/src/components/work-surface/GeneratedFilesSurface.tsx",
         "frontend/src/components/work-surface/GeneratedFilesSurface.test.tsx",
         "frontend/src/lib/workSurface/generatedFileSource.ts",
@@ -10364,6 +10365,27 @@
         "frontend/src/lib/workSurface/generatedFileSource.test.ts",
         "frontend/src/components/workspace-panels/VideoResultViewer.test.tsx",
         "test/item85-video-open-path.test.mjs"
+      ]
+    },
+    {
+      "id": "item87-do-knowledge",
+      "note": "item 87 第一阶段——领域知识层骨架与 bio 三件套草稿：do_knowledge_cards/do_citation_records DDL（append-only 触发器+字节一致迁移 025）、sources.yaml 严格子集解析与 schema、采集管线 MVP（摘录式总结 fail-closed）、DOI 反查验真（Crossref+DataCite 兜底，fixture 注入+live 真调用）、引用纪律钉（断言无来源=红+资产 lint）。HK-01 钉①②③在 test/item87-* 四文件。",
+      "patterns": [
+        "core/shared-backend/do-knowledge-schema.js",
+        "core/shared-backend/do-knowledge-store.js",
+        "core/shared-backend/do-sources.js",
+        "core/shared-backend/citation-verify.js",
+        "core/shared-backend/citation-discipline.js",
+        "core/shared-backend/do-ingest.js",
+        "src/migrations/025_domain_knowledge.sql",
+        "resources/domain-onboarding/**",
+        "acceptance/item87-phase1/**"
+      ],
+      "tests": [
+        "test/item87-do-knowledge.test.mjs",
+        "test/item87-citation-verify.test.mjs",
+        "test/item87-citation-discipline.test.mjs",
+        "test/item87-do-ingest.test.mjs"
       ]
     }
   ]
