@@ -17,6 +17,10 @@ vi.mock('@/lib/events', async (importOriginal) => {
   return { ...actual, dispatchPetriEvent };
 });
 
+vi.mock('@/components/work-surface/Model3DScene', () => ({
+  Model3DScene: ({ modelUrl }: { modelUrl?: string }) => <div data-testid="model3d-scene" data-model-url={modelUrl} />,
+}));
+
 vi.mock('@/lib/desktopBridge', () => ({
   getBridge: () => ({ writeTextFile: vi.fn() }),
 }));
@@ -74,6 +78,18 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
   dispatchPetriEvent.mockClear();
+});
+
+describe('item83 第5症 GLB 点击即内嵌 3D', () => {
+  it('HK-01 点击 GLB 直接内嵌渲染，无二进制兜底中间步骤', async () => {
+    stubFetch('glb-bytes');
+    renderPreview(workspaceFile('mesh_textured_pbr.glb', 'model3d/assets/mesh_textured_pbr.glb'));
+    const preview = await screen.findByTestId('workspace-file-3d-preview');
+    expect(preview).toBeTruthy();
+    expect(within(preview).getByTestId('model3d-scene')).toBeTruthy();
+    expect(screen.queryByText(/二进制文件/)).toBeNull();
+    expect(screen.getAllByRole('button', { name: /系统应用打开|下载副本/ }).length).toBeGreaterThanOrEqual(2);
+  });
 });
 
 describe('UI-654 文件预览一键转 3D 模型', () => {

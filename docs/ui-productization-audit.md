@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **item83 返工第5症同批登记（2026-11-27）**：文件面板点击 GLB 原落「二进制文件」兜底页，需再点「在 3D 模型预览」两步。真修=`WorkspaceFilePreview` 对 `.glb/.gltf` 直接 `status='ready'` 并内嵌 `Model3DScene`（复用既有 3D 查看器），系统应用打开/下载副本降为 viewer 内次级按钮；二进制兜底只留不可预览类型。HK-01 `WorkspaceFilePreview.model3d.test.tsx` 1/1（点击 GLB 内嵌 3D 挂载、无二进制兜底、次级操作在场），文件预览邻域 12/12，11 静态门绿。**状态**：in_progress（观感 pending_human_eye 零代签）。
+
 > **item83 返工第4症同批登记（2026-11-27）**：owner 实测 GLB 已落但会话区不出卡。核真真实描述符来自 `model3d_asset` 导入（workspace-relative `.glb`，无 `/api/generated/` URL）与 `model3d_recipe` 本地近似降级，均被 `groupGeneratedActivities` 的 `generate.*` 过滤挡住——mock 用 generate.model3d 描述符所以没抓到。真修=新增 `model3dArtifactsFromResult` 把两类真实形状归一化为 ChatArtifact（无 url 时靠 path+projectId 走 workspaceFileUrlFor，不伪造受控读面），降级路径 source provider/model/mode/status 如实保留。HK-01 `ChatArtifactCard.model3d-real.test.tsx` 2/2（真实 asset/recipe/generate 三条路径 + 自动出卡），邻域 80/80。**状态**：in_progress（观感 pending_human_eye 零代签）。
 
 > **item89 会话切换联动文件树同批登记（2026-11-27）**：项目点击联动正常、会话切换不联动的根因=旧项目 `activeConvId` 挡住新项目预选（种子 effect `if (activeConvId) return`），文件面板仍绑旧 workspace。修复=新 `resolveActiveConversationId` 只接受属于当前项目会话列表的 activeConvId，否则消费 preselect 或回落首条；`RightFileTree` 加 `key={projectId}` 强制随项目重挂载。HK-01 2/2（A→B 旧 id 不挡预选、项目内合法 id 保持）。**状态**：in_progress（代码级完成，观感 pending_human_eye 零代签）。

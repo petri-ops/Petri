@@ -538,6 +538,14 @@
       "sha256": "1282d1ce146060b24f87bf63ad8a4356981359d6b799eebd2d07bac73de4de58"
     },
     {
+      "path": "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 764,
+      "bytes": 36645,
+      "sha256": "74ed9e0da164b37c080f544b04d0522ebcc0edd4ec937d2436947a5c7b7b5de4"
+    },
+    {
       "path": "frontend/src/components/svg-editor/SvgEditorCanvas.tsx",
       "wave": "L0",
       "module": "auto-discovered",
@@ -552,14 +560,6 @@
       "lines": 742,
       "bytes": 34462,
       "sha256": "e6ce19c9bdfd040f137f434a6b08f20540dbd681a2801e20191e5c40d54b9edc"
-    },
-    {
-      "path": "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 731,
-      "bytes": 35060,
-      "sha256": "def0075fb1874adfab9d3c4c11058d65a0f376e639ebd64e3f86cae2b748d444"
     },
     {
       "path": "core/shared-backend/result-studio-contracts.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86835,
+  "total": 86868,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1139,6 +1139,19 @@
       "to": {
         "lines": 808,
         "bytes": 36082
+      }
+    },
+    {
+      "path": "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
+      "reason": "item83第5症：GLB/GLTF点击即内嵌3D渲染+viewer内次级操作，HK-01 1/1",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 731,
+        "bytes": 35060
+      },
+      "to": {
+        "lines": 764,
+        "bytes": 36645
       }
     }
   ]

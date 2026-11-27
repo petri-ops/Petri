@@ -20,6 +20,7 @@ import { TableViewer } from '@/components/viewers/TableViewer';
 import { HtmlViewer } from '@/components/viewers/HtmlViewer';
 import { SpreadsheetViewer } from '@/components/viewers/SpreadsheetViewer';
 import { meshFormatForPath } from '@/lib/meshAssets';
+import { Model3DScene } from '@/components/work-surface/Model3DScene';
 import { getBridge } from '@/lib/desktopBridge';
 import {
   loadOfficePreview,
@@ -113,6 +114,8 @@ export function WorkspaceFilePreview({
   // BLOCK-342 方案 A — .svg 用缩略图（不挤右栏）；「在编辑器打开」才进入整窗编辑器
   const [svgEditorOpen, setSvgEditorOpen] = useState(false);
   const isImage = viewerAdapter === 'image';
+  // item83 第5症：.glb/.gltf 点击即内嵌 3D，不再落二进制兜底页。
+  const isModel3dFile = /\.(glb|gltf)$/i.test(file?.name || '');
   const isText = viewerAdapter === 'text';
   const isMarkdown = viewerAdapter === 'markdown';
   const isCsv = viewerAdapter === 'table';
@@ -184,6 +187,11 @@ export function WorkspaceFilePreview({
     }
     // BLOCK-342 W1 实机抓真：编辑器的输入是 SVG 文本，必须在文本加载白名单内，
     // 否则 status 落 'unsupported' → 编辑器分支被二进制卡顶掉（实机复现）。
+    if (isModel3dFile) {
+      // 3D 走二进制流由 Model3DScene 自载，不读成文本（否则会落二进制兜底）。
+      setStatus('ready');
+      return () => { cancelled = true; };
+    }
     if (!isSvgEditor && !isText && !isCsv && !isJson && !isMarkdown) {
       setStatus('unsupported');
       return () => { cancelled = true; };
@@ -216,7 +224,7 @@ export function WorkspaceFilePreview({
         if (!cancelled) setStatus('error');
       });
     return () => { cancelled = true; };
-  }, [file, isCsv, isHtml, isImage, isJson, isMarkdown, isPdf, isSpreadsheet, isText, officeKind, previewUrl]);
+  }, [file, isCsv, isHtml, isImage, isJson, isMarkdown, isModel3dFile, isPdf, isSpreadsheet, isText, officeKind, previewUrl]);
 
   // BLOCK-20 — 文件切换时重置保存基准线和 Markdown 视图
   useEffect(() => {
@@ -289,8 +297,9 @@ export function WorkspaceFilePreview({
   // BLOCK-74 修复（UI-323 回归）：自动保存 effect 与 Ctrl+S 回调必须在 `if (!file)` 提前返回
   // 之前注册——否则无文件 → 打开文件的首次渲染 Hook 数从 N 变 N+2，React 抛
   // "Rendered more hooks" 导致整窗白屏（实机点击 md 复现）。
-  const fallbackKind: 'csv' | 'pdf' | 'html' | 'json' | 'markdown' | 'image' | 'text' | 'binary' | 'svg' =
-    isSvgEditor ? 'svg'
+  const fallbackKind: 'csv' | 'pdf' | 'html' | 'json' | 'markdown' | 'image' | 'text' | 'binary' | 'svg' | 'model3d' =
+    isModel3dFile ? 'model3d'
+    : isSvgEditor ? 'svg'
     : isSceneSpec || isJson ? 'json'
     : isCsv ? 'csv'
     : isPdf ? 'pdf'
@@ -417,6 +426,30 @@ export function WorkspaceFilePreview({
         )}
         {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
         {status === 'error' && <p className={styles.panelEmpty}>预览失败</p>}
+        {/* item83 第5症：GLB/GLTF 点击即内嵌 3D；系统打开/下载降为 viewer 内次级操作。 */}
+        {status === 'ready' && fallbackKind === 'model3d' && (
+          <div data-testid="workspace-file-3d-preview">
+            <div style={{ height: 320 }}>
+              <React.Suspense fallback={<div>加载 3D 渲染…</div>}>
+                <Model3DScene
+                  view={null}
+                  viewAngle="iso"
+                  modelUrl={previewUrl}
+                  modelFormat={/\.gltf$/i.test(file?.name || '') ? 'gltf' : 'glb'}
+                  projectId={projectId}
+                />
+              </React.Suspense>
+            </div>
+            <div className={styles.workspacePreviewActions}>
+              <button type="button" className={styles.workspacePreviewOpen} onClick={() => void onOpen()}>
+                系统应用打开
+              </button>
+              <button type="button" className={styles.workspacePreviewOpen} onClick={onDownload}>
+                下载副本
+              </button>
+            </div>
+          </div>
+        )}
         {status === 'unsupported' && !officePreview && (
           <BinaryPreviewCard
             file={file}

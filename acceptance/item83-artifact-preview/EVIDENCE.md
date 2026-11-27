@@ -83,7 +83,15 @@ HK-01 `test/item83-artifact-path.test.mjs` 3/3 + `generatedArtifactPanel.test.ts
 
 HK-01 `ChatArtifactCard.model3d-real.test.tsx` 2/2：三条真实路径（asset/recipe/generate）均归一化为 3D 产物且自动出卡，含降级路径；邻域 80/80。
 
-## §11 安全边界与待办
+## §11 追加第5症：GLB 点击即内嵌 3D
+
+owner 截图：`mesh_textured_pbr…21.8MB` 点击后是「二进制文件」兜底页（推荐系统默认应用打开/下载副本），需再悬停点「在 3D 模型预览」才渲染。核真：`WorkspaceFilePreview` 把 `.glb` 归 `fallbackKind='binary'`，effect 走 `status='unsupported'` → `BinaryPreviewCard`；顶部虽有 UI-654 的 3D 按钮，但属第二步，违反 85 视频「点击即内嵌播放」范式。
+
+真修：`.glb/.gltf` 直接 `status='ready'` + `fallbackKind='model3d'`，内联 `Model3DScene`（与 ChatArtifactCard 同款查看器，view=null/iso，modelUrl 走受控 workspace URL），系统应用打开/下载副本降为 viewer 内次级按钮；二进制兜底只留真正不可预览类型。
+
+HK-01 `WorkspaceFilePreview.model3d.test.tsx` 1/1：点击 GLB → 3D 查看器挂载（mock 钉，避开 jsdom WebGL 限制）、无二进制兜底文案、两个次级操作在场；文件预览邻域 12/12。
+
+## §12 安全边界与待办
 
 - HTML sandbox 为 opaque origin，不能凭同源凭据调后端——预期安全边界，非缺陷。
 - 产物文件与元信息继续本地留存（dataDir/generated），会话预览不替代落盘；artifact-truth 契约未改。
