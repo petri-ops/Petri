@@ -188,6 +188,7 @@
     "closeout:full": "npm run closeout -- --force-full",
     "verify": "node .agents/skills/petri-dev-infra/dev-verify/run.cjs",
     "verify:clean": "node scripts/verify-clean.mjs",
+    "release:mac": "bash scripts/release-mac.sh",
     "skills:check": "node scripts/skill-scaffold.mjs --check",
     "skills:scaffold": "node scripts/skill-scaffold.mjs",
     "schema:verify": "node scripts/verify-schema.js",

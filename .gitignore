@@ -127,3 +127,4 @@ model3d/runs/
 .petri-agent-tmp/
 .petri-test-instance.ttl
 .petri-test-instance.ttl.log
+dist-release/
