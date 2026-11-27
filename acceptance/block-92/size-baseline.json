@@ -374,8 +374,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1014,
-      "bytes": 46978,
-      "sha256": "472ef8282d6b7eb670bdf3d8270f74849b2fa8328709950227f332281f1cf6d9"
+      "bytes": 47040,
+      "sha256": "3e941aa827b21e60607a32bb0ed328d0977388986ff8b9d9b557958d4361a365"
     },
     {
       "path": "frontend/src/components/desktop/TitleBar.module.css",

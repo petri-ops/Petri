@@ -9,6 +9,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { buildGeneratedArtifactUrl } = require('../routes/generated-file');
 
 const DEFAULT_PACK_DIR = path.resolve(__dirname, '..', '..', '..', 'resources', 'built-in-packs', 'petri-pack-create');
 
@@ -60,7 +61,15 @@ function createGenerateHandler(toolId, options = {}) {
       outDir,
       ...(options.deps || {}),
     };
-    return fn(input, deps);
+    const result = await fn(input, deps);
+    // item 83：给产物描述符补受控读面 url（单一真值在 route 模块），落盘 path/sha256/mime/source 不改。
+    const kind = String(toolId).split('.')[1] || '';
+    const withUrl = (descriptor) => {
+      if (!descriptor || typeof descriptor !== 'object' || typeof descriptor.path !== 'string') return descriptor;
+      const url = buildGeneratedArtifactUrl(kind, path.basename(descriptor.path));
+      return url ? { ...descriptor, url } : descriptor;
+    };
+    return Array.isArray(result) ? result.map(withUrl) : withUrl(result);
   };
 }
 

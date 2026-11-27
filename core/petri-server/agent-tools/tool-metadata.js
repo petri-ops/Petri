@@ -82,6 +82,10 @@ const TOOL_METADATA = {
   'generate.image': { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 300000 },
   'generate.video': { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 600000 },
   'generate.model3d': { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 600000 },
+  // provider 投影别名：getToolDefs() 返回 provider-safe 名（generate_*），完备性门与新调度按投影名查表。
+  'generate_image': { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 300000 },
+  'generate_video': { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 600000 },
+  'generate_model3d': { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 600000 },
   // ---- Result Studio 域：破坏性（串行 + 审批）----
   result_changeset_revert: { readOnly: false, destructive: true, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   result_changeset_revert_in_context: { readOnly: false, destructive: true, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },

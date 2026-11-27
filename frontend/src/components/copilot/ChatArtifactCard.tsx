@@ -1,4 +1,5 @@
 import React from 'react';
+import { HtmlViewer } from '@/components/viewers/HtmlViewer';
 // BLOCK-511 S4.2 — 3D 场景改走懒加载（同 Model3DSurface:46 的 lazy 包装），首屏不静态引入 three
 const Model3DScene = React.lazy(() =>
   import('@/components/work-surface/Model3DScene').then((m) => ({ default: m.Model3DScene }))
@@ -25,6 +26,17 @@ interface ChatArtifact {
   path?: string;
   url?: string;
   sha256?: string;
+  /** item 83 — 生成产物描述符元信息（落盘真值，展示不替代） */
+  mime?: string;
+  source?: {
+    provider?: string;
+    model?: string;
+    taskId?: string;
+    prompt?: string;
+    seed?: number | null;
+    mode?: string;
+    status?: string;
+  };
 }
 
 interface ChatArtifactCardProps {
@@ -34,11 +46,14 @@ interface ChatArtifactCardProps {
   projectId?: string | null;
   /** UI-713 — 聊天主链默认轻量摘要；详情点击后才展开产物明细。 */
   lightweight?: boolean;
+  /** item 83 — 工具活动耗时（来自 toolActivity.durationMs），缺值不展示 */
+  durationMs?: number | null;
 }
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']);
 const MODEL_3D_EXTENSIONS = new Set(['.glb', '.gltf']);
 const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.mov']);
+const HTML_EXTENSIONS = new Set(['.html', '.htm']);
 
 const ACTION_BUTTON_STYLE: React.CSSProperties = {
   fontSize: 'var(--petri-font-size-xs, 11px)',
@@ -92,7 +107,7 @@ function sceneSnapshotPath(outDir: string, artifact: ChatArtifact): string {
   return slash >= 0 ? `${artifactPath.slice(0, slash)}/scene.json` : '';
 }
 
-export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight = false }: ChatArtifactCardProps): React.ReactElement | null {
+export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight = false, durationMs }: ChatArtifactCardProps): React.ReactElement | null {
   const [artifacts, setArtifacts] = React.useState<ChatArtifact[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
@@ -125,6 +140,11 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
   // 由 Vite(:3000) 承载，直接当 src 会打到 Vite 的 SPA 兜底；统一经 getApiPrefix
   // 拼成绝对地址（与工作区文件预览同一出口，不另立第二套 URL 规则）。
   const fileUrl = (artifact: ChatArtifact): string => {
+    // item 83：generate.* 产物落在 dataDir，受控读面 URL 是唯一可展示地址；
+    // 优先于 workspace path 分支，其余产物保持原逻辑（零回归）。
+    if (typeof artifact.url === 'string' && artifact.url.startsWith('/api/generated/')) {
+      return `${getApiPrefix()}${artifact.url.slice(4)}`;
+    }
     if (artifact.path && projectId) return workspaceFileUrlFor(projectId, artifact.path);
     const url = artifact.url || '';
     if (!url) return '';
@@ -159,10 +179,12 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
   const model3dArtifacts = visibleArtifacts.filter((a) => MODEL_3D_EXTENSIONS.has(ext(a.name || a.filename || '')));
   const imageArtifacts = visibleArtifacts.filter((a) => IMAGE_EXTENSIONS.has(ext(a.name || a.filename || '')));
   const videoArtifacts = visibleArtifacts.filter((a) => VIDEO_EXTENSIONS.has(ext(a.name || a.filename || '')));
+  const htmlArtifacts = visibleArtifacts.filter((a) => HTML_EXTENSIONS.has(ext(a.name || a.filename || '')));
   const otherArtifacts = visibleArtifacts.filter(
     (a) => !MODEL_3D_EXTENSIONS.has(ext(a.name || a.filename || ''))
       && !IMAGE_EXTENSIONS.has(ext(a.name || a.filename || ''))
-      && !VIDEO_EXTENSIONS.has(ext(a.name || a.filename || '')),
+      && !VIDEO_EXTENSIONS.has(ext(a.name || a.filename || ''))
+      && !HTML_EXTENSIONS.has(ext(a.name || a.filename || '')),
   );
 
   return (
@@ -189,7 +211,7 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
             </button>
           </div>
           {show3D && model3dArtifacts.map((artifact) => (
-            <div key={artifact.name} style={{ height: 220, border: '1px solid rgba(128,152,177,0.2)', borderRadius: 6, overflow: 'hidden' }}>
+            <div key={artifact.name} data-testid="chat-artifact-3d-preview" style={{ height: 220, border: '1px solid rgba(128,152,177,0.2)', borderRadius: 6, overflow: 'hidden' }}>
               <Model3DSceneWrapper url={fileUrl(artifact)} />
             </div>
           ))}
@@ -273,6 +295,51 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
           ))}
         </div>
       )}
+
+      {/* item 83 HTML 产物：会话内沙箱预览——仅 allow-scripts，保持 opaque origin，
+          与工作区 HtmlViewer 同安全边界；不可给 allow-same-origin（会逃逸隔离）。 */}
+      {htmlArtifacts.length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          {htmlArtifacts.map((artifact) => (
+            <div key={`html:${artifact.name}`} style={{ marginBottom: 6 }}>
+              <HtmlViewer
+                src={fileUrl(artifact)}
+                title={artifact.name}
+                sandbox="allow-scripts"
+                testId="chat-artifact-html"
+              />
+              <a
+                data-testid="chat-artifact-html-download"
+                href={fileUrl(artifact)}
+                download={artifact.name}
+                style={ACTION_BUTTON_STYLE}
+              >
+                下载 HTML · {artifact.name}
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* item 83 元信息：model/provider/taskId 来自 artifact.source，耗时来自工具活动；
+          费用未写入 ai_usage（generate.* 未记账），缺值不展示、不伪造 0。 */}
+      {(() => {
+        const sources = visibleArtifacts
+          .map((a) => a.source)
+          .filter((s): s is NonNullable<ChatArtifact['source']> => Boolean(s));
+        const models = [...new Set(sources.map((s) => s.model).filter((v): v is string => Boolean(v)))];
+        const providers = [...new Set(sources.map((s) => s.provider).filter((v): v is string => Boolean(v)))];
+        const taskIds = [...new Set(sources.map((s) => s.taskId).filter((v): v is string => Boolean(v)))];
+        if (!models.length && !providers.length && !taskIds.length && !durationMs) return null;
+        return (
+          <div data-testid="chat-artifact-meta" style={{ fontSize: 'var(--petri-font-size-xs)', color: 'var(--petri-text-secondary)', marginBottom: 8 }}>
+            {providers.map((v) => <span key={`p:${v}`}>provider {v} · </span>)}
+            {models.map((v) => <span key={`m:${v}`}>模型 {v} · </span>)}
+            {taskIds.map((v) => <span key={`t:${v}`}>task {v} · </span>)}
+            {durationMs ? <span>耗时 {Math.round(durationMs / 1000)}s</span> : null}
+          </div>
+        );
+      })()}
 
       {/* 渲染图 */}
       {imageArtifacts.length > 0 && (

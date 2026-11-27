@@ -175,13 +175,13 @@ export function ConversationTimeline({
   // 否则「执行工具 N 次」折起来后 3D/图像/下载卡随节点一起消失（用户实机抓真）。
   const artifactJobs = (() => {
     const seen = new Set<string>();
-    const jobs: string[] = [];
+    const jobs: { toolJobId: string; durationMs: number | null }[] = [];
     for (const segment of toolsSegments) {
       for (const activity of segment.activities) {
         const toolJobId = activity.toolJobId;
         if (activity.status !== 'success' || !toolJobId || seen.has(toolJobId)) continue;
         seen.add(toolJobId);
-        jobs.push(toolJobId);
+        jobs.push({ toolJobId, durationMs: activity.durationMs ?? null });
       }
     }
     return jobs;
@@ -261,8 +261,8 @@ export function ConversationTimeline({
             </span>
           </button>
         </div>
-        {artifactJobs.map((toolJobId) => (
-          <ChatArtifactCard key={toolJobId} toolJobId={toolJobId} expanded projectId={projectId} lightweight />
+        {artifactJobs.map((job) => (
+          <ChatArtifactCard key={job.toolJobId} toolJobId={job.toolJobId} expanded projectId={projectId} lightweight durationMs={job.durationMs} />
         ))}
       </div>
     );
