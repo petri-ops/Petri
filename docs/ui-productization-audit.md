@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **item88 第二波同批登记（2026-11-27）**：三档交互（`WorkbenchApprovalCard` 独立卡 + `WorkbenchFlagGate` total gate，审批走 approval-request-store、咨询走 question store）；双通道回写单一幂等入口 `workbench-writeback.js`；变更单 `workbench-change-order.js`（wb_changes + wb_documents chain）；2D 总览 `WorkbenchOverviewSurface`（目标树/OrchestrationGraph/TraceSurface，纯只读）+ registry `overview` tab；调度队列纯函数 `rankQueueTasks`/`computeRetryDecision`；flag `workbench.enabled` 默认 off，开发态用既有 decisions endpoint 开。HK-01 节点 5/5 + 前端 3/3，回归 13/13+35/35。**状态**：in_progress（观感 pending_human_eye 零代签）。
+
 > **item83 返工第5症同批登记（2026-11-27）**：文件面板点击 GLB 原落「二进制文件」兜底页，需再点「在 3D 模型预览」两步。真修=`WorkspaceFilePreview` 对 `.glb/.gltf` 直接 `status='ready'` 并内嵌 `Model3DScene`（复用既有 3D 查看器），系统应用打开/下载副本降为 viewer 内次级按钮；二进制兜底只留不可预览类型。HK-01 `WorkspaceFilePreview.model3d.test.tsx` 1/1（点击 GLB 内嵌 3D 挂载、无二进制兜底、次级操作在场），文件预览邻域 12/12，11 静态门绿。**状态**：in_progress（观感 pending_human_eye 零代签）。
 
 > **item83 返工第4症同批登记（2026-11-27）**：owner 实测 GLB 已落但会话区不出卡。核真真实描述符来自 `model3d_asset` 导入（workspace-relative `.glb`，无 `/api/generated/` URL）与 `model3d_recipe` 本地近似降级，均被 `groupGeneratedActivities` 的 `generate.*` 过滤挡住——mock 用 generate.model3d 描述符所以没抓到。真修=新增 `model3dArtifactsFromResult` 把两类真实形状归一化为 ChatArtifact（无 url 时靠 path+projectId 走 workspaceFileUrlFor，不伪造受控读面），降级路径 source provider/model/mode/status 如实保留。HK-01 `ChatArtifactCard.model3d-real.test.tsx` 2/2（真实 asset/recipe/generate 三条路径 + 自动出卡），邻域 80/80。**状态**：in_progress（观感 pending_human_eye 零代签）。

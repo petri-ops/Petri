@@ -3,6 +3,7 @@
 // 原导出路径 '@/pages/project-workspace' 经页面 re-export 保持兼容。
 
 type CoreRightPanelMode =
+  | 'overview'
   | 'home'
   | 'results'
   | 'files'

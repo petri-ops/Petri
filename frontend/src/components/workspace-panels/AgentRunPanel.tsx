@@ -11,6 +11,8 @@
 // 经 onSpawnedAgent 回调交由宿主（右栏 tab 切换），独立窗路线退役。
 // ============================================================
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { WorkbenchFlagGate } from './WorkbenchFlagGate';
+import { WorkbenchApprovalCard } from './WorkbenchApprovalCard';
 import {
   subscribeAgentTask,
   cancelAgentTask,
@@ -69,10 +71,13 @@ function runStateFromStatus(status: string | null | undefined): RunState {
 export function AgentRunPanel({
   runId,
   onSpawnedAgent,
+  workbenchEnabled = false,
 }: {
   runId: string;
   /** 续派成功后回调（宿主切换面板到新 agent；不再弹独立窗）。 */
   onSpawnedAgent?: (agentId: string) => void;
+  /** item88 第二波总闸：开发态由宿主按 workbench flag 传入；默认 off 保持 v1.0 渲染。 */
+  workbenchEnabled?: boolean;
 }): React.ReactElement {
   const [runState, setRunState] = useState<RunState>('running');
   const [taskText, setTaskText] = useState('');
@@ -381,6 +386,9 @@ export function AgentRunPanel({
           </span>
         )}
       </div>
+      <WorkbenchFlagGate enabled={workbenchEnabled}>
+        <WorkbenchApprovalCard taskId={runId} title="子任务审批请求" onDecide={() => undefined} />
+      </WorkbenchFlagGate>
       {streamError && <div className={styles.loadError} role="alert">事件流断开：{streamError}</div>}
       {errorText && <div className={styles.loadError} role="alert">{errorText}</div>}
       {actionNote && <div className={styles.drillNote} role="status">{actionNote}</div>}

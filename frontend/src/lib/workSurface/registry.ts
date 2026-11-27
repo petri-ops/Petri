@@ -10,6 +10,7 @@ import type {
 // the old hard-coded tab table without moving URL/legacy state. Pack ids are
 // namespaced (`pack:<packId>:<viewId>`), so the two spaces cannot collide.
 export const CORE_WORK_SURFACE_IDS = {
+  overview: 'overview',
   home: 'home',
   results: 'results',
   files: 'files',
@@ -51,6 +52,7 @@ function coreSurface(
 /** Order mirrors the pre-Q5 right-panel rail so the existing UI stays visually stable. */
 export const CORE_WORK_SURFACES: readonly WorkSurfaceDescriptor[] = Object.freeze([
   coreSurface('home', '工作台', 'home', 0, { closeable: false, persist: false }),
+  coreSurface('overview', '项目总览', 'layers', 5, { emptyState: '目标树 / 协作关系图 / 审计流水（只读投影）。' }),
   coreSurface('results', '结果', 'bar-chart', 10),
   coreSurface('files', '文件', 'folder', 20),
   coreSurface('generated', '生成文件', 'file', 25, { emptyState: '当前会话还没有写入过工作区文件。' }),

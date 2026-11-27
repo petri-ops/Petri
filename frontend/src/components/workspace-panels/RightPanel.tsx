@@ -24,6 +24,8 @@ import { useConversationShortstat, useConversationUnreviewedCount } from '@/comp
 import { CommandCenterJobsWall } from '@/pages/window/CommandCenterJobsWall';
 import { WorkflowRunsPanel } from '@/components/work-surface/WorkflowRunsPanel';
 import { Model3DSurface } from '@/components/work-surface/Model3DSurface';
+import { WorkbenchOverviewSurface } from '@/components/work-surface/WorkbenchOverviewSurface';
+import { useSubAgentTasksForConversation } from '@/components/copilot/conversationRunStore/subAgentTasks';
 // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（复用 dock 紧凑形态，填满 tab 容器）
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
 // BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（原 composer ⋯ 菜单 overlay 迁入）
@@ -157,6 +159,8 @@ export function RightPanel({
   workspaceMode,
   onResize,
 }: RightPanelProps): React.ReactElement | null {
+  // item88 第二波：总览三视图只读投影；数据来自既有子任务快照，零新账本。
+  const overviewTasks = useSubAgentTasksForConversation(ctx.activeConvId);
   const handleBrowserNavigationStateChange = React.useCallback(
     ({ canGoBack, canGoForward }: { canGoBack: boolean; canGoForward: boolean }) => {
       ctx.setBrowserCanGoBack(canGoBack);
@@ -333,6 +337,13 @@ export function RightPanel({
                   />
                 )}
                 {/* BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（绑当前会话，只读；无会话诚实空态） */}
+                {tab === 'overview' && (
+                  <WorkbenchOverviewSurface
+                    tasks={overviewTasks}
+                    rootTaskId={ctx.activeConvId || null}
+                    conversationId={ctx.activeConvId}
+                  />
+                )}
                 {tab === 'io' && <LlmTranscriptViewer conversationId={ctx.activeConvId} />}
                 {/* BLOCK-248（Q3）— 事件级执行轨迹：只读已记录事件；与模型 I/O 互链 */}
                 {tab === 'trace' && (
