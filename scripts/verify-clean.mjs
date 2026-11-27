@@ -120,25 +120,36 @@ function run(command, args, options = {}) {
 export function resolveGateSteps(gatesArg) {
   const names = (gatesArg ? gatesArg.split(',') : ['ci']).map((name) => name.trim()).filter(Boolean);
   const steps = [];
-  for (const name of names) {
-    if (name === 'ci' || name === 'static') {
+  const pushPreset = (name) => {
+    if (name === 'ci') {
+      pushPreset('static');
+      pushPreset('platform');
+      pushPreset('harness');
+      pushPreset('frontend');
+      return;
+    }
+    if (name === 'static') {
       for (const gate of CI_STATIC_GATES) steps.push({ name: gate, kind: 'npm' });
-      if (name === 'static') continue;
-    } else if (name === 'platform') {
+      return;
+    }
+    if (name === 'platform') {
       steps.push({ name: 'platform regressions', kind: 'node-test', files: CI_PLATFORM_TEST_FILES });
-      continue;
-    } else if (name === 'harness') {
+      return;
+    }
+    if (name === 'harness') {
       steps.push({ name: 'harness:check', kind: 'npm' });
       steps.push({ name: 'harness:phase6', kind: 'npm' });
       steps.push({ name: 'harness tool bundle', kind: 'node-test', files: CI_HARNESS_TEST_FILES });
-      continue;
-    } else if (name === 'frontend') {
+      return;
+    }
+    if (name === 'frontend') {
       steps.push({ name: 'frontend check (tsc)', kind: 'npm', prefix: 'frontend' });
       steps.push({ name: 'build:spa', kind: 'npm' });
-      continue;
+      return;
     }
     steps.push({ name, kind: 'npm' });
-  }
+  };
+  for (const name of names) pushPreset(name);
   return steps;
 }
 

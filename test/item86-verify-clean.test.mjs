@@ -104,3 +104,17 @@ test('HK-86-9：默认门清单是 CI 等价集（防漂移钉）', () => {
     assert.ok(source.includes(gate), `默认门清单应包含 ${gate}`);
   }
 });
+
+test('HK-86-10：预设展开——默认(ci)不含字面量预设名，17 步覆盖四预设', async () => {
+  // 真跑首验曾暴露：ci 预设展开后 fallback 又把字面量 'ci' 当 npm script 推入（不存在即红）。
+  const mod = await import(SCRIPT);
+  const steps = mod.resolveGateSteps(null);
+  const names = steps.map((step) => step.name);
+  for (const preset of ['ci', 'static', 'platform', 'harness', 'frontend']) {
+    assert.equal(names.includes(preset), false, `预设展开不得残留字面量 ${preset}`);
+  }
+  assert.equal(steps.filter((step) => step.kind === 'npm' && step.name === 'docs:check').length, 1);
+  assert.equal(steps.filter((step) => step.kind === 'node-test').length, 2, 'platform + harness 两个 node-test 步');
+  assert.equal(mod.resolveGateSteps('ci').length, steps.length, 'ci 预设与默认等价');
+  assert.equal(mod.resolveGateSteps('static').length, 11, 'static 预设 = 11 静态门');
+});
