@@ -3,6 +3,9 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ResultsSurface, type ResultsSurfaceContext } from './ResultsSurface';
 
+vi.mock('@/lib/resultStudioFlag', () => ({
+  useResultStudioEnabled: () => true, // 本文件验证 flag-on 契约（off 态见 ResultsSurface.flag.test.tsx）
+}));
 vi.mock('@/components/copilot/conversationRunStore', () => ({
   useConversationRun: () => null,
   resultEditProgressForContext: () => [],

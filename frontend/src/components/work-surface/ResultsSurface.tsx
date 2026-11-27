@@ -31,6 +31,7 @@ import {
 import { ResultView, type ActiveArtifact } from '@/components/workspace-panels/ResultView';
 import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
 import { PackSurfaceFrame } from '@/components/work-surface/PackSurfaceFrame';
+import { useResultStudioEnabled } from '@/lib/resultStudioFlag';
 import { useResultSurfaceHost } from './useResultSurfaceHost';
 import styles from './ResultsSurface.module.css';
 
@@ -68,7 +69,28 @@ export interface ResultsSurfaceContext {
  * URL 只承载 `?job=&artifact=`。pack 结果面 / tab 级接管 / 身份水化走
  * useResultSurfaceHost（自 CenterPanel 原样平移）。
  */
-export function ResultsSurface({
+/**
+ * item 90 阶段一可逆下架——flag 包装层：resultStudio off 时渲染「已下架」诚实态，
+ * 零 RS 数据拉取（Inner 不挂载）。原组件逐字未动（改名 Inner）。
+ */
+export function ResultsSurface(props: {
+  ctx: ResultsSurfaceContext;
+  active: boolean;
+  onBackToChat?: () => void;
+}): React.ReactElement {
+  const enabled = useResultStudioEnabled();
+  if (!enabled) {
+    return (
+      <div className={styles.surface} data-testid="results-surface-off" data-flag="result-studio:off">
+        <p className={styles.note}>结果面（Result Studio）已按产品裁决下架（阶段一，可逆）——查看场景由会话区产物卡与文件面板承接。</p>
+        <p className={styles.note}>恢复：设置 → 决策接点 → result-studio，或 env PETRI_RESULT_STUDIO=1。</p>
+      </div>
+    );
+  }
+  return <ResultsSurfaceInner {...props} />;
+}
+
+function ResultsSurfaceInner({
   ctx,
   active,
   onBackToChat,

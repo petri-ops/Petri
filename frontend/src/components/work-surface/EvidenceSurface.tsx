@@ -1,3 +1,4 @@
+import { useResultStudioEnabled } from '@/lib/resultStudioFlag';
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { fetchTrajectory } from '@/lib/trajectoryClient';
@@ -9,7 +10,23 @@ import { composeTrustStatus } from '@/lib/statusProjection';
 import { shortRevisionLabel } from '@/components/result-studio/resultSurface';
 import styles from './WorkSurfacePanels.module.css';
 
-export function EvidenceSurface({
+/**
+ * item 90 阶段一可逆下架——flag 包装层：resultStudio off 时渲染「已下架」诚实态。
+ * 原组件逐字未动（改名 Inner）。
+ */
+export function EvidenceSurface(props: Parameters<typeof EvidenceSurfaceInner>[0]): React.ReactElement {
+  const enabled = useResultStudioEnabled();
+  if (!enabled) {
+    return (
+      <div data-testid="evidence-surface-off" data-flag="result-studio:off">
+        <p>证据面随 Result Studio 一并下架（阶段一，可逆）。</p>
+      </div>
+    );
+  }
+  return <EvidenceSurfaceInner {...props} />;
+}
+
+function EvidenceSurfaceInner({
   activeJob,
   activeWorkflow,
   activeArtifact,

@@ -36,6 +36,9 @@ const RUNTIME_POINTS = {
   'report-guard': { label: '子智能体汇报门（P2 试点）', enabledDefault: false, envKey: 'PETRI_JEV_REPORT_GUARD' },
   // item88 工作台：默认 off，项目粒度灰度另由 wb_project_settings 决定；关 flag 零残留。
   'workbench': { label: '项目工作台（第一波地基）', enabledDefault: false, envKey: 'PETRI_WORKBENCH' },
+  // item 90 阶段一可逆下架——默认 off：RS 后端入口 404、前端结果面出「已下架」诚实态；
+  // env PETRI_RESULT_STUDIO=1 或设置页显式开启即恢复（数据只读保留观察期，写入面未动）。
+  'result-studio': { label: 'Result Studio（结果面）', enabledDefault: false, envKey: 'PETRI_RESULT_STUDIO' },
 };
 
 function configPath() {

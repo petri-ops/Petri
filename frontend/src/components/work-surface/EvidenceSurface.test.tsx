@@ -3,6 +3,9 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EvidenceSurface } from './EvidenceSurface';
 
+vi.mock('@/lib/resultStudioFlag', () => ({
+  useResultStudioEnabled: () => true, // 本文件验证 flag-on 契约（off 态见 ResultsSurface.flag.test.tsx）
+}));
 vi.mock('@/lib/trajectoryClient', () => ({ fetchTrajectory: vi.fn() }));
 
 afterEach(cleanup);

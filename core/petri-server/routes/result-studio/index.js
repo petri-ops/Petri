@@ -51,6 +51,9 @@ module.exports = {
       throw new Error('result-studio/index register requires an Express app');
     }
 
+    // item 90 阶段一可逆下架——flag 守卫（两行）：resultStudio off 时本域全部入口 404。
+    app.use('/api/result-studio', (req, res, next) => (require('../../helpers/decision-config').getPointRuntime('result-studio').enabled ? next() : res.status(404).json({ error: 'result_studio_disabled' })));
+
     // 共享闭包变量（与原 routes/result-studio.js 第 233-247 行同语义）
     let repositoryInstance = null;
     const replayService = createControlledReplayService();

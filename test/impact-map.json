@@ -10330,6 +10330,9 @@
         "frontend/src/components/copilot/ConversationTimeline.tsx",
         "acceptance/item83-artifact-preview/**",
         "acceptance/item84-3d-fallback/**",
+        "acceptance/item89-conversation-tree/**",
+        "acceptance/item83-mock-real-gap/**",
+        "acceptance/item88-workbench-wave2/**",
         "acceptance/item85-video-file-panel/**",
         "frontend/src/components/work-surface/GeneratedFilesSurface.tsx",
         "frontend/src/components/work-surface/GeneratedFilesSurface.test.tsx",
@@ -10348,13 +10351,11 @@
         "frontend/src/lib/conversationSelection.test.ts",
         "frontend/src/components/desktop/AppRailContext.item89.test.ts",
         "frontend/src/components/desktop/AppRailContext.item89.integration.test.tsx",
-        "acceptance/item89-conversation-tree/**",
         "frontend/src/components/copilot/ChatArtifactCard.model3d-real.test.tsx",
         "test/item83-second-round.test.mjs",
         "frontend/src/components/copilot/item83-failure-reason.test.ts",
         "frontend/src/lib/workSurface/item83-real-flow.test.tsx",
         "frontend/src/components/work-surface/GeneratedFilesSurface.item83.integration.test.tsx",
-        "acceptance/item83-mock-real-gap/**",
         "core/petri-server/helpers/workbench-interaction.js",
         "core/petri-server/helpers/workbench-writeback.js",
         "core/petri-server/helpers/workbench-change-order.js",
@@ -10362,7 +10363,6 @@
         "frontend/src/components/work-surface/WorkbenchOverviewSurface.tsx",
         "frontend/src/components/workspace-panels/WorkbenchApprovalCard.tsx",
         "frontend/src/components/workspace-panels/WorkbenchFlagGate.tsx",
-        "acceptance/item88-workbench-wave2/**",
         "frontend/src/pages/project-workspace/WorkspaceFilePreview.model3d.test.tsx",
         "frontend/src/lib/generatedArtifactGroups.ts",
         "frontend/src/lib/workSurface/generatedArtifactPanel.test.ts",
@@ -10444,7 +10444,8 @@
         "frontend/src/pages/project-workspace/FileTreeItem.tsx",
         "frontend/src/pages/project-workspace/FileTreeList.tsx",
         "frontend/src/components/editor/integration/PetriOpenFileDevBridge.tsx",
-        "acceptance/block-109/arch-cycles-baseline.json"
+        "acceptance/block-109/arch-cycles-baseline.json",
+        "acceptance/item86-verify-clean-cycles/**"
       ],
       "tests": [
         "test/item86-verify-clean.test.mjs",
@@ -10456,6 +10457,25 @@
         "test/block93-agent-roles.test.mjs",
         "test/block93-role-prompt.test.mjs",
         "test/block256-automation.test.mjs"
+      ]
+    },
+    {
+      "id": "item90-result-studio-phase1",
+      "note": "item 90 阶段一可逆下架——resultStudio 决策点默认 off（decision-config + config-schema 登记，env PETRI_RESULT_STUDIO 种子）+ routes/result-studio/index.js 两行守卫（off 时 /api/result-studio/* 404 result_studio_disabled，可逆）+ 前端 lib/resultStudioFlag.ts fail-closed hook + ResultsSurface/EvidenceSurface 包装 off 诚实态（Inner 逐字未动）。HK-01：test/item90-result-studio-flag.test.mjs 4 钉（默认 off/全入口 404/env 恢复可逆/双表面映射表逐行判定）+ ResultsSurface.flag.test.tsx 3 钉。数据只读保留观察期（写入面 7 个 agent result-* 工具+background 未动）。影响面清单=acceptance/item90-result-studio-phase1/IMPACT-INVENTORY.md（五节+10 场景双表面映射，4 缺口报备）。顺笔修：item89 同款错位（acceptance pattern 误入 tests 数组）移回 patterns——该错型已是第二次（item84 先例），建议 coordinator 提醒各 seat tests 数组只放测试文件。零触碰 copilot/**、workspace-panels/**（RightPanel tab 骨架不碰，门控在 work-surface 包装层）、build/afterPack、agent-tools 凭据段。",
+      "patterns": [
+        "core/petri-server/helpers/decision-config.js",
+        "core/packages/shared-config/config-schema.js",
+        "core/petri-server/routes/result-studio/index.js",
+        "frontend/src/lib/resultStudioFlag.ts",
+        "frontend/src/components/work-surface/ResultsSurface.tsx",
+        "frontend/src/components/work-surface/EvidenceSurface.tsx",
+        "acceptance/item90-result-studio-phase1/**"
+      ],
+      "tests": [
+        "test/item90-result-studio-flag.test.mjs",
+        "frontend/src/components/work-surface/ResultsSurface.flag.test.tsx",
+        "frontend/src/components/work-surface/ResultsSurface.test.tsx",
+        "frontend/src/components/work-surface/EvidenceSurface.test.tsx"
       ]
     }
   ]

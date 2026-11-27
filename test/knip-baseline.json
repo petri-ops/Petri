@@ -24,6 +24,7 @@
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::selectPageTarget",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::withInputShield",
     "exports::frontend/src/components/result-studio/viewerRegistry.ts::viewerProfileCanCompare",
+    "exports::frontend/src/lib/resultStudioFlag.ts::__resetResultStudioFlagForTest",
     "exports::frontend/src/lib/workSurface/packWriteBridge.ts::PACK_WRITE_BRIDGE_VERSION",
     "exports::frontend/src/lib/workSurface/packWriteBridge.ts::validateSurfaceWritesDecl",
     "exports::src/ipc/utility-host.js::shutdownUtilityHosts",
@@ -529,6 +530,11 @@
     {
       "key": "files::acceptance/item87-phase1/live-ingest.mjs",
       "reason": "item 87 真源实测采集管线证据脚本：一次性动态入口（node 直跑留证），非生产依赖也非死代码，同 acceptance/stall-live-* 先例",
+      "date": "2026-11-27"
+    },
+    {
+      "key": "exports::frontend/src/lib/resultStudioFlag.ts::__resetResultStudioFlagForTest",
+      "reason": "item90 测试隔离接缝（与 decision-config/scratchpad 同款 __resetForTest 先例），生产路径零调用",
       "date": "2026-11-27"
     }
   ]

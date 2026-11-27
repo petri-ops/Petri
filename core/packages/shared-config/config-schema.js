@@ -275,6 +275,12 @@ const CONFIG_KEYS = Object.freeze([
     mutable: true, ui: 'settings',
   },
   {
+    // item90 RS 可逆下架总闸：默认 off（阶段一观察期）；env PETRI_RESULT_STUDIO 种子。
+    key: 'point.result-studio.enabled', family: 'decision-points', path: 'result-studio.enabled',
+    type: 'boolean', envKeys: ['PETRI_RESULT_STUDIO'], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
     // 阈值数值本身受校准门约束：可改（设置页热调）但"改默认值"须先重校准 → mutable=true + 证据在注册表
     key: 'point.*.threshold', family: 'decision-points', path: '<point>.threshold',
     type: 'number', domain: { min: 0, max: 1 }, envKeys: [], aliases: [],

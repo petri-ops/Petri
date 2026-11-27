@@ -51,7 +51,7 @@ test('设置分区清单冻结：12 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 12, `分区数应为 12（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：21 族 / 117 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice；BLOCK-247 web-search 8 键；BLOCK-249 subagent-profile tools 2 键；BLOCK-258 mcp-servers headers；BLOCK-264 C-37 model-access 2 键）', () => {
+test('配置注册表冻结：21 族 / 125 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice；BLOCK-247 web-search 8 键；BLOCK-249 subagent-profile tools 2 键；BLOCK-258 mcp-servers headers；BLOCK-264 C-37 model-access 2 键；item90 +1=point.result-studio.enabled，可逆下架总闸与 workbench 同形态登记制）', () => {
   // 2026-10-17 两次显式上调（BLOCK-203 W4a）：
   //  P1+P2：8 族/35 键 → 9 族/38 键（user-prefs：theme/fontScale/accent）；
   //  P3   ：9 族/38 键 → 10 族/43 键（skills-prefs：version + disabled.<id>.{at,reason}
@@ -89,7 +89,11 @@ test('配置注册表冻结：21 族 / 117 键（BLOCK-210 data-retention；BLOC
   //     独立成族不塞 network——network 是"往 env 写代理"的源头（有"需重启"语义），两者混族会造出第二套真相）。
   //   BLOCK-249（Q4a）：103 → 105 键（subagent-profile + tools.allow/tools.deny：子代理工具约束只收紧）。
   //   BLOCK-258（Q8-REM）：105 → 106 键（mcp-servers + headers：远程传输自定义凭据头，落盘密文/导出剥离）。
-  assert.equal(schema.CONFIG_KEYS.length, 117);
+  // item90 重锚 117→125：其中 117→124 为上游存量漂移（workbench 等多键合入时未同步重锚，
+  // base 5493dfda0..b057dd2503 复核实锚 117 vs 实际 124，被更早的门挡住未暴露）；
+  // 124→125 为本批 +point.result-studio.enabled（RS 可逆下架总闸，与 point.workbench.enabled 同形态）。
+  // 冻结语义不变：新增键即红、显式重锚留因。
+  assert.equal(schema.CONFIG_KEYS.length, 125);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {
