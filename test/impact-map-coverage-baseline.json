@@ -97,7 +97,6 @@
     "test/ack-token-guard.test.mjs",
     "test/approval-persistence.test.mjs",
     "test/ark-visible-provider.test.mjs",
-    "test/clipboard-ipc.test.mjs",
     "test/column-divider-visibility.test.mjs",
     "test/composer-mic-position.test.mjs",
     "test/context-menu-zindex.test.mjs",

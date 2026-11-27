@@ -992,12 +992,24 @@
     {
       "id": "governance-docs",
       "patterns": [
+        "README.md",
         "AGENTS.md",
         "CLAUDE.md",
         "frontend/AGENTS.md",
         "docs/**",
         ".agents/**",
         ".gitignore"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "code-signing-policy",
+      "note": "SignPath 开源签名申请前置件：公开 Code signing policy 页的验收证据目录，只随文档治理门，不触发产品代码测试。",
+      "patterns": [
+        "acceptance/code-signing-policy/**"
       ],
       "commands": [
         "docs-check"

@@ -57,6 +57,10 @@ npm run docs:check     # 文档治理门禁
 
 工程指令与治理纪律见 [AGENTS.md](./AGENTS.md)；文档入口见 [docs/README.md](./docs/README.md)。
 
+## Signing / 签名
+
+Petri Desktop 的 Windows 代码签名策略见 [Code signing policy](./docs/releases/code-signing-policy.md)：签名仅覆盖官方 GitHub Release 与官方 OSS 下载渠道发布的产物，其他渠道分发的包不受签名保护。
+
 ## License / 许可
 
 [MIT](./LICENSE) © petri-ops contributors
