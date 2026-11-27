@@ -117,4 +117,8 @@ test('HK-86-10：预设展开——默认(ci)不含字面量预设名，17 步�
   assert.equal(steps.filter((step) => step.kind === 'node-test').length, 2, 'platform + harness 两个 node-test 步');
   assert.equal(mod.resolveGateSteps('ci').length, steps.length, 'ci 预设与默认等价');
   assert.equal(mod.resolveGateSteps('static').length, 11, 'static 预设 = 11 静态门');
+  // script 与显示名分离（首验曾把显示名 'frontend check (tsc)' 当 script 传给 npm）
+  const feStep = mod.resolveGateSteps('frontend').find((step) => step.name === 'frontend check (tsc)');
+  assert.equal(feStep.script, 'check');
+  assert.equal(feStep.prefix, 'frontend');
 });

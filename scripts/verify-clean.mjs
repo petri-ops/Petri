@@ -143,7 +143,8 @@ export function resolveGateSteps(gatesArg) {
       return;
     }
     if (name === 'frontend') {
-      steps.push({ name: 'frontend check (tsc)', kind: 'npm', prefix: 'frontend' });
+      // script 与显示 name 分离：'check' 是 frontend 包的 script 名（首验曾把显示名当 script 传给 npm）
+      steps.push({ name: 'frontend check (tsc)', script: 'check', kind: 'npm', prefix: 'frontend' });
       steps.push({ name: 'build:spa', kind: 'npm' });
       return;
     }
@@ -221,7 +222,8 @@ function main() {
       if (step.kind === 'node-test') {
         result = run('node', ['--test', ...step.files], { cwd: checkoutDir });
       } else {
-        const args2 = ['run', step.name, '--silent'];
+        const scriptName = step.script || step.name;
+        const args2 = ['run', scriptName];
         if (step.prefix) args2.splice(1, 0, '--prefix', step.prefix);
         result = run('npm', args2, { cwd: checkoutDir });
       }
