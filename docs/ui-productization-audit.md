@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **item89 会话切换联动文件树同批登记（2026-11-27）**：项目点击联动正常、会话切换不联动的根因=旧项目 `activeConvId` 挡住新项目预选（种子 effect `if (activeConvId) return`），文件面板仍绑旧 workspace。修复=新 `resolveActiveConversationId` 只接受属于当前项目会话列表的 activeConvId，否则消费 preselect 或回落首条；`RightFileTree` 加 `key={projectId}` 强制随项目重挂载。HK-01 2/2（A→B 旧 id 不挡预选、项目内合法 id 保持）。**状态**：in_progress（代码级完成，观感 pending_human_eye 零代签）。
+
 > **item83 返工同批登记（2026-11-27 · owner 终验三症）**：症状=视频/HTML 未进文件面板且落默认路径、HTML 查看乱码。核真=HTML 原无 `generate.html` 工具，agent 用 `workspace_write`/脚本落到 `dist/`；视频描述符本身正确但面板只从当前 run 快照取活动。修复=新增 `generate.html`（UTF-8 写 `generated/generate-html`）+ handler `verifyGeneratedDescriptor` 强制 path 在受控 outDir 且 url↔basename 一致（默认路径红）+ HTML 读面显式 `charset=utf-8` + 面板 `generatedArtifactsFromActivities` 四类归一化。HK-01 节点 3/3 + 前端 1/1，回归节点 14/14+前端 43/43。**状态**：in_progress（观感 pending_human_eye 零代签）。
 
 > **item88 工作台第一波同批登记（2026-11-27）**：权威设计 `petri-workbench-design-v1.md`（v1.0 14 章 + v1.1 增量，第一波范围不变）。落地=四表迁移 025（wb_goals/wb_tasks/wb_documents append-only/wb_changes）+ core schema 同步；`workbench.enabled` flag 默认 off（PETRI_WORKBENCH）；任务状态机按 §4.4 原词全轮转（draft→confirm→queued→running→…→reviewing→delivered→accepted，任意态可 cancelled/failed）机械落 task_events；子任务隔离选 git worktree（deriveTaskWorktree + 冲突拒绝，禁目录副本，合并只出 diff 走既有评审面）；任务书 `requireAcceptanceCriteria` 缺验收标准即红；文档链 chain_hash append-only；计量 `ai_usage.task_id` + `summarizeTaskUsage` + `/api/ai/usage-task` + 独立 `WorkbenchMetricsCard`（tok/费用/时长/轮数，不碰 83/84/85 已验卡区）。HK-01 节点 5/5 + 前端 1/1，回归 37/37。**状态**：in_progress（代码级完成，观感 pending_human_eye 零代签；owner 实机终验未做）。

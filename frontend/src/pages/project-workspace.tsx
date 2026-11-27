@@ -17,6 +17,7 @@ import { TitleBar } from '@/components/desktop/TitleBar';
 import { getProject, listProjectJobs, listDatasetsByProject } from '@/lib/project-store';
 import type { Project, ToolJob, Dataset } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
+import { resolveActiveConversationId } from '@/lib/conversationSelection';
 import {
   isConversationRunning,
   useConversationRun,
@@ -439,25 +440,23 @@ export function ProjectWorkspace(): React.ReactElement {
   // projectId is null). What it doesn't know about is the auto-select rule
   // "if no conversation is active, pick the most recent one for this project".
   useEffect(() => {
-    if (!projectId) return;
-    if (activeConvId) return;
-    if (conversations.length === 0) return;
-    // BLOCK-171 CP-3 — 命令面板「最近会话」预选交接（一次性；命中即消费，
-    // 未命中/损坏即丢弃回落 conversations[0] 自动选）。
+    if (!projectId || conversations.length === 0) return;
+    // BLOCK-171 CP-3 / item89 — 命令面板「最近会话」预选交接（一次性；命中即消费）。
+    let preselected: string | null = null;
     try {
       const raw = sessionStorage.getItem('petri.conversationPreselect');
       if (raw) {
         sessionStorage.removeItem('petri.conversationPreselect');
-        const preselect = JSON.parse(raw) as { conversationId?: string };
-        if (preselect.conversationId && conversations.some((c) => c.id === preselect.conversationId)) {
-          setActiveConvId(preselect.conversationId);
-          return;
-        }
+        preselected = (JSON.parse(raw) as { conversationId?: string }).conversationId || null;
       }
     } catch {
       /* 交接损坏即忽略 */
     }
-    setActiveConvId(conversations[0].id);
+    // item89：旧项目 id 若不在当前项目会话列表里，不得挡住新项目绑定。
+    const resolved = resolveActiveConversationId({ projectId, conversations, activeConvId, preselectedConversationId: preselected });
+    if (resolved.conversationId && resolved.conversationId !== activeConvId) {
+      setActiveConvId(resolved.conversationId);
+    }
   }, [projectId, conversations, activeConvId]);
   // Reset active conv when the project changes — hook re-seeds the list.
   // UI-341 实机抓真修：只在 projectId 真正「变化」时清，mount 不清——本组件

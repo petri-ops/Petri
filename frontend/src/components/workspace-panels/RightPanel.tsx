@@ -290,6 +290,7 @@ export function RightPanel({
                 )}
                 {tab === 'files' && (
                   <RightFileTree
+                    key={ctx.projectId || 'no-project'}
                     project={ctx.project}
                     active={ctx.rightTab === 'files'}
                     openFiles={ctx.openWorkspaceFiles}

@@ -45,9 +45,9 @@
       "path": "frontend/src/pages/project-workspace.tsx",
       "wave": "B",
       "module": "W-02",
-      "lines": 1233,
-      "bytes": 61385,
-      "sha256": "13909672de538c578b4a078384ec2bbd4fadb9f25638456f610a50aff126f3d7"
+      "lines": 1232,
+      "bytes": 61559,
+      "sha256": "a2d0c3191d3801b7378d3c027a102744e12e2ab5eb3d9ce17caaf1a95e36b5b6"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86836,
+  "total": 86835,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
