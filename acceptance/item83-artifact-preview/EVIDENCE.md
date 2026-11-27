@@ -75,7 +75,15 @@ owner 截图反馈（`/Users/zhangdiandian/Library/Application Support/orca/agen
 修复：①新增 `generate.html` 内核工具，UTF-8 写 `generated/generate-html`，返回受控读面描述符；②`generate-tools.js::verifyGeneratedDescriptor` 强制 `path` 在受控 outDir 且 `url`↔basename 一致，默认路径红；③HTML 读面 `Content-Type: text/html; charset=utf-8`（generated-file 与 files 两路）；④`generatedArtifactsFromActivities` 四类归一化进文件面板，视频保留原预览。
 HK-01 `test/item83-artifact-path.test.mjs` 3/3 + `generatedArtifactPanel.test.ts` 1/1；回归节点 14/14、前端 43/43、工具计数 20/20；11 静态门绿。
 
-## §10 安全边界与待办
+## §10 追加第4症：GLB 已落但会话区不出卡
+
+真实来源核真（conv_6c81c8fb-e70 / msg_b1218beb-a1a）：`model3d_asset` 成功导入 `asset.path='model3d/assets/<sha>.glb'`（workspace-relative，无 `/api/generated/` URL）；84 降级路径为 `model3d_recipe` 返回 `render.outputs[].path` + `source.provider='local'`。83 批自动出卡 mock 用 generate.model3d 描述符，`groupGeneratedActivities` 前置 `name.startsWith('generate.')` 把两条真实路径全过滤掉。
+
+真修：`frontend/src/lib/generatedArtifactGroups.ts::model3dArtifactsFromResult` 归一化 model3d_asset / model3d_recipe 真实描述符为 ChatArtifact；无 url 时靠 `path + projectId` 走 `workspaceFileUrlFor`（不伪造受控读面）；降级 source 的 provider/model/mode/status 如实保留并随卡展示。
+
+HK-01 `ChatArtifactCard.model3d-real.test.tsx` 2/2：三条真实路径（asset/recipe/generate）均归一化为 3D 产物且自动出卡，含降级路径；邻域 80/80。
+
+## §11 安全边界与待办
 
 - HTML sandbox 为 opaque origin，不能凭同源凭据调后端——预期安全边界，非缺陷。
 - 产物文件与元信息继续本地留存（dataDir/generated），会话预览不替代落盘；artifact-truth 契约未改。
