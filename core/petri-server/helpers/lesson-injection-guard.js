@@ -33,7 +33,7 @@ function guardLessonInjection(lessons = [], verifyFn = null) {
       // 冻结理由随 verdict 留痕：code / reason 原样带出，不改写判据本体
       const entry = { sourceFingerprint: fp, verdict };
       frozen.push(entry);
-      if (process.env.EVO_DEBUG) { try { console.warn('[evo][guard] frozen at injection boundary:', JSON.stringify(entry)); } catch {} }
+      if (process.env.EVO_DEBUG) { try { console.warn('[evo][guard] frozen at injection boundary:', JSON.stringify(entry)); } catch { /* debug 留痕失败可忽略，不影响冻结主链路 */ } }
       continue;
     }
     allowed.push(lesson);
