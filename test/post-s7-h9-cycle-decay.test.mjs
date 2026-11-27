@@ -21,9 +21,9 @@ test('DiffViewOptions 单一定义在 types.ts，unifiedDiff 只 re-export', () 
   assert.equal(/export interface DiffViewOptions/.test(diff), false, 'extension 不得再定义第二份');
 });
 
-test('环基线 13→12 已收紧，无回退', () => {
+test('环基线 13→0 已清零（item 86），无回退', () => {
   const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, 'acceptance/block-109/arch-cycles-baseline.json'), 'utf8'));
-  assert.equal(baseline.cycles.length, 12);
+  assert.equal(baseline.cycles.length, 0, 'item 86 后基线应为零环（新环由 arch-cycles 门即红）');
   const codeMirrorCycle = baseline.cycles.filter((c) => c.includes('CodeMirror/types.ts') && c.includes('unifiedDiff'));
   assert.equal(codeMirrorCycle.length, 0, '该环应已消亡');
 });

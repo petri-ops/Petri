@@ -28,7 +28,7 @@ const require = createRequire(import.meta.url);
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools.js');
-const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
+const { getProviderToolDefs: getToolDefs } = require('../core/petri-server/agent-tools/registry.js');
 const { dispatchTool } = require('../core/petri-server/agent-tools/index.js');
 
 // Windows (without Developer Mode) and some CI images cannot create symlinks,

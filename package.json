@@ -187,6 +187,7 @@
     "closeout": "node .agents/skills/petri-dev-infra/scripts/closeout-gates.mjs --gate gate:user-assets --gate gate:version-parity --gate gate:silent-catch --gate gate:code-size --gate gate:arch-cycles --gate gate:css-modules --gate gate:tracked-consistency --gate quality:secret --gate quality:arch --gate quality:frontend-deps --gate quality:ts-syntax --gate quality:lint --gate quality:lint:ledger --gate quality:perf --gate quality:types --gate quality:knip:check --gate gate:post-h9-contracts --report skills:check --report next:prompt:report --gate quality:ear --gate quality:surface",
     "closeout:full": "npm run closeout -- --force-full",
     "verify": "node .agents/skills/petri-dev-infra/dev-verify/run.cjs",
+    "verify:clean": "node scripts/verify-clean.mjs",
     "skills:check": "node scripts/skill-scaffold.mjs --check",
     "skills:scaffold": "node scripts/skill-scaffold.mjs",
     "schema:verify": "node scripts/verify-schema.js",

@@ -39,7 +39,7 @@ const {
   getToolContract,
   getToolRegistry,
 } = require('../core/petri-server/agent-tools/registry.js');
-const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
+const { getProviderToolDefs: getToolDefs } = require('../core/petri-server/agent-tools/registry.js');
 const { dispatchTool } = require('../core/petri-server/agent-tools/index.js');
 const { DeepSeekProvider } = require('../core/shared-backend/llm-providers/deepseek.js');
 const {
@@ -177,7 +177,7 @@ test('risk tier allowlist cannot be extended by registry consumers', () => {
 test('schema-first loading does not capture partial act helper exports', () => {
   const script = `
     (async () => {
-      const { getToolDefs } = require('./core/petri-server/agent-tools/tool-defs.js');
+      const { getProviderToolDefs: getToolDefs } = require('./core/petri-server/agent-tools/registry.js');
       const actTools = require('./core/petri-server/agent-tools/act-tools.js');
       // BLOCK-99 G4：空间管理会话台工具族 71 件；BLOCK-116 W2（BK-04）决策观测 +2 = 73；
       // BLOCK-121 P2（B1）result_summary +1 = 74；BLOCK-124（C-13）codegraph +2 = 76；

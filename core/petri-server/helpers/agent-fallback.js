@@ -176,7 +176,10 @@ function maybeLaunchTaskLevelFallback(input, deps = {}) {
     }
   } catch {}
 
-  const runAgentLoop = typeof deps.runAgentLoop === 'function' ? deps.runAgentLoop : require('../agent-runner').runAgentLoop;
+  // item 86 环解耦：默认分支改走组合根 locator（deps 注入优先语义不变）
+  const runAgentLoop = typeof deps.runAgentLoop === 'function'
+    ? deps.runAgentLoop
+    : require('./kernel-registry').getAgentLoopEntry();
   setImmediate(() => {
     runAgentLoop({
       messages: resumeMessages,

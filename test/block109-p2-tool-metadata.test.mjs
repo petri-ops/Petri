@@ -40,7 +40,7 @@ const require = createRequire(import.meta.url);
 const toolMetadataMod = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-metadata.js'));
 const { TOOL_METADATA, METADATA_KEYS, RISK_LEVELS, getToolMetadata } = toolMetadataMod;
 const toolDefsMod = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-defs.js'));
-const { getToolRegistry } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'registry.js'));
+const { getToolRegistry, getProviderToolDefs } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'registry.js'));
 const { runAgentToolCallBatch } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'agent-loop-control.js'));
 
 // skill 元工具（skill_discover/get/execute）注册在 mcp/registry（getSkillToolDefinitions），
@@ -57,7 +57,8 @@ function definedToolNames() {
   };
   collect(toolDefsMod.TOOL_DEFS);
   collect(toolDefsMod.WORKSPACE_TOOL_DEFS);
-  collect(toolDefsMod.getToolDefs ? toolDefsMod.getToolDefs() : []);
+  // item 86 环解耦：provider 投影（原 tool-defs.getToolDefs）已归位 registry
+  collect(getProviderToolDefs());
   return names;
 }
 

@@ -477,11 +477,10 @@ function builtinToolNames() {
   return [...builtinToolNameSet()];
 }
 
-// BLOCK-515 — registry 内置名单惰性读取（顶层 require 会与 goal-tools 形成环：
-// store→agent-tools/registry→goal-tools→store，循环内 store.createGoal 尚未导出）。
+// BLOCK-515 → item 86 环解耦：内置名单改由组合根 locator 供给
+// （原惰性 require registry 仍构成 store→registry→goal-tools→store 的 C 族环）。
 function builtinToolNameSet() {
-  const { listBuiltinToolNames } = require('../agent-tools/registry');
-  return new Set(listBuiltinToolNames());
+  return new Set(require('./kernel-registry').getBuiltinToolNames());
 }
 
 function consecutiveFailures(scheduleId) {

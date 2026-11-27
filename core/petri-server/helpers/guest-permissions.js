@@ -6,7 +6,8 @@
  */
 
 const dbMod = require('../db');
-const { MODULE_KEYS, normalizePermissionsForStore, resolveModulePermission } = require('./permissions');
+// item 86 环解耦：契约符号改自纯面 contract（原指向 permissions 与 moduleGate 的游客兜底构成 E 族环）
+const { MODULE_KEYS, normalizePermissionsForStore, resolveModulePermission } = require('./permissions-contract');
 
 const SITE_KEY = 'guest_permissions';
 

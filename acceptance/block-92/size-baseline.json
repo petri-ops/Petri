@@ -318,8 +318,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1091,
-      "bytes": 53553,
-      "sha256": "3cc75912315ce9c641cb96c27299ec5d1597ef979dbf9d8c2e4f7b5123d4b85e"
+      "bytes": 53599,
+      "sha256": "0e077c3aab4c933d754b8bb3c68474362643d31b50da26088f5a5af6f7d22f37"
     },
     {
       "path": "frontend/src/pages/project-workspace/RightFileTree.tsx",
@@ -349,9 +349,9 @@
       "path": "core/petri-server/agent-runner.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1038,
-      "bytes": 58077,
-      "sha256": "3331f07a288f1caf71fae7747939a5fcfffbed46dbefe4f1e4896de7048210cc"
+      "lines": 1042,
+      "bytes": 58349,
+      "sha256": "8f01dd393e2798ad00b650ced72a6d8a0c038cfcf7b5732f0096abe7bdfda0fc"
     },
     {
       "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86868,
+  "total": 86872,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1152,6 +1152,19 @@
       "to": {
         "lines": 764,
         "bytes": 36645
+      }
+    },
+    {
+      "path": "core/petri-server/agent-runner.js",
+      "reason": "item86 组合根 kernel-registry 注册接线 +4 行（A/B/C 三族循环依赖真解耦，arch-cycles 基线 13→0；行棘轮已同批重锚 1038→1042 留因）",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 1038,
+        "bytes": 58077
+      },
+      "to": {
+        "lines": 1042,
+        "bytes": 58349
       }
     }
   ]

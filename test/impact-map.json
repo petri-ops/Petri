@@ -10329,6 +10329,7 @@
         "frontend/src/components/copilot/ToolActivityList.tsx",
         "frontend/src/components/copilot/ConversationTimeline.tsx",
         "acceptance/item83-artifact-preview/**",
+        "acceptance/item84-3d-fallback/**",
         "acceptance/item85-video-file-panel/**",
         "frontend/src/components/work-surface/GeneratedFilesSurface.tsx",
         "frontend/src/components/work-surface/GeneratedFilesSurface.test.tsx",
@@ -10369,7 +10370,6 @@
         "core/petri-server/helpers/model3d-fallback.js",
         "frontend/src/components/copilot/SimpleChat/Model3DFallbackDialog.tsx",
         "frontend/src/components/copilot/SimpleChat/Model3DFallbackDialog.test.tsx",
-        "acceptance/item84-3d-fallback/**",
         "frontend/src/components/copilot/ChatArtifactCard.toolbar.test.tsx",
         "frontend/src/components/copilot/ChatArtifactGridCard.tsx",
         "frontend/src/components/copilot/ChatArtifactGridCard.test.tsx",
@@ -10414,6 +10414,40 @@
         "test/item87-citation-verify.test.mjs",
         "test/item87-citation-discipline.test.mjs",
         "test/item87-do-ingest.test.mjs"
+      ]
+    },
+    {
+      "id": "item86-verify-clean-arch-cycles",
+      "note": "item 86 部分——verify:clean 一条命令（临时全新 checkout+npm ci+CI 等价门禁，脏树预检拒绝；自测=干净跑通/脏跑红/门失败红/默认清单防漂移钉）+ arch-cycles 修绿（11 现存环真解耦非豁免：kernel-registry 组合根 locator 反转 A/B/C 族、tool-defs 纯数据化解 D 族、permissions-contract 纯面抽取解 E 族、FileTree 组件并模块解 G、PetriOpenFileDevBridge 自环直出 default；基线 13→0，值岗断言 item86-kernel-registry HK-86-4/5 + post-s7-h9-cycle-decay 13→0）。顺笔修：item84 误入 tests 数组的 acceptance 目录 pattern 移回 patterns（上游 9048486a8 错位，test:changed 解析即红被更早的门挡住未暴露）。",
+      "patterns": [
+        "scripts/verify-clean.mjs",
+        "core/petri-server/helpers/kernel-registry.js",
+        "core/petri-server/helpers/permissions-contract.js",
+        "core/petri-server/helpers/permissions.js",
+        "core/petri-server/helpers/guest-permissions.js",
+        "core/petri-server/helpers/automation-store.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-tools/index.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/helpers/agent-fallback.js",
+        "core/petri-server/routes/ai-agent/resume.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/agent-tools/registry.js",
+        "frontend/src/pages/project-workspace/FileTreeItem.tsx",
+        "frontend/src/pages/project-workspace/FileTreeList.tsx",
+        "frontend/src/components/editor/integration/PetriOpenFileDevBridge.tsx",
+        "acceptance/block-109/arch-cycles-baseline.json"
+      ],
+      "tests": [
+        "test/item86-verify-clean.test.mjs",
+        "test/item86-kernel-registry.test.mjs",
+        "test/post-s7-h9-cycle-decay.test.mjs",
+        "test/block232-permissions-generalization.test.mjs",
+        "test/block49-spawn-agent-tools.test.mjs",
+        "test/block49-phase2-tools.test.mjs",
+        "test/block93-agent-roles.test.mjs",
+        "test/block93-role-prompt.test.mjs",
+        "test/block256-automation.test.mjs"
       ]
     }
   ]

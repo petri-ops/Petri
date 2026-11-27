@@ -473,8 +473,8 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
     );
   }
 
-  // 懒加载打断 require 环（agent-runner → agent-tools → registry → 本模块）
-  const { runAgentLoop } = require('../agent-runner');
+  // item 86 环解耦：反向 require agent-runner 构成 A 族环，改走组合根 locator（依赖反转）
+  const runAgentLoop = require('../helpers/kernel-registry').getAgentLoopEntry();
   const dbMod = require('../db');
   let parentLoopRunId = null;
   try {

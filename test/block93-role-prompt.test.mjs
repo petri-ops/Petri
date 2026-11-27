@@ -84,6 +84,11 @@ after(() => {
 });
 
 const agentTaskStore = require(path.join(R_SERVER, 'agent-task-store.js'));
+// item 86 环解耦：spawn-agent-tools 不再反向 require agent-runner（A 族环消亡），
+// 改经 kernel-registry locator 取 runAgentLoop。测试直拉 spawn_agent 时组合根尚未加载，
+// 故在此显式加载一次（加载即注册；生产路径由 routes 链天然加载）。
+require(path.join(R_SERVER, 'agent-runner.js'));
+
 const { saveAiSettings } = require(path.join(R_SERVER, 'helpers', 'ai-settings.js'));
 const spawnTools = require(path.join(R_SERVER, 'agent-tools', 'spawn-agent-tools.js'));
 

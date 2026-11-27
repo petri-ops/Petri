@@ -67,10 +67,8 @@ const DOMAIN_TOOL_DEFS = Object.freeze({ ...domainModules });
 const toolByName = new Map(TOOL_DEFS.map((t) => [t.function.name, t]));
 const WORKSPACE_TOOL_DEFS = WORKSPACE_SUBSET_NAMES.map((n) => toolByName.get(n));
 
-function getToolDefs() {
-  // Lazy require avoids a module-initialization cycle: registry consumes these
-  // schema constants, while callers receive only fresh Provider-safe projections.
-  return require('./registry').getProviderToolDefs();
-}
+// item 86 环解耦：本模块是纯数据面（TOOL_DEFS/DOMAIN_TOOL_DEFS），不再反向 require
+// registry（原 getToolDefs 惰性 require 仍构成 registry↔tool-defs 的 D 族环）。
+// provider 投影单一实现在 registry.getProviderToolDefs()，index barrel 负责兼容转出。
 
-module.exports = { TOOL_DEFS, WORKSPACE_TOOL_DEFS, DOMAIN_TOOL_DEFS, getToolDefs };
+module.exports = { TOOL_DEFS, WORKSPACE_TOOL_DEFS, DOMAIN_TOOL_DEFS };

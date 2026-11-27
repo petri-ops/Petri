@@ -35,6 +35,11 @@ for (const key of Object.keys(process.env)) {
 }
 
 const { decideAgentToolCall } = require('../core/petri-server/agent-tools/agent-tool-policy.js');
+// item 86 环解耦：spawn-agent-tools 不再反向 require agent-runner（A 族环消亡），
+// 改经 kernel-registry locator 取 runAgentLoop。测试直拉 spawn_agent 时组合根尚未加载，
+// 故在此显式加载一次（加载即注册；生产路径由 routes 链天然加载）。
+require(R_SERVER + '/agent-runner.js');
+
 const { getToolContract } = require('../core/petri-server/agent-tools/registry.js');
 const { spawn_agent, list_agents, wait_agent, followup_task, __test } = require('../core/petri-server/agent-tools/spawn-agent-tools.js');
 const agentTaskStore = require('../core/petri-server/agent-task-store.js');

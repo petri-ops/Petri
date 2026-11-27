@@ -681,6 +681,10 @@ function getToolRegistry() {
   return TOOL_REGISTRY;
 }
 
+// item 86 环解耦：内置工具名单在此向 kernel-registry 注册，
+// automation-store 经 locator 取用，不再反向 require 本模块（C 族环消亡）。
+require('../helpers/kernel-registry').registerBuiltinToolNames(listBuiltinToolNames());
+
 module.exports = {
   CONTRACT_VERSION,
   RISK_TIERS,

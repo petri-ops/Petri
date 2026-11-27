@@ -2,14 +2,13 @@
 // FileTreeItem — UI-305 P1 从 project-workspace.tsx 尾部整簇平移（原 2014-2117 行），
 // 零行为变化；主文件按既有惯例再导出保持 '@/pages/project-workspace' 导入路径兼容。
 // ============================================================
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import styles from '../project-workspace.module.css';
 import { getToken } from '@/lib/authClient';
 import { getBridge } from '@/lib/desktopBridge';
 import type { ActiveWorkspaceFile, FileEntry } from './types';
-import { FileTreeList } from './FileTreeList';
 import { formatSize } from './helpers';
 
 // UI-400-3 — 树内拖拽内部 MIME 协议常量导出：RightFileTree 根目录落点复用同一协议
@@ -246,3 +245,84 @@ export function FileTreeItem({
 
 // ============================================================
 // RightFileTree — file tree for the right panel (current workspace)
+
+// ============================================================
+// item 86 环解耦 — FileTreeList 并入本模块（原 ./FileTreeList.tsx）
+//
+// FileTreeItem ↔ FileTreeList 是树形互递归（List 渲染 Item、Item 展开子目录时又渲染
+// List），双向 import 构成 arch-cycles 环。组件合入同一模块后只剩单向边
+// （FileTreeList.tsx → 本模块 barrel），递归语义零变化。
+// ============================================================
+
+export function FileTreeList({
+  entries,
+  prefix,
+  expandedDirs,
+  onToggleDir,
+  onFetchDir,
+  onFetchDirPage,
+  fileUrlFor,
+  onOpenFile,
+  activePath,
+  refreshVersion,
+  depth = 0,
+  workspaceDir,
+  workspaceKind,
+  onRowContextMenu,
+  onDropToDir,
+}: {
+  entries: FileEntry[];
+  prefix: string;
+  expandedDirs: Set<string>;
+  onToggleDir: (path: string) => void;
+  onFetchDir: (prefix: string) => Promise<FileEntry[]>;
+  /** BLOCK-96 F2 — 游标分页（可选；缺省回退 onFetchDir 全量） */
+  onFetchDirPage?: (prefix: string, offset: number) => Promise<{ entries: FileEntry[]; total: number; truncated: boolean }>;
+  fileUrlFor: (path: string) => string;
+  onOpenFile: (file: ActiveWorkspaceFile) => void;
+  activePath?: string | null;
+  refreshVersion: number;
+  depth?: number;
+  workspaceDir?: string;
+  workspaceKind?: 'local' | 'ssh';
+  onRowContextMenu?: (event: React.MouseEvent, entry: FileEntry, fullPath: string) => void;
+  onDropToDir?: (item: { path: string; name: string; type: 'file' | 'dir' }, targetDir: string, copy: boolean) => void;
+}): React.ReactElement {
+  const orderedEntries = useMemo(
+    () => [...entries].sort((left, right) => {
+      if (left.type !== right.type) return left.type === 'dir' ? -1 : 1;
+      return left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: 'base' });
+    }),
+    [entries]
+  );
+
+  return (
+    <ul className={styles.fileTree} role={depth === 0 ? 'tree' : 'group'}>
+      {orderedEntries.map((entry) => {
+        const fullPath = prefix ? `${prefix}/${entry.name}` : entry.name;
+        const isExpanded = expandedDirs.has(fullPath);
+        return (
+          <FileTreeItem
+            key={fullPath}
+            entry={entry}
+            fullPath={fullPath}
+            isExpanded={isExpanded}
+            depth={depth}
+            expandedDirs={expandedDirs}
+            onToggleDir={onToggleDir}
+            onFetchDir={onFetchDir}
+            onFetchDirPage={onFetchDirPage}
+            fileUrlFor={fileUrlFor}
+            onOpenFile={onOpenFile}
+            activePath={activePath}
+            refreshVersion={refreshVersion}
+            workspaceDir={workspaceDir}
+            workspaceKind={workspaceKind}
+            onRowContextMenu={onRowContextMenu}
+            onDropToDir={onDropToDir}
+          />
+        );
+      })}
+    </ul>
+  );
+}

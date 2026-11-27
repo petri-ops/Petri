@@ -1029,6 +1029,10 @@ async function runAgentLoop({
   return { assistantText };
 }
 
+// item 86 环解耦：组合根在此向 kernel-registry 注册运行期服务，
+// 下游（spawn-agent-tools/agent-fallback/resume）经 locator 取用，不再反向 require 本模块。
+require('./helpers/kernel-registry').registerAgentLoopEntry({ runAgentLoop });
+
 module.exports = {
   runAgentLoop,
   resolveAgentTaskTerminal,

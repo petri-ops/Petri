@@ -8,7 +8,8 @@
  * Also exports ackActToken + pendingActAcks for server.js act-ack endpoint.
  */
 
-const { getToolDefs } = require('./tool-defs');
+// item 86 环解耦：getToolDefs（provider 投影）单一实现在 registry，兼容名从这里转出
+const { getProviderToolDefs: getToolDefs } = require('./registry');
 const { _ackActToken, _pendingActAcks } = require('./act-tools');
 const { interceptAgentToolCall } = require('./agent-tool-interceptor');
 const {

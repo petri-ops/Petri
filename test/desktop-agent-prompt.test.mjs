@@ -30,7 +30,7 @@ const { buildSystemPrompt } = require('../core/petri-server/helpers/system-promp
 const {
   appendDesktopAgentInstructions,
 } = require('../core/petri-server/helpers/desktop-agent-prompt.js');
-const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
+const { getProviderToolDefs: getToolDefs } = require('../core/petri-server/agent-tools/registry.js');
 
 test('desktop prompt rejects legacy identity and automatic recommendation patterns', () => {
   const prompt = appendDesktopAgentInstructions(

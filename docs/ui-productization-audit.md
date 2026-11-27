@@ -1,6 +1,8 @@
 # Petri Desktop UI 产品化审计台账
 
 > **item88 第二波同批登记（2026-11-27）**：三档交互（`WorkbenchApprovalCard` 独立卡 + `WorkbenchFlagGate` total gate，审批走 approval-request-store、咨询走 question store）；双通道回写单一幂等入口 `workbench-writeback.js`；变更单 `workbench-change-order.js`（wb_changes + wb_documents chain）；2D 总览 `WorkbenchOverviewSurface`（目标树/OrchestrationGraph/TraceSurface，纯只读）+ registry `overview` tab；调度队列纯函数 `rankQueueTasks`/`computeRetryDecision`；flag `workbench.enabled` 默认 off，开发态用既有 decisions endpoint 开。HK-01 节点 5/5 + 前端 3/3，回归 13/13+35/35。**状态**：in_progress（观感 pending_human_eye 零代签）。
+> **item 86 arch-cycles 修绿同批登记（2026-11-27）**：环解耦涉及三处 UI 文件，**零观感/零交互/零样式变化**（HK-01 判据=行为等价，前端邻域 105/105 绿）：①`FileTreeItem ↔ FileTreeList` 树形互递归双向 import 消环——FileTreeList 组件并入 FileTreeItem.tsx（逐字未动），原文件改 barrel re-export，导入路径不变；②`PetriOpenFileDevBridge.tsx` 自引用 re-export（`export {...} from './本模块'` 自环）改同模块直出 default（App.tsx lazy import 语义不变）；③`permissions.js` 纯面抽至 permissions-contract.js（权限 UI 数据形状零变化）。**状态**：in_progress（代码级完成，观感无变化故无 pending_human_eye 项——文件树/开发桥/权限面像素级不变）。同批 core 面：kernel-registry 组合根 locator（A/B/C 族环反转）、tool-defs 纯数据化（D 族）、基线 13→0（post-s7-h9-cycle-decay 值岗断言同步收紧）。
+
 
 > **item83 返工第5症同批登记（2026-11-27）**：文件面板点击 GLB 原落「二进制文件」兜底页，需再点「在 3D 模型预览」两步。真修=`WorkspaceFilePreview` 对 `.glb/.gltf` 直接 `status='ready'` 并内嵌 `Model3DScene`（复用既有 3D 查看器），系统应用打开/下载副本降为 viewer 内次级按钮；二进制兜底只留不可预览类型。HK-01 `WorkspaceFilePreview.model3d.test.tsx` 1/1（点击 GLB 内嵌 3D 挂载、无二进制兜底、次级操作在场），文件预览邻域 12/12，11 静态门绿。**状态**：in_progress（观感 pending_human_eye 零代签）。
 

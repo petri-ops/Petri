@@ -57,6 +57,19 @@ require.cache[runnerPath] = {
 };
 
 const agentTaskStore = require(path.join(R_SERVER, 'agent-task-store.js'));
+// item 86 环解耦：spawn-agent-tools 不再反向 require agent-runner（A 族环消亡），
+// 改经 kernel-registry locator 取 runAgentLoop。本文件的假件不再走 require-cache 注入，
+// 改向 locator 显式注册同一假件（记录调用、不触真实模型的语义不变）。
+const kernelRegistryForTest = require(path.join(R_SERVER, 'helpers', 'kernel-registry.js'));
+kernelRegistryForTest.__resetKernelRegistryForTest();
+kernelRegistryForTest.registerAgentLoopEntry({
+  runAgentLoop: async (opts) => {
+    fakeRunnerState.launches.push(opts);
+    try { require(path.join(R_SERVER, 'helpers', 'runtime.js')).aiTaskConcurrencyRelease(opts.userId, opts.taskId); } catch {}
+    return { assistantText: 'fake-ok' };
+  },
+});
+
 const { getToolContract, getToolRegistry } = require(path.join(R_SERVER, 'agent-tools', 'registry.js'));
 const { decideAgentToolCall } = require(path.join(R_SERVER, 'agent-tools', 'agent-tool-policy.js'));
 const { executeToolCall } = require(path.join(R_SERVER, 'agent-tools', 'index.js'));

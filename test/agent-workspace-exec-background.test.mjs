@@ -30,7 +30,7 @@ const require = createRequire(import.meta.url);
   });
 }
 const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools.js');
-const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
+const { getProviderToolDefs: getToolDefs } = require('../core/petri-server/agent-tools/registry.js');
 
 const isWindows = process.platform === 'win32';
 const maybeSkipShell = isWindows ? test.skip : test;

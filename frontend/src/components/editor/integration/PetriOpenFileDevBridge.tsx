@@ -126,4 +126,6 @@ export const PetriOpenFileDevBridge: FC = (): ReactElement | null => {
  *
  * 注意：React.lazy + Suspense 在 SSR 场景可能需要特殊处理；本项目为纯 SPA，无此问题。
  */
-export { PetriOpenFileDevBridge as default } from './PetriOpenFileDevBridge';
+// item 86 环解耦：原 `export { ... } from './本模块'` 自引用 re-export 构成自环（forbidCycles
+// 判自环违规），改为同模块直出 default（App.tsx 的 lazy import 语义不变）。
+export default PetriOpenFileDevBridge;
