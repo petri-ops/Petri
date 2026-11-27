@@ -17,38 +17,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = path.join(ROOT, 'acceptance/block-109/arch-cycles-baseline.json');
 const OUT = path.join(ROOT, 'acceptance/post-s7-2026-11-10/h10/cycle-clusters.json');
 
-export const CLUSTERS = [
-  {
-    id: 'agent-runner-agent-tools-backref',
-    edge: 'agent-runner.js -> agent-tools/* -> spawn-agent-tools.js --lazy require--> agent-runner.js',
-    marker: /agent-runner\.js.*agent-tools/,
-    note: 'agent-tools 工具实现回指 agent-runner（含 loop-orchestrator 链）。懒加载打断运行期 require 环，静态图仍成环；消亡需抽 runAgentLoop 或依赖注入。',
-  },
-  {
-    id: 'agent-fallback-resume-backref',
-    edge: 'agent-runner.js -> helpers/agent-fallback.js (-> routes/ai-agent/resume.js)',
-    marker: /agent-runner\.js.*agent-fallback\.js/,
-    note: '续跑与降级辅助回指主循环，属 resume 语义簇。',
-  },
-  {
-    id: 'tool-defs-registry-backref',
-    edge: 'agent-tools/registry.js <-> agent-tools/tool-defs.js',
-    marker: /agent-tools\/registry\.js.*tool-defs\.js/,
-    note: '工具定义与注册表互为定义/执行，拆环需把 defs 改成纯数据。',
-  },
-  {
-    id: 'guest-permissions-backref',
-    edge: 'helpers/guest-permissions.js <-> helpers/permissions.js',
-    marker: /guest-permissions\.js/,
-    note: '访客权限委托基础权限又反向读，抽公共判定表可消。',
-  },
-  {
-    id: 'frontend-component-mutual',
-    edge: '前端组件互斥引用：PetriOpenFileDevBridge / LeftPanel<->LeftSshCreatePanel / FileTreeItem<->FileTreeList',
-    marker: /frontend\/src\//,
-    note: '三处前端组件双向 import（类型或回调），需按组件职责抽共享类型/契约。',
-  },
-];
+// item 86（2026-11-27）— 五簇全部消亡：循环依赖真解耦（kernel-registry 组合根 locator
+// 反转 A/B/C 族、tool-defs 纯数据化 D 族、permissions-contract 纯面抽取 E 族、
+// 前端组件合并/自环直出 F/G 族），arch-cycles 基线 13→0。本登记表随之清空；
+// 新环由 arch-cycles 门（基线外即红）+ 本测试的负测继续值守。
+export const CLUSTERS = [];
 
 export function clusterCycles(cycles, clusters = CLUSTERS) {
   const rows = cycles.map((c) => {

@@ -342,6 +342,7 @@ export function RightPanel({
                     tasks={overviewTasks}
                     rootTaskId={ctx.activeConvId || null}
                     conversationId={ctx.activeConvId}
+                    projectId={ctx.projectId ?? null}
                   />
                 )}
                 {tab === 'io' && <LlmTranscriptViewer conversationId={ctx.activeConvId} />}

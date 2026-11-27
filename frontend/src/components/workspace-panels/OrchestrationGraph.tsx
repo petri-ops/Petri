@@ -24,6 +24,12 @@ const STATUS_COLOR: Record<string, string> = {
   stopped: 'var(--petri-text-muted, #6a6a73)',
   cancelled: 'var(--petri-text-muted, #6a6a73)',
   error: 'var(--petri-danger, #ef4444)',
+  // item 88 第三波 — wb 状态机五态（§4.4 状态色）：accepted 成功绿 / running 信息蓝 /
+  // blocked 阻塞红 / needs-user 等人琥珀 / queued 排队灰。
+  accepted: 'var(--petri-status-success, #16a34a)',
+  blocked: 'var(--petri-danger, #ef4444)',
+  'needs-user': 'var(--petri-warning, #d97706)',
+  queued: 'var(--petri-text-muted, #6a6a73)',
 };
 
 function shortLabel(content: string): string {

@@ -76,6 +76,7 @@ export interface LeftPanelContext {
   handleShowScheduled: () => void;
   /** BLOCK-156 — 插件/Skills 两入口收敛为扩展中心单入口（四货架） */
   handleShowExtensions: () => void;
+  handleShowOverview: () => void;
   handleShowSettings: () => void;
   /** BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端为设备级全局能力，非项目关联） */
   handleNavigateToKnowledge: () => void;
@@ -335,12 +336,14 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const { pathname } = useLocation();
   const routeActiveKey: string | null = pathname.startsWith('/extensions')
     ? 'extensions'
-    : pathname.startsWith('/knowledge')
-      ? 'knowledge'
-      : null;
+    : pathname.startsWith('/overview')
+      ? 'overview'
+      : pathname.startsWith('/knowledge')
+        ? 'knowledge'
+        : null;
   const items: Array<{
     // BLOCK-156 — 'plugins'/'skills' 收敛为 'extensions'（扩展中心四货架）
-    key: WorkspaceMode | 'skills' | 'knowledge' | 'backend' | 'newtask' | 'extensions';
+    key: WorkspaceMode | 'skills' | 'knowledge' | 'backend' | 'newtask' | 'extensions' | 'overview';
     mode: WorkspaceMode | null;
     label: string;
     icon: Parameters<typeof Icon>[0]['name'];
@@ -355,6 +358,15 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
       icon: 'plus',
       onClick: ctx.handleNavigateToHome,
       title: '新建任务：在当前项目新建会话（点即出）',
+    },
+    {
+      // item 88 第三波 — 项目总览升一级导航独立入口（/overview；右栏 tab 保留短入口）
+      key: 'overview',
+      mode: null,
+      label: '项目总览',
+      icon: 'layers',
+      onClick: ctx.handleShowOverview,
+      title: '项目总览（工作台指挥面：目标树 / 协作图 / 执行轨迹）',
     },
     {
       // BLOCK-156 — 插件+Skills 两入口收敛为「扩展」单入口：扩展中心四货架

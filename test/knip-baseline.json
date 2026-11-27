@@ -425,6 +425,8 @@
     "types::frontend/src/lib/result-studio-interaction-client.ts::ResultStudioEditControlGroup",
     "types::frontend/src/lib/result-studio-interaction-client.ts::ResultTableColumn",
     "types::frontend/src/lib/tool-catalog.ts::CatalogOutputDef",
+    "types::frontend/src/lib/wbOverviewClient.ts::WbOverviewGoal",
+    "types::frontend/src/lib/wbOverviewClient.ts::WbOverviewTask",
     "types::frontend/src/pages/home/useHomeCreateFlows.ts::PendingWorkspace",
     "types::frontend/src/pages/project-workspace/fileOps.ts::FileOpAction",
     "types::frontend/src/themes/ThemeProvider.tsx::AccentId",
@@ -535,6 +537,16 @@
     {
       "key": "exports::frontend/src/lib/resultStudioFlag.ts::__resetResultStudioFlagForTest",
       "reason": "item90 测试隔离接缝（与 decision-config/scratchpad 同款 __resetForTest 先例），生产路径零调用",
+      "date": "2026-11-27"
+    },
+    {
+      "key": "types::frontend/src/lib/wbOverviewClient.ts::WbOverviewGoal",
+      "reason": "item88-wave3 wb overview 投影契约类型（客户端消费面形状，非死代码）",
+      "date": "2026-11-27"
+    },
+    {
+      "key": "types::frontend/src/lib/wbOverviewClient.ts::WbOverviewTask",
+      "reason": "item88-wave3 同上（任务形状）",
       "date": "2026-11-27"
     }
   ]

@@ -1,0 +1,181 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`GeneratedFilesSurface 快照（item 88 第三波） > wb 视频产物段快照（生成视频在面板的联动形态） > video-artifact-section 1`] = `
+<DocumentFragment>
+  <div
+    class="_panel_dc20c2"
+    data-state="ready"
+    data-testid="generated-files-surface"
+  >
+    <div
+      class="_panelHeader_dc20c2"
+    >
+      <svg
+        aria-hidden="true"
+        fill="none"
+        focusable="false"
+        height="15"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.75"
+        viewBox="0 0 24 24"
+        width="15"
+      >
+        <path
+          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+        />
+        <polyline
+          points="14 2 14 8 20 8"
+        />
+      </svg>
+      <strong>
+        生成文件
+      </strong>
+      <span
+        class="_muted_dc20c2"
+      />
+    </div>
+    <div
+      class="_list_dc20c2"
+      data-testid="generated-video-artifacts"
+    >
+      <article
+        class="_row_dc20c2"
+        data-testid="generated-video-artifact"
+      >
+        <div
+          class="_rowHeader_dc20c2"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            focusable="false"
+            height="13"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.75"
+            viewBox="0 0 24 24"
+            width="13"
+          >
+            <polygon
+              points="5 3 19 12 5 21 5 3"
+            />
+          </svg>
+          <span
+            class="_path_dc20c2"
+            title="/data/generated/generate-video/clip.mp4"
+          >
+            clip.mp4
+          </span>
+          <span
+            class="_badge_dc20c2"
+          >
+            视频
+          </span>
+        </div>
+        <div
+          class="_viewer_bc4828"
+          data-testid="video-result-viewer"
+        >
+          <div
+            class="_fallback_bc4828"
+            data-testid="video-result-viewer-state"
+          >
+            <strong>
+              视频预览不可用
+            </strong>
+            <span>
+              视频字节读取失败（offline）；可打开原文件。
+            </span>
+            <a
+              href="http://localhost:3001/api/generated/file/video/clip.mp4"
+              rel="noreferrer"
+              target="_blank"
+            >
+              打开或下载原文件
+            </a>
+          </div>
+          <div
+            class="_metaRow_bc4828"
+          >
+            <span
+              class="_name_bc4828"
+              title="clip.mp4"
+            >
+              clip.mp4
+            </span>
+            <span
+              class="_hint_bc4828"
+            >
+              预览经本地受控读面供给；超过内嵌上限请用系统播放器打开
+            </span>
+          </div>
+        </div>
+        <div
+          class="_actions_dc20c2"
+        >
+          <button
+            class="petri-btn petri-btn--ghost petri-btn--sm"
+            title="用系统默认播放器打开：/data/generated/generate-video/clip.mp4"
+            type="button"
+          >
+            系统播放器打开
+          </button>
+        </div>
+      </article>
+    </div>
+    <div
+      class="_list_dc20c2"
+    />
+  </div>
+</DocumentFragment>
+`;
+
+exports[`GeneratedFilesSurface 快照（item 88 第三波） > 工作区改动行快照（无视频产物共存形态） > workspace-row 1`] = `
+<DocumentFragment>
+  <div
+    class="_panel_dc20c2"
+    data-state="loading"
+    data-testid="generated-files-surface"
+  >
+    <div
+      class="_panelHeader_dc20c2"
+    >
+      <svg
+        aria-hidden="true"
+        fill="none"
+        focusable="false"
+        height="15"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.75"
+        viewBox="0 0 24 24"
+        width="15"
+      >
+        <path
+          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+        />
+        <polyline
+          points="14 2 14 8 20 8"
+        />
+      </svg>
+      <strong>
+        生成文件
+      </strong>
+      <span
+        class="_muted_dc20c2"
+      >
+        1 个
+      </span>
+    </div>
+    <p
+      class="_empty_dc20c2"
+    >
+      正在读取本会话的生成文件记录…
+    </p>
+  </div>
+</DocumentFragment>
+`;

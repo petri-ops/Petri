@@ -378,20 +378,20 @@
       "sha256": "c1a69dfa6592d5b1cfaf78d1bae7fbdc019a821b5db5629423f211f4c387615d"
     },
     {
+      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1002,
+      "bytes": 40670,
+      "sha256": "d263fc7c25ff907c3b333c5e0d8cc074756ab4d1bfcf092deb0ee0a8ca147f8d"
+    },
+    {
       "path": "frontend/src/components/desktop/TitleBar.module.css",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 994,
       "bytes": 22721,
       "sha256": "a26ce0c08b135e4497dc31586c7ce442bdacb25f360d290afcb94b74b4cc0a48"
-    },
-    {
-      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 990,
-      "bytes": 40208,
-      "sha256": "3d22caf63ba3ab74ddea3cccfdcafac0d300c60aa32359c6cf7a39d8b4bf21de"
     },
     {
       "path": "core/shared-backend/loop-repair-strategy.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86892,
+  "total": 86904,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1231,6 +1231,47 @@
         "lines": 1210,
         "bytes": 63804
       }
+    },
+    {
+      "path": "core/petri-server/routes/index.js",
+      "reason": "item88-wave3 wb-overview 只读路由注册接线 +2 行",
+      "date": "2026-11-27",
+      "from": null,
+      "to": null
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/OrchestrationGraph.tsx",
+      "reason": "item88-wave3 STATUS_COLOR §4.4 五态扩展 +5 行（状态色登记制）",
+      "date": "2026-11-27",
+      "from": null,
+      "to": null
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
+      "reason": "item88-wave3 项目总览一级导航入口 +12 行（/overview 独立目的地，右栏 tab 保留短入口）",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 990,
+        "bytes": 40208
+      },
+      "to": {
+        "lines": 1002,
+        "bytes": 40670
+      }
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/RightPanel.tsx",
+      "reason": "item88-wave3 总览面传 projectId +1 行（wb 投影按项目）",
+      "date": "2026-11-27",
+      "from": null,
+      "to": null
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "reason": "item88-wave3 /overview 路由注册 +2 行",
+      "date": "2026-11-27",
+      "from": null,
+      "to": null
     }
   ]
 }

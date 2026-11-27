@@ -70,6 +70,8 @@ module.exports = async function registerRoutes(app) {
     ['Tools', () => require('./tools')(app)],
     // item 83 — 生成产物会话区预览的受控读面（dataDir/generated，fail-closed）。
     ['Generated file', () => require('./generated-file').registerGeneratedFileRoutes(app)],
+    // item 88 第三波 — wb 目标/任务只读投影面（总览目标树数据源；只读，写入面归 store）。
+    ['Wb overview', () => require('./wb-overview').registerWbOverviewRoutes(app)],
     ['Storage capabilities', () => require('./storage-capabilities').registerStorageCapabilitiesRoute(app)],
     ['Result Studio', () => require('./result-studio')(app)],
     // NEXT-04A — 3D/Blender 只读能力探测（构建/渲染/导出仍走 agent tools）

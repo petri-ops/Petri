@@ -52,6 +52,7 @@ function LegacyResultsRedirect(): React.ReactElement {
 }
 const SettingsPage = lazy(() => import('@/pages/settings').then((m) => ({ default: m.default })));
 const KnowledgePage = lazy(() => import('@/pages/knowledge').then((m) => ({ default: m.default })));
+const OverviewPage = lazy(() => import('@/pages/overview').then((m) => ({ default: m.default })));
 // BLOCK-28 — main-area code review mode (VS Code SCM style)
 const ReviewModePage = lazy(() => import('@/pages/review').then((m) => ({ default: m.ReviewModePage })));
 // BLOCK-59 P1 — 独立窗路由面：/window/* 不走主窗 AppShell（无 TitleBar/
@@ -225,6 +226,7 @@ function AppShell(): React.ReactElement {
             {/* BLOCK-72 / UI-320 → UI-366 — 知识空间保留全局页；「后端」页退役，
                 诊断并入设置「运行时与诊断」分区 */}
             <Route path="/knowledge" element={<KnowledgePage />} />
+            <Route path="/overview" element={<OverviewPage />} />
             {/* BLOCK-28 — main-area code review mode (VS Code SCM style) */}
             <Route path="/review" element={<ReviewModePage />} />
             {/* UI-456（PL-4c）— 独立结果页退役：旧 URL/收藏优雅回落工作区（双轨收敛，

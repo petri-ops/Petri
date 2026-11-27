@@ -1,0 +1,156 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ChatArtifactCard 快照（item 88 第三波） > 完整卡图片产物快照 > full-image-card 1`] = `
+<DocumentFragment>
+  <div
+    data-testid="chat-artifact-card"
+    style="margin: 4px 0px; padding: 8px; border: 1px solid rgba(128, 152, 177, 0.25); border-radius: 8px; background: rgba(128, 152, 177, 0.06);"
+  >
+    <div
+      data-testid="chat-artifact-meta"
+      style="font-size: var(--petri-font-size-xs); color: var(--petri-text-secondary); margin-bottom: 8px;"
+    >
+      <span>
+        provider ark · 
+      </span>
+      <span>
+        模型 seedream-4 · 
+      </span>
+      <span>
+        task demo-task · 
+      </span>
+      <span>
+        耗时 10s
+      </span>
+    </div>
+    <div
+      style="margin-bottom: 8px;"
+    >
+      <div
+        data-testid="chat-artifact-image-frame"
+        style="display: flex; justify-content: center; width: 100%;"
+      >
+        <img
+          alt="poster-1080x1920.png"
+          data-testid="chat-artifact-image"
+          loading="lazy"
+          src="http://localhost:3001/api/generated/file/image/poster-1080x1920.png"
+          style="max-width: 480px; max-height: 360px; border-radius: 4px; cursor: pointer; border: 1px solid; border-width: var(--petri-border); border-style: var(--petri-border); border-color: var(--petri-border);"
+        />
+      </div>
+      <div
+        style="display: flex; gap: 8px; margin-top: 4px;"
+      >
+        <button
+          data-testid="chat-artifact-zoom-out"
+          style="font-size: var(--petri-font-size-xs, 11px); background: none none; border: none none; padding: 0px; cursor: pointer; color: var(--accent, #3b82f6);"
+          type="button"
+        >
+          -
+        </button>
+        <button
+          data-testid="chat-artifact-zoom-toggle"
+          style="font-size: var(--petri-font-size-xs, 11px); background: none none; border: none none; padding: 0px; cursor: pointer; color: var(--accent, #3b82f6);"
+          type="button"
+        >
+          放大
+        </button>
+        <button
+          data-testid="chat-artifact-zoom-in"
+          style="font-size: var(--petri-font-size-xs, 11px); background: none none; border: none none; padding: 0px; cursor: pointer; color: var(--accent, #3b82f6);"
+          type="button"
+        >
+          +
+        </button>
+      </div>
+      <div
+        style="display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;"
+      >
+        <button
+          data-testid="chat-artifact-copy-image"
+          style="font-size: var(--petri-font-size-xs, 11px); background: none none; border: none none; padding: 0px; cursor: pointer; color: var(--accent, #3b82f6);"
+          type="button"
+        >
+          复制图片
+        </button>
+        <button
+          data-testid="chat-artifact-export"
+          style="font-size: var(--petri-font-size-xs, 11px); background: none none; border: none none; padding: 0px; cursor: pointer; color: var(--accent, #3b82f6);"
+          type="button"
+        >
+          另存为
+        </button>
+        <button
+          data-testid="chat-artifact-open-folder"
+          style="font-size: var(--petri-font-size-xs, 11px); background: none none; border: none none; padding: 0px; cursor: pointer; color: var(--accent, #3b82f6);"
+          type="button"
+        >
+          打开所在文件夹
+        </button>
+        <button
+          data-testid="chat-artifact-open-system"
+          style="font-size: var(--petri-font-size-xs, 11px); background: none none; border: none none; padding: 0px; cursor: pointer; color: var(--accent, #3b82f6);"
+          type="button"
+        >
+          系统查看器打开
+        </button>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`ChatArtifactCard 快照（item 88 第三波） > 完整卡视频产物快照（下载出口） > full-video-card 1`] = `
+<DocumentFragment>
+  <div
+    data-testid="chat-artifact-card"
+    style="margin: 4px 0px; padding: 8px; border: 1px solid rgba(128, 152, 177, 0.25); border-radius: 8px; background: rgba(128, 152, 177, 0.06);"
+  >
+    <div
+      style="margin-bottom: 8px;"
+    >
+      <div
+        style="margin-bottom: 6px;"
+      >
+        <video
+          controls=""
+          data-testid="chat-artifact-video"
+          preload="metadata"
+          src="http://localhost:3001/api/generated/file/video/clip.mp4"
+          style="display: block; width: 100%; max-width: 640px; max-height: 360px; border-radius: 6px; background: var(--petri-bg-subtle);"
+        />
+        <a
+          data-testid="chat-artifact-video-download"
+          download="clip.mp4"
+          href="http://localhost:3001/api/generated/file/video/clip.mp4"
+          style="font-size: var(--petri-font-size-xs, 11px); background: none none; border: none none; padding: 0px; cursor: pointer; color: var(--accent, #3b82f6);"
+        >
+          下载视频 · clip.mp4
+        </a>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`ChatArtifactCard 快照（item 88 第三波） > 轻量摘要形态快照 > lightweight-summary 1`] = `
+<DocumentFragment>
+  <div
+    data-testid="chat-artifact-summary"
+    style="margin: 4px 0px; padding: 6px 8px; border: 1px solid; border-radius: 8px; background: var(--petri-bg-subtle); display: flex; align-items: center; gap: 10px; border-width: var(--petri-border-card, var(--petri-border)); border-style: var(--petri-border-card, var(--petri-border)); border-color: var(--petri-border-card, var(--petri-border));"
+  >
+    <span
+      style="font-size: var(--petri-font-size-sm); color: var(--petri-text-secondary);"
+    >
+      已生成 1 个产物 · poster-1080x1920.png
+    </span>
+    <button
+      data-testid="chat-artifact-open-detail"
+      style="font-size: var(--petri-font-size-xs, 11px); background: none none; border: none none; padding: 0px; cursor: pointer; color: var(--accent, #3b82f6);"
+      type="button"
+    >
+      查看结果详情
+    </button>
+  </div>
+</DocumentFragment>
+`;

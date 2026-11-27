@@ -62,7 +62,8 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
     sshRegisterHost: vi.fn(() => Promise.resolve({ ok: true, alias: 'petri-1-2-3-4' })),
     sshCreateAt: vi.fn(() => Promise.resolve({ ok: true })),
     handleShowScheduled: vi.fn(),
-    handleShowExtensions: vi.fn(),
+    handleShowOverview: () => undefined,
+  handleShowExtensions: vi.fn(),
     handleShowSettings: vi.fn(),
     handleNavigateToKnowledge: vi.fn(),
     // UI-366 — handleNavigateToBackend 随 /backend 页退役移除
