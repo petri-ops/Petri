@@ -18,7 +18,7 @@ import {
   type ToolActivityItem,
 } from './toolActivity';
 import { reasoningPreview } from './conversationSegments';
-import { ChatArtifactCard } from './ChatArtifactCard';
+import { ChatArtifactCard, generatedArtifactsFromResult } from './ChatArtifactCard';
 import { ToolRowBoundary } from './TimelineBoundaries';
 import { McpAppCard } from './gen-ui/McpAppCard';
 import { projectExecutionAxis } from '@/lib/statusProjection';
@@ -773,6 +773,26 @@ export function ToolActivityList({
   const artifactCards = artifactWorthyJobs.map((job) => (
     <ChatArtifactCard key={job.toolJobId} toolJobId={job.toolJobId} expanded projectId={projectId} lightweight durationMs={job.durationMs} />
   ));
+  // item 83 补：generate.* 是 agent 工具，无 tool_job → 从 resultData 描述符直挂产物卡。
+  const generatedCards = activities
+    .map((a, index) => ({
+      activity: a,
+      artifacts: a.name.startsWith('generate.') && a.status === 'success'
+        ? generatedArtifactsFromResult(a.resultData)
+        : null,
+      index,
+    }))
+    .filter((entry) => entry.artifacts !== null)
+    .map((entry) => (
+      <ChatArtifactCard
+        key={`generated:${entry.activity.key || entry.index}`}
+        toolJobId=""
+        expanded
+        projectId={projectId}
+        durationMs={entry.activity.durationMs ?? null}
+        artifacts={entry.artifacts}
+      />
+    ));
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(
     (activity) => activity.status === 'error' || activity.status === 'denied'
@@ -854,6 +874,7 @@ export function ToolActivityList({
           ))}
         </div>
         {artifactCards}
+        {generatedCards}
       </div>
     );
   }
@@ -913,6 +934,7 @@ export function ToolActivityList({
           </div>
         )}
         {artifactCards}
+        {generatedCards}
       </div>
     );
   }
@@ -1007,6 +1029,7 @@ export function ToolActivityList({
         </div>
       )}
       {artifactCards}
+      {generatedCards}
     </div>
   );
 }

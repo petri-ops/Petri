@@ -48,6 +48,36 @@ interface ChatArtifactCardProps {
   lightweight?: boolean;
   /** item 83 — 工具活动耗时（来自 toolActivity.durationMs），缺值不展示 */
   durationMs?: number | null;
+  /** item 83 补：generate.* 活动无 toolJobId，直接传 resultData 归一化的产物 */
+  artifacts?: ChatArtifact[] | null;
+}
+
+/** item 83 补：agent 工具 generate.* 的 resultData 是 artifact 描述符（单/数组），
+ *  没有 tool_job，故不能直接走 /tools/status；在此归一化为卡片产物（只接受控读面 URL）。 */
+export function generatedArtifactsFromResult(resultData: unknown): ChatArtifact[] | null {
+  if (!resultData || typeof resultData !== 'object') return null;
+  const items = Array.isArray(resultData) ? resultData : [resultData];
+  const artifacts: ChatArtifact[] = [];
+  for (const raw of items) {
+    if (!raw || typeof raw !== 'object') continue;
+    const d = raw as Record<string, unknown>;
+    if (typeof d.path !== 'string' || typeof d.url !== 'string' || !d.url.startsWith('/api/generated/')) continue;
+    artifacts.push({
+      name: d.path.split(/[\\/]/).pop() || 'artifact',
+      path: d.path,
+      url: d.url,
+      sha256: typeof d.sha256 === 'string' ? d.sha256 : undefined,
+      mime: typeof d.mime === 'string' ? d.mime : undefined,
+      source: d.source && typeof d.source === 'object' ? d.source : undefined,
+    });
+  }
+  return artifacts.length ? artifacts : null;
+}
+
+function generatedApiUrl(artifact: ChatArtifact): string {
+  return typeof artifact.url === 'string' && artifact.url.startsWith('/api/generated/')
+    ? `${getApiPrefix()}${artifact.url.slice(4)}`
+    : '';
 }
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']);
@@ -107,8 +137,8 @@ function sceneSnapshotPath(outDir: string, artifact: ChatArtifact): string {
   return slash >= 0 ? `${artifactPath.slice(0, slash)}/scene.json` : '';
 }
 
-export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight = false, durationMs }: ChatArtifactCardProps): React.ReactElement | null {
-  const [artifacts, setArtifacts] = React.useState<ChatArtifact[] | null>(null);
+export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight = false, durationMs, artifacts: directArtifacts }: ChatArtifactCardProps): React.ReactElement | null {
+  const [artifacts, setArtifacts] = React.useState<ChatArtifact[] | null>(directArtifacts || null);
   const [error, setError] = React.useState<string | null>(null);
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const [show3D, setShow3D] = React.useState(false);
@@ -116,7 +146,8 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
   const [outDir, setOutDir] = React.useState('');
 
   React.useEffect(() => {
-    if (!expanded || !toolJobId) return;
+    // 直挂产物已在 useState 初始化；此处不再同步 setState（避免 effect 级联渲染）。
+    if (directArtifacts || !expanded || !toolJobId) return;
     let cancelled = false;
     fetchToolArtifacts(toolJobId).then((result) => {
       if (!cancelled) {
@@ -131,7 +162,36 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
     return () => { cancelled = true; };
   }, [expanded, toolJobId]);
 
-  if (!expanded || !toolJobId) return null;
+  // item 83 补：跨源 media 会被 Chromium 的 URL safety check 拒（见 csp-config.js:44-47），
+  // 与 VideoResultViewer 同方案——fetch 字节后建 blob:（渲染进程自建，不回扩网络面）。
+  const [videoBlobs, setVideoBlobs] = React.useState<Record<string, string>>({});
+  React.useEffect(() => {
+    if (!expanded || !artifacts) return;
+    let cancelled = false;
+    const created: string[] = [];
+    void (async () => {
+      for (const artifact of artifacts) {
+        if (!VIDEO_EXTENSIONS.has(ext(artifact.name || ''))) continue;
+        const apiUrl = generatedApiUrl(artifact);
+        if (!apiUrl) continue;
+        try {
+          const token = getToken();
+          const response = await fetch(apiUrl, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+          if (!response.ok) continue;
+          const buffer = await response.arrayBuffer();
+          if (cancelled || buffer.byteLength > 64 * 1024 * 1024) continue;
+          const blobUrl = URL.createObjectURL(
+            new Blob([buffer], { type: response.headers.get('content-type') || 'video/mp4' }),
+          );
+          created.push(blobUrl);
+          if (!cancelled) setVideoBlobs((prev) => ({ ...prev, [artifact.name]: blobUrl }));
+        } catch { /* 读取失败保留原文件出口，不伪造可播 */ }
+      }
+    })();
+    return () => { cancelled = true; for (const url of created) URL.revokeObjectURL(url); };
+  }, [expanded, artifacts]);
+
+  if (!expanded || (!toolJobId && !directArtifacts)) return null;
   if (error) return <div className="chat-artifact-error" style={{ padding: '4px 8px', fontSize: 'var(--petri-font-size-xs, 11px)', color: '#999' }}>产物信息获取失败</div>;
   if (artifacts === null) return <div style={{ padding: '4px 8px', fontSize: 'var(--petri-font-size-xs, 11px)', color: '#888' }}>加载产物…</div>;
   if (artifacts.length === 0) return null;
@@ -142,9 +202,8 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
   const fileUrl = (artifact: ChatArtifact): string => {
     // item 83：generate.* 产物落在 dataDir，受控读面 URL 是唯一可展示地址；
     // 优先于 workspace path 分支，其余产物保持原逻辑（零回归）。
-    if (typeof artifact.url === 'string' && artifact.url.startsWith('/api/generated/')) {
-      return `${getApiPrefix()}${artifact.url.slice(4)}`;
-    }
+    const generated = generatedApiUrl(artifact);
+    if (generated) return generated;
     if (artifact.path && projectId) return workspaceFileUrlFor(projectId, artifact.path);
     const url = artifact.url || '';
     if (!url) return '';
@@ -280,7 +339,7 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
                 data-testid="chat-artifact-video"
                 controls
                 preload="metadata"
-                src={fileUrl(artifact)}
+                src={videoBlobs[artifact.name] || fileUrl(artifact)}
                 style={{ display: 'block', width: '100%', maxWidth: 640, maxHeight: 360, borderRadius: 6, background: 'var(--petri-bg-subtle)' }}
               />
               <a

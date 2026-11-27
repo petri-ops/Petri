@@ -354,6 +354,14 @@
       "sha256": "3331f07a288f1caf71fae7747939a5fcfffbed46dbefe4f1e4896de7048210cc"
     },
     {
+      "path": "frontend/src/components/copilot/ToolActivityList.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1037,
+      "bytes": 47831,
+      "sha256": "4f353c7255e3b2e7e4d41fbc9c4eee0672155a8386e9440bb30093fc84e64da9"
+    },
+    {
       "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
       "wave": "L0",
       "module": "auto-discovered",
@@ -368,14 +376,6 @@
       "lines": 1019,
       "bytes": 43520,
       "sha256": "c1a69dfa6592d5b1cfaf78d1bae7fbdc019a821b5db5629423f211f4c387615d"
-    },
-    {
-      "path": "frontend/src/components/copilot/ToolActivityList.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1014,
-      "bytes": 47040,
-      "sha256": "3e941aa827b21e60607a32bb0ed328d0977388986ff8b9d9b557958d4361a365"
     },
     {
       "path": "frontend/src/components/desktop/TitleBar.module.css",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86812,
+  "total": 86835,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1074,6 +1074,19 @@
       "to": {
         "lines": 1530,
         "bytes": 54097
+      }
+    },
+    {
+      "path": "frontend/src/components/copilot/ToolActivityList.tsx",
+      "reason": "item83实机补充：generate.*无toolJobId时从resultData直挂产物卡，HK-01 3/3+邻域63/63",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 1014,
+        "bytes": 47040
+      },
+      "to": {
+        "lines": 1037,
+        "bytes": 47831
       }
     }
   ]

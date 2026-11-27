@@ -19,7 +19,20 @@
 - 邻域回归：`ChatArtifactCard*.test.tsx` + `HtmlViewer.test.tsx` + `theme-token-contract.test.ts` 共 25/25 绿。
 - 门禁：docs/ui-audit/secret/arch/lint/types/knip/code-size/css-modules/arch-cycles/tracked-consistency 全绿；code-size 仅指纹漂移已 `--write` 随提交。
 
-## §4 安全边界与待办
+## §4 owner 实机补充：generate.video 无卡且不能播（同批修复）
+
+实机反馈：generate.video 成功但会话区只给文件路径、无结果卡片，视频也播不了。只读核真两因：
+1. `generate.*` 是 agent 工具，活动无 `toolJobId`；`ToolActivityList` / `ConversationTimeline` 的产物卡挂载条件要求 `toolJobId && status==='success'`，所以卡片恒不出现。结果描述符完整躺在 `toolActivity.resultData`（含 `path/sha256/mime/source/url`）。
+2. CSP `media-src 'self' blob:`（`src/main/csp-config.js:47`）拒跨源 media——注释记录 Chromium `MEDIA_ELEMENT_ERROR: Media load rejected by URL safety check`；直连 `http://localhost:3001/api/generated/...` 不可播。既有可播方案是 `VideoResultViewer.tsx` 的 fetch 字节 → `blob:` URL。
+
+修复（不重造）：
+- `ChatArtifactCard.tsx` 导出 `generatedArtifactsFromResult(resultData)`，把单/数组描述符归一化为 `ChatArtifact[]`（只接受 `/api/generated/` 受控 URL）；组件新增可选 `artifacts` 直挂 prop，有直挂时跳过 `/tools/status` 拉取。
+- 视频分支对生成产物 `fetch → arrayBuffer → URL.createObjectURL(Blob)`（64MB 上限、卸载时 revoke），`<video src>` 用 blob URL，下载出口保留原 API URL；读取失败不伪造可播。
+- `ToolActivityList` / `ConversationTimeline` 对 `generate.*` 成功活动用直挂卡（非轻量摘要，视频直接可见），三处渲染分支均接线。
+- HK-01 `ChatArtifactCard.generated-video.test.tsx` 红 3/3 → 绿 3/3（描述符归一化、blob src、无 toolJobId 活动挂载）；邻域 8 文件 63/63 绿；11 静态门绿。
+- 文件面板视频播放属 item 85，等 83 交付后单独立令，本包未做。
+
+## §5 安全边界与待办
 
 - HTML sandbox 为 opaque origin，不能凭同源凭据调后端——预期安全边界，非缺陷。
 - 产物文件与元信息继续本地留存（dataDir/generated），会话预览不替代落盘；artifact-truth 契约未改。
