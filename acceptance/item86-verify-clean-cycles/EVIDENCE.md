@@ -63,9 +63,22 @@
   权限键别名搬移）、agent-runner 行棘轮（重锚 1038→1042 留因 + code-size --allow-grow 同因）、
   UI 台账缺登记（补记零观感变化批注）。
 
+## 真跑首验（verify:clean 对本仓完整三跑，坑与修均留钉）
+
+1. 第一跑：门「ci」红——resolveGateSteps('ci') 的 if/else 链推完 11 静态门后未 continue，
+   字面量 'ci' 又落 npm script 兜底（仓内无此脚本）。修=递归 pushPreset 展开；HK-86-10 补钉
+   （默认 17 步/无字面量预设名/static=11/ci≡默认）。
+2. 第二跑：门「frontend check (tsc)」红——显示名被当 script 名直传 npm run。修=script 字段与
+   显示 name 分离（check @frontend）+ 去 --silent 保失败可见；HK-86-10 补 script/prefix 断言。
+3. 第三跑：**PASS——全新 checkout 上 17 步全绿（98.7s，npm ci 根+frontend，零本机脏状态依赖）**：
+   11 静态门 + platform（node --test 5 文件）+ harness:check/phase6 + 工具单测（8 文件）+
+   frontend tsc + build:spa。
+
+两次真跑各暴露一个单元自测测不出的集成坑且均当跑修复留钉——正是 verify:clean 存在的价值实证。
+
 ## 约束遵守 / 待办
 
 - 基座 merge-base = 5493dfda0（=origin/main HEAD，0/0 分叉）；零触碰 copilot/**、workspace-panels/**
   （LeftPanel 环上游已消亡，未触碰该领地）、build/afterPack.js；未 push。
-- verify:clean 对本仓的完整首跑（npm ci 全量 + 全门）由 coordinator 择机执行或在干净提交后自跑；
-  机制自测已覆盖（HK-86-6/7/8）。
+- 分支 codex/item86-verify-clean-arch-cycles，三提交：291eede32（主批）/ 79800bc1c（ci 预设修）/
+  04cce90de（frontend script 分离修）。
