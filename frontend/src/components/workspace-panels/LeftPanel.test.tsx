@@ -69,6 +69,7 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
     handleNavigateToHome: vi.fn(),
     switchToProject: vi.fn(),
     handleSwitchConversation: vi.fn(),
+    switchConversationInProject: vi.fn(),
     toggleProjectExpand: vi.fn(),
     handleOpenWorkspacePath: vi.fn(),
     showConversations: true,
@@ -376,8 +377,7 @@ describe('UI-445 会话标题搜索', () => {
     expect(screen.queryByText('闲聊一条')).toBeNull();
     // 点击结果 → 切项目 + 切会话
     fireEvent.click(screen.getByText('DESeq2 结果解读'));
-    expect(ctx.switchToProject).toHaveBeenCalledWith('project-2');
-    expect(ctx.handleSwitchConversation).toHaveBeenCalledWith('conv-deseq2');
+    expect(ctx.switchConversationInProject).toHaveBeenCalledWith('conv-deseq2', 'project-2');
   });
 
   it('无匹配 → 诚实空态', async () => {

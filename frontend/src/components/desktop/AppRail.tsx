@@ -59,6 +59,7 @@ export function AppRail(): React.ReactElement {
     startColumnResize,
     switchToProject,
     switchConversation,
+    switchConversationInProject,
     createConversationForProject,
     openCreatePanel,
     createProjectFromPath,
@@ -127,6 +128,7 @@ export function AppRail(): React.ReactElement {
     handleNavigateToHome: handleNewTask,
     switchToProject,
     handleSwitchConversation: switchConversation,
+    switchConversationInProject,
     toggleProjectExpand,
     handleOpenWorkspacePath: () => {
       if (currentProjectId) void navigate(`/project/${currentProjectId}`);

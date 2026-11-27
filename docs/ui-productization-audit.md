@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **item89 attempt2 同批登记（2026-11-27）**：上笔只修命令面板预选，真实左栏会话列表点击仍不切。根因=跨项目点击同 tick 先 `switchToProject`(导航) + `handleSwitchConversation`(setActiveConvId)，随后 currentProjectId effect 清空并自动选 conversations[0]，被点会话被冲掉。修复=`switchConversationInProject` 先写一次性 preselect 再导航，`AppRailContext` 种子 effect 用 `resolveActiveConversationId` 消费 preselect，LeftPanel 三处跨项目点击改走新入口。验证升级=真实 AppRailProvider + 真实 LeftPanel 点击集成测试（导航/文件根/activeConvId 三断言），不靠 mock handler；CDP 开发实例由 crinoid 工作区供码，不在本工作区，未直接改其工作区。HK-01 6/6 + 集成 1/1，邻域 36/36。**状态**：in_progress（观感 pending_human_eye 零代签）。
+
 > **item83 第二轮返工同批登记（2026-11-27）**：owner 拍板产物归属改当前项目工作区（可见 `generated/<kind>/`），`/api/generated/` 留历史兼容；3D 双路径核真 `params.mode='ark'/'local'` 从不被读取导致两次都打 Ark，修 local→model3d_recipe（render:false 写 SceneSpec + 本地近似标注）、Ark 401/403 稳定 code、失败原因原文进 event/活动行；生成类工具补 ai_usage 记账（cost_status='unknown'、禁伪造费用）。HK-01 节点 4/4 + 前端 1/1，回归 14/14 + 56/56。**状态**：in_progress（观感 pending_human_eye 零代签）。
 
 > **item88 第二波同批登记（2026-11-27）**：三档交互（`WorkbenchApprovalCard` 独立卡 + `WorkbenchFlagGate` total gate，审批走 approval-request-store、咨询走 question store）；双通道回写单一幂等入口 `workbench-writeback.js`；变更单 `workbench-change-order.js`（wb_changes + wb_documents chain）；2D 总览 `WorkbenchOverviewSurface`（目标树/OrchestrationGraph/TraceSurface，纯只读）+ registry `overview` tab；调度队列纯函数 `rankQueueTasks`/`computeRetryDecision`；flag `workbench.enabled` 默认 off，开发态用既有 decisions endpoint 开。HK-01 节点 5/5 + 前端 3/3，回归 13/13+35/35。**状态**：in_progress（观感 pending_human_eye 零代签）。

@@ -1,6 +1,6 @@
 /** item89 HK-01：A 会话→B 会话切换后，文件面板根目录绑定到 B 项目。 */
 import { describe, expect, it } from 'vitest';
-import { resolveActiveConversationId } from './conversationSelection';
+import { resolveActiveConversationId, writeConversationPreselect, consumeConversationPreselect } from './conversationSelection';
 
 const conversations = [
   { id: 'conv-b1', project_id: 'p-b' },
@@ -26,5 +26,11 @@ describe('item89 会话切换项目上下文', () => {
     expect(resolveActiveConversationId({
       projectId: 'p-b', conversations, activeConvId: null, preselectedConversationId: null,
     }).conversationId).toBe('conv-b1');
+  });
+
+  it('HK-01 跨项目点击写入的 preselect 可一次性消费，随后不残留', () => {
+    writeConversationPreselect('conv-b2');
+    expect(consumeConversationPreselect()).toBe('conv-b2');
+    expect(consumeConversationPreselect()).toBeNull();
   });
 });

@@ -86,6 +86,8 @@ export interface LeftPanelContext {
   // Project / conversation switching
   switchToProject: (id: string) => void;
   handleSwitchConversation: (id: string) => void;
+  /** item89 attempt2：跨项目会话点击专用，preselect + 导航。 */
+  switchConversationInProject: (conversationId: string, projectId: string) => void;
   toggleProjectExpand: (id: string) => void;
   handleOpenWorkspacePath: () => void | Promise<void>;
 
@@ -516,8 +518,8 @@ function ConversationSearchResults({ ctx, query }: { ctx: LeftPanelContext; quer
             key={c.id}
             className={styles.convItem}
             onClick={() => {
-              if (c.project_id) ctx.switchToProject(c.project_id);
-              ctx.handleSwitchConversation(c.id);
+              if (c.project_id && c.project_id !== ctx.projectId) ctx.switchConversationInProject(c.id, c.project_id);
+              else ctx.handleSwitchConversation(c.id);
             }}
             title={c.title}
           >
@@ -699,8 +701,8 @@ function ProjectNode({
               key={c.id}
               className={`${styles.convItem} ${isCurrent && c.id === ctx.activeConvId ? styles.convItemActive : ''}`}
               onClick={() => {
-                if (!isCurrent) ctx.switchToProject(p.id);
-                ctx.handleSwitchConversation(c.id);
+                if (!isCurrent) ctx.switchConversationInProject(c.id, p.id);
+                else ctx.handleSwitchConversation(c.id);
               }}
               title={c.title}
             >
@@ -798,8 +800,8 @@ function ConversationItem({
         setInfoMenu({ x: event.clientX, y: event.clientY });
       }}
       onClick={() => {
-        if (!isCurrent) ctx.switchToProject(projectId);
-        ctx.handleSwitchConversation(conversation.id);
+        if (!isCurrent) ctx.switchConversationInProject(conversation.id, projectId);
+        else ctx.handleSwitchConversation(conversation.id);
       }}
     >
       {isRunning ? (

@@ -389,9 +389,9 @@
       "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 988,
-      "bytes": 39931,
-      "sha256": "917b4d20a7e0d33df6e3926fc3826ce3ba116c7e94c995ecc5862e41166643fa"
+      "lines": 990,
+      "bytes": 40208,
+      "sha256": "3d22caf63ba3ab74ddea3cccfdcafac0d300c60aa32359c6cf7a39d8b4bf21de"
     },
     {
       "path": "core/shared-backend/loop-repair-strategy.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86884,
+  "total": 86886,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1204,6 +1204,19 @@
       "to": {
         "lines": 1029,
         "bytes": 47898
+      }
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
+      "reason": "item89 attempt2：跨项目会话点击改走 switchConversationInProject（真实点击路径修复）",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 988,
+        "bytes": 39931
+      },
+      "to": {
+        "lines": 990,
+        "bytes": 40208
       }
     }
   ]

@@ -42,6 +42,11 @@ import {
 import type { Project } from '@/lib/project-types';
 import { useConversations, useOtherConversations } from '@/hooks/useConversations';
 import { useProjectTreeState } from '@/pages/project-workspace/useProjectTreeState';
+import {
+  resolveActiveConversationId,
+  writeConversationPreselect,
+  consumeConversationPreselect,
+} from '@/lib/conversationSelection';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
 import { petriEvents, subscribePetriEvent , dispatchPetriEvent } from '@/lib/events';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -104,6 +109,8 @@ export interface AppRailState {
   // ── 动作 ──
   switchToProject: (id: string) => void;
   switchConversation: (id: string) => void;
+  /** item89 attempt2：跨项目会话列表点击——先写 preselect 再导航，不先污染旧项目 activeConvId。 */
+  switchConversationInProject: (conversationId: string, projectId: string) => void;
   createConversationForProject: (projectId?: string) => Promise<void>;
   openCreatePanel: () => Promise<void>;
   createProjectFromPath: (selected: string) => Promise<void>;
@@ -231,10 +238,19 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   // 自动选中最新的会话 + 切项目时清空（原工作区内的两处 effect 上提到此，
   // 使壳层与工作区读同一份 activeConvId）
   useEffect(() => {
-    if (activeConvId) return;
     if (!conversations.length) return;
-    setActiveConvId(conversations[0].id);
-  }, [conversations, activeConvId]);
+    // item89 attempt2：左栏跨项目点击的 preselect 必须优先于 conversations[0]。
+    const preselected = consumeConversationPreselect();
+    const resolved = resolveActiveConversationId({
+      projectId: currentProjectId,
+      conversations,
+      activeConvId,
+      preselectedConversationId: preselected,
+    });
+    if (resolved.conversationId && resolved.conversationId !== activeConvId) {
+      setActiveConvId(resolved.conversationId);
+    }
+  }, [conversations, activeConvId, currentProjectId]);
 
   useEffect(() => {
     setActiveConvId(null);
@@ -294,6 +310,13 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
     adapterRef.current?.clearConversationContext();
     setActiveConvId(convId);
   }, []);
+
+  const switchConversationInProject = useCallback((conversationId: string, projectId: string) => {
+    // 真实左栏点击路径：preselect + 导航，不先 setActiveConvId（项目变更 effect 会清掉）。
+    writeConversationPreselect(conversationId);
+    setActiveConvId(null);
+    void navigate(`/project/${projectId}/chat`);
+  }, [navigate]);
 
   /** 左栏工作台入口：模式导航（工作区在场时直接切模式，否则进项目工作区）。 */
   const openWorkspaceMode = useCallback((mode: WorkspaceMode) => {
@@ -477,7 +500,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
     conversationsApi, treeState,
     leftWidth, rightWidth, setLeftWidth, setRightWidth, bottomTerminalHeight,
     startColumnResize, startBottomTerminalResize,
-    switchToProject, switchConversation, createConversationForProject,
+    switchToProject, switchConversation, switchConversationInProject, createConversationForProject,
     openCreatePanel, createProjectFromPath,
     renameProjectInTree, renameConversationInTree,
     archiveProjectFromTree, archiveConversationFromTree, forkConversationInTree,
@@ -493,7 +516,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
     creatingProject, creatingConversation, createError,
     conversationsApi, treeState,
     leftWidth, rightWidth, bottomTerminalHeight, startColumnResize, startBottomTerminalResize,
-    switchToProject, switchConversation, createConversationForProject,
+    switchToProject, switchConversation, switchConversationInProject, createConversationForProject,
     openCreatePanel, createProjectFromPath,
     renameProjectInTree, renameConversationInTree,
     archiveProjectFromTree, archiveConversationFromTree, forkConversationInTree,

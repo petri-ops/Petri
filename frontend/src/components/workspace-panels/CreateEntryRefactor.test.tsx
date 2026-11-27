@@ -59,6 +59,7 @@ function ctxWith(overrides: Partial<LeftPanelContext> = {}): LeftPanelContext {
     handleNavigateToHome: vi.fn(),
     switchToProject: vi.fn(),
     handleSwitchConversation: vi.fn(),
+    switchConversationInProject: vi.fn(),
     toggleProjectExpand: vi.fn(),
     handleOpenWorkspacePath: vi.fn(),
     showConversations: true,
