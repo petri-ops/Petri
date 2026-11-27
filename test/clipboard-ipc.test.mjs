@@ -35,3 +35,17 @@ test('HK-01-4：Electron 侧 IPC handler 用主进程 clipboard.writeText', () =
   assert.match(inMain, /clipboard\.writeText/);
   assert.match(inMain, /app:write-clipboard|CHANNELS\.app\.writeClipboard/);
 });
+
+// item 83 打磨批：产物图复制（image 分支）走主进程 clipboard，路径 fail-closed。
+test('HK-01-5：app.copyImage 通道登记且 preload 暴露同名包装', () => {
+  assert.match(channels, /copyImage:\s*['"]app:copy-image['"]/);
+  assert.match(preload, /copyImage:[\s\S]{0,140}ipcRenderer\.invoke\(['"]app:copy-image['"]/);
+});
+
+test('HK-01-6：copyImage handler 主进程写图，路径经 fail-closed 校验', () => {
+  const shell = read('src/ipc/desktop-shell.js');
+  assert.match(shell, /CHANNELS\.app\.copyImage/);
+  assert.match(shell, /clipboard\.writeImage/);
+  assert.match(shell, /nativeImage\.createFromPath/);
+  assert.match(shell, /resolveGeneratedArtifactPath/);
+});

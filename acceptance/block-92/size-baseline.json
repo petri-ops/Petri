@@ -341,9 +341,9 @@
       "path": "frontend/src/lib/electron.d.ts",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1053,
-      "bytes": 48953,
-      "sha256": "29f9499817c6ff6a3dc4743df1b6893e9eda6f6378cbc49277a6451a939d1443"
+      "lines": 1059,
+      "bytes": 49221,
+      "sha256": "db225d614859fbd86162660b773614507cb794b5eea8ae618118a0d3dd28cd28"
     },
     {
       "path": "core/petri-server/agent-runner.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86835,
+  "total": 86841,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1087,6 +1087,19 @@
       "to": {
         "lines": 1037,
         "bytes": 47831
+      }
+    },
+    {
+      "path": "frontend/src/lib/electron.d.ts",
+      "reason": "item83打磨批：app.copyImage 图片复制通道类型声明（HK-01 IPC 6/6、前端 4/4）",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 1053,
+        "bytes": 48953
+      },
+      "to": {
+        "lines": 1059,
+        "bytes": 49221
       }
     }
   ]

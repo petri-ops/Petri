@@ -30,6 +30,8 @@ const CHANNELS = {
   app: {
     // 试用反馈⑫续（owner msg_67a61cb96b68）：主进程剪贴板写（渲染进程 API 受限根治）
     writeClipboard: 'app:write-clipboard',
+    // item 83 打磨批：产物图片复制（image 分支）走主进程 clipboard，只传 kind/filename。
+    copyImage: 'app:copy-image',
     getActivitySummary: 'app:get-activity-summary',
     getShellStatus: 'app:get-shell-status',
     hideToTray: 'app:hide-to-tray',

@@ -8,6 +8,12 @@ import { getApiPrefix } from '@/lib/env';
 import { getToken } from '@/lib/authClient';
 import { workspaceFileUrlFor } from '@/lib/previewFileUtils';
 import { dispatchPetriEvent, petriEvents } from '@/lib/events';
+import {
+  copyGeneratedImage,
+  downloadGeneratedArtifact,
+  openGeneratedArtifact,
+  showGeneratedArtifactFolder,
+} from '@/lib/generatedArtifactActions';
 
 /**
  * ChatArtifactCard — BLOCK-322 产品洞察（用户 2026-10-30）：聊天时间线是一等交互面。
@@ -450,20 +456,25 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
                 ))}
               </div>
             )}
-            <img
-              data-testid="chat-artifact-image"
-              src={fileUrl(active)}
-              alt={active.name}
-              style={{
-                maxWidth: Math.round(IMAGE_THUMB_MAX_WIDTH * scale),
-                maxHeight: Math.round(IMAGE_THUMB_MAX_HEIGHT * scale),
-                borderRadius: 4,
-                cursor: 'pointer',
-                border: '1px solid var(--petri-border)',
-              }}
-              onClick={() => setZoomedImage(fileUrl(active))}
-              loading="lazy"
-            />
+            <div
+              data-testid="chat-artifact-image-frame"
+              style={{ display: 'flex', justifyContent: 'center', width: '100%' }}
+            >
+              <img
+                data-testid="chat-artifact-image"
+                src={fileUrl(active)}
+                alt={active.name}
+                style={{
+                  maxWidth: Math.round(IMAGE_THUMB_MAX_WIDTH * scale),
+                  maxHeight: Math.round(IMAGE_THUMB_MAX_HEIGHT * scale),
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  border: '1px solid var(--petri-border)',
+                }}
+                onClick={() => setZoomedImage(fileUrl(active))}
+                loading="lazy"
+              />
+            </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
               <button type="button" data-testid="chat-artifact-zoom-out" style={ACTION_BUTTON_STYLE} onClick={() => changeZoom(-1)}>-</button>
               <button
@@ -475,6 +486,41 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
                 {zoomedImage ? '还原' : '放大'}
               </button>
               <button type="button" data-testid="chat-artifact-zoom-in" style={ACTION_BUTTON_STYLE} onClick={() => changeZoom(1)}>+</button>
+            </div>
+            {/* item 83 打磨批：只做查看/带出/复制的常规操作；不提供裁剪/标注/滤镜等编辑入口。 */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                data-testid="chat-artifact-copy-image"
+                style={ACTION_BUTTON_STYLE}
+                onClick={() => { void copyGeneratedImage('image', active.name); }}
+              >
+                复制图片
+              </button>
+              <button
+                type="button"
+                data-testid="chat-artifact-export"
+                style={ACTION_BUTTON_STYLE}
+                onClick={() => { void downloadGeneratedArtifact(fileUrl(active), active.name); }}
+              >
+                另存为
+              </button>
+              <button
+                type="button"
+                data-testid="chat-artifact-open-folder"
+                style={ACTION_BUTTON_STYLE}
+                onClick={() => { void showGeneratedArtifactFolder(active.path || ''); }}
+              >
+                打开所在文件夹
+              </button>
+              <button
+                type="button"
+                data-testid="chat-artifact-open-system"
+                style={ACTION_BUTTON_STYLE}
+                onClick={() => { void openGeneratedArtifact(active.path || ''); }}
+              >
+                系统查看器打开
+              </button>
             </div>
           </div>
         );

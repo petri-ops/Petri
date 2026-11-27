@@ -196,6 +196,12 @@ declare global {
         /** BLOCK-223 — 退出摘要只读计数（主进程把终端会话数合并进来）。 */
         /** 试用反馈⑫续：主进程剪贴板写（返回是否成功，渲染进程 API 受限根治）。 */
         writeClipboard: (text: string) => Promise<boolean>;
+        /** item 83 打磨批：产物图片复制（路径签名，主进程读图写剪贴板） */
+        copyImage: (payload: { kind: string; filename: string }) => Promise<{
+          ok: boolean;
+          code?: string;
+          message?: string;
+        }>;
         getActivitySummary: () => Promise<{
           ok: boolean;
           counts: Record<string, number>;

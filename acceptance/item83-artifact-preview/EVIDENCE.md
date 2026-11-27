@@ -49,7 +49,17 @@ owner 明确纠正：此前截图里的内嵌预览卡是手动要求 agent 现�
 - 触发条件不含任何回复文本/marker：`name.startsWith('generate.') && status==='success' && resultData _descriptor`。
 - HK-01 `ChatArtifactCard.auto-trigger.test.tsx` 3/3：generate.image 三候选数组自动出 1/3 tabs、generate.model3d 单描述符自动出 3D 卡、status=error 不出卡；邻域 6 文件 63/63。
 
-## §7 安全边界与待办
+## §7 打磨批：图片居中 + 常规操作工具条（owner 实机通过自动出卡后）
+
+- **居中**：`<img>` 外包 `data-testid="chat-artifact-image-frame"`，`display:flex; justify-content:center; width:100%`。
+- **工具条（image 分支）**：复制图片 / 另存为 / 打开所在文件夹 / 系统查看器打开。
+  - 复制图片新增 `app:copy-image` 通道：`src/ipc/channels.js` → `src/preload.js` → `src/ipc/desktop-shell.js`；只收 `{kind,filename}`，用 `core/shared-backend/generated-artifact-path.js` 单源 fail-closed 校验（kind 白名单+扁平名+根内+真实文件），主进程 `nativeImage.createFromPath` → `clipboard.writeImage`。不传字节、不信渲染层裸路径。
+  - 另存为复用 `files.downloadFromUrl`（本机来源 + 原生保存对话框）；打开所在文件夹与系统查看器打开复用 `files.openPath`（目录无扩展名校验、`.png` 在既有白名单）。
+  - 前端单一调用面 `frontend/src/lib/generatedArtifactActions.ts`，bridge 缺失返回 `{ok:false}`，不伪造成功。
+- **边界（owner 拍板）**：预览不做人工编辑（裁剪/标注/滤镜一律不做），只做查看+带出+复制；HK-01 断言无编辑入口。
+- HK-01：前端 `ChatArtifactCard.toolbar.test.tsx` 4/4、节点 `test/clipboard-ipc.test.mjs` 扩展至 6/6；邻域前端 41/41、节点 18/18、`quality:arch` 绿（src→core/shared-backend 合法边）。
+
+## §8 安全边界与待办
 
 - HTML sandbox 为 opaque origin，不能凭同源凭据调后端——预期安全边界，非缺陷。
 - 产物文件与元信息继续本地留存（dataDir/generated），会话预览不替代落盘；artifact-truth 契约未改。

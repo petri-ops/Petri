@@ -239,6 +239,8 @@ const desktopBridgeSurface = {
     getShellStatus: () => ipcRenderer.invoke('app:get-shell-status'),
     // 试用反馈⑫续：主进程剪贴板写（preload 自包含字面量、不 require 本地模块）
     writeClipboard: (text) => ipcRenderer.invoke('app:write-clipboard', text),
+    // item 83 打磨批：产物图片复制（路径签名，主进程按 fail-closed 校验后读图）。
+    copyImage: (payload) => ipcRenderer.invoke('app:copy-image', payload || {}),
     setShellPrefs: (prefs) => ipcRenderer.invoke('app:set-shell-prefs', prefs),
     notify: (payload) => ipcRenderer.invoke('app:notify', payload),
     respondQuitDecision: (action) => ipcRenderer.invoke('app:quit-decision', action),

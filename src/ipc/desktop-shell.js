@@ -9,9 +9,11 @@
  */
 
 const CHANNELS = require('./channels');
+const { resolveCore } = require('../main/core-utils');
+const { resolveGeneratedArtifactPath } = require(resolveCore('shared-backend/generated-artifact-path'));
 
 function setupDesktopShellIpc({ desktopShell, isTestInstance = false }) {
-  const { ipcMain, clipboard } = require('electron');
+  const { ipcMain, clipboard, nativeImage } = require('electron');
   const testOnly = (fn) => () => {
     if (!isTestInstance) return { ok: false, reason: 'test_instance_only' };
     return fn();
@@ -21,6 +23,26 @@ function setupDesktopShellIpc({ desktopShell, isTestInstance = false }) {
   ipcMain.handle(CHANNELS.app.writeClipboard, (_event, text) => {
     if (typeof text !== 'string' || !text) return false;
     try { clipboard.writeText(text); return true; } catch { return false; }
+  });
+  // item 83 打磨批：产物图复制——只收 {kind,filename}，主进程用 shared-backend 单源
+  // fail-closed 校验路径后读图写剪贴板，绝不信任渲染层裸绝对路径。
+  ipcMain.handle(CHANNELS.app.copyImage, (_event, payload) => {
+    try {
+      const kind = payload && payload.kind;
+      const filename = payload && payload.filename;
+      const filePath = resolveGeneratedArtifactPath(kind, filename);
+      if (!filePath) {
+        return { ok: false, code: 'generated_image_not_found', message: '产物图片不存在或路径越界' };
+      }
+      const image = nativeImage.createFromPath(filePath);
+      if (image.isEmpty()) {
+        return { ok: false, code: 'generated_image_unreadable', message: '产物图片内容不可读' };
+      }
+      clipboard.writeImage(image);
+      return { ok: true };
+    } catch {
+      return { ok: false, code: 'copy_image_failed', message: '复制图片失败' };
+    }
   });
   ipcMain.handle(CHANNELS.app.getActivitySummary, () => desktopShell.getActivitySummary());
   ipcMain.handle(CHANNELS.app.getShellStatus, () => desktopShell.getStatus());
