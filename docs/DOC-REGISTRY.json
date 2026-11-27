@@ -10,9 +10,9 @@
    "docs/post-h9-optimization-blueprint-2026-11-10.md"
   ],
   "requireRegistration": true,
-  "documentCount": 674,
-  "lastUpdated": "2026-11-25",
-  "managedMarkdown": 657
+  "documentCount": 675,
+  "lastUpdated": "2026-11-27",
+  "managedMarkdown": 658
  },
  "documents": [
   {
@@ -3619,6 +3619,14 @@
    "id": "RELEASE-RC7",
    "path": "docs/releases/v0.0.1-rc.7.md",
    "kind": "release",
+   "status": "reference",
+   "canonical": false,
+   "archivePolicy": "retain_stable_path"
+  },
+  {
+   "id": "CODE-SIGNING-POLICY",
+   "path": "docs/releases/code-signing-policy.md",
+   "kind": "reference",
    "status": "reference",
    "canonical": false,
    "archivePolicy": "retain_stable_path"
@@ -14068,5 +14076,5 @@
    "notes": "2026-11-25 并行派工队列6 A4 decisionVerifier 裁决留档（msg_39e08fd3c346）：维持 null 不改、与 BLOCK-520 P2 goal-verifier 仅观测钩子边界对齐；纯文档零产品代码。"
   }
  ],
- "lastUpdated": "2026-11-25"
+ "lastUpdated": "2026-11-27"
 }
