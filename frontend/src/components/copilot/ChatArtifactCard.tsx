@@ -85,6 +85,25 @@ const MODEL_3D_EXTENSIONS = new Set(['.glb', '.gltf']);
 const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.mov']);
 const HTML_EXTENSIONS = new Set(['.html', '.htm']);
 
+// item 83 UX：默认缩略上限（320–400 区间）；缩放档位只记本次会话（模块内、有界），不落盘。
+const IMAGE_THUMB_MAX_HEIGHT = 360;
+const IMAGE_THUMB_MAX_WIDTH = 480;
+const ZOOM_LEVELS = [0.75, 1, 1.5, 2];
+const zoomPreferences = new Map<string, number>();
+function zoomKeyFor(projectId: string, artifact: ChatArtifact): string {
+  return `${projectId}:${artifact.url || artifact.path || artifact.name}`;
+}
+function zoomIndexFor(key: string): number {
+  return zoomPreferences.get(key) ?? 1;
+}
+function rememberZoom(key: string, index: number): void {
+  zoomPreferences.set(key, index);
+  if (zoomPreferences.size > 64) {
+    const oldest = zoomPreferences.keys().next().value;
+    if (oldest !== undefined) zoomPreferences.delete(oldest);
+  }
+}
+
 const ACTION_BUTTON_STYLE: React.CSSProperties = {
   fontSize: 'var(--petri-font-size-xs, 11px)',
   background: 'none',
@@ -165,6 +184,8 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
   // item 83 补：跨源 media 会被 Chromium 的 URL safety check 拒（见 csp-config.js:44-47），
   // 与 VideoResultViewer 同方案——fetch 字节后建 blob:（渲染进程自建，不回扩网络面）。
   const [videoBlobs, setVideoBlobs] = React.useState<Record<string, string>>({});
+  const [activeImageIndex, setActiveImageIndex] = React.useState(0);
+  const [, setZoomRevision] = React.useState(0);
   React.useEffect(() => {
     if (!expanded || !artifacts) return;
     let cancelled = false;
@@ -400,21 +421,64 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
         );
       })()}
 
-      {/* 渲染图 */}
-      {imageArtifacts.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-          {imageArtifacts.map((artifact) => (
+      {/* 渲染图：默认缩略 + 编号 tabs（多结果只显示当前一张，不堆一长串）+ 会话内缩放 */}
+      {imageArtifacts.length > 0 && (() => {
+        const safeIndex = Math.min(activeImageIndex, imageArtifacts.length - 1);
+        const active = imageArtifacts[safeIndex];
+        const key = zoomKeyFor(projectId || '', active);
+        const zoomIndex = zoomIndexFor(key);
+        const scale = ZOOM_LEVELS[zoomIndex] ?? 1;
+        const changeZoom = (delta: number) => {
+          rememberZoom(key, Math.max(0, Math.min(ZOOM_LEVELS.length - 1, zoomIndex + delta)));
+          setZoomRevision((v) => v + 1);
+        };
+        return (
+          <div style={{ marginBottom: 8 }}>
+            {imageArtifacts.length > 1 && (
+              <div data-testid="chat-artifact-tabs" style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                {imageArtifacts.map((artifact, index) => (
+                  <button
+                    key={`tab:${artifact.name}`}
+                    type="button"
+                    data-testid="chat-artifact-tab"
+                    aria-pressed={index === safeIndex}
+                    style={ACTION_BUTTON_STYLE}
+                    onClick={() => setActiveImageIndex(index)}
+                  >
+                    {`${index + 1}/${imageArtifacts.length}`}
+                  </button>
+                ))}
+              </div>
+            )}
             <img
-              key={artifact.name}
-              src={fileUrl(artifact)}
-              alt={artifact.name}
-              style={{ maxWidth: 120, maxHeight: 90, borderRadius: 4, cursor: 'pointer', border: '1px solid rgba(128,152,177,0.2)' }}
-              onClick={() => setZoomedImage(fileUrl(artifact))}
+              data-testid="chat-artifact-image"
+              src={fileUrl(active)}
+              alt={active.name}
+              style={{
+                maxWidth: Math.round(IMAGE_THUMB_MAX_WIDTH * scale),
+                maxHeight: Math.round(IMAGE_THUMB_MAX_HEIGHT * scale),
+                borderRadius: 4,
+                cursor: 'pointer',
+                border: '1px solid var(--petri-border)',
+              }}
+              onClick={() => setZoomedImage(fileUrl(active))}
               loading="lazy"
             />
-          ))}
-        </div>
-      )}
+            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+              <button type="button" data-testid="chat-artifact-zoom-out" style={ACTION_BUTTON_STYLE} onClick={() => changeZoom(-1)}>-</button>
+              <button
+                type="button"
+                data-testid="chat-artifact-zoom-toggle"
+                style={ACTION_BUTTON_STYLE}
+                onClick={() => setZoomedImage((prev) => (prev ? null : fileUrl(active)))}
+              >
+                {zoomedImage ? '还原' : '放大'}
+              </button>
+              <button type="button" data-testid="chat-artifact-zoom-in" style={ACTION_BUTTON_STYLE} onClick={() => changeZoom(1)}>+</button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 其他产物下载 */}
       {otherArtifacts.map((artifact) => (
@@ -433,6 +497,7 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
       {/* 图片放大灯箱 */}
       {zoomedImage && (
         <div
+          data-testid="chat-artifact-lightbox"
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 'var(--petri-z-lightbox)' }}
           onClick={() => setZoomedImage(null)}
         >

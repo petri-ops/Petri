@@ -10313,6 +10313,7 @@
         "test/generated-file-route.test.mjs",
         "frontend/src/components/copilot/ChatArtifactCard.generate.test.tsx",
         "frontend/src/components/copilot/ChatArtifactCard.generated-video.test.tsx",
+        "frontend/src/components/copilot/ChatArtifactCard.ux.test.tsx",
         "frontend/src/components/copilot/ChatArtifactCard.test.tsx",
         "frontend/src/components/copilot/ChatArtifactCard.video.test.tsx",
         "frontend/src/components/copilot/ChatArtifactCard.lightweight.test.tsx",

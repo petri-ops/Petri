@@ -32,7 +32,14 @@
 - HK-01 `ChatArtifactCard.generated-video.test.tsx` 红 3/3 → 绿 3/3（描述符归一化、blob src、无 toolJobId 活动挂载）；邻域 8 文件 63/63 绿；11 静态门绿。
 - 文件面板视频播放属 item 85，等 83 交付后单独立令，本包未做。
 
-## §5 安全边界与待办
+## §5 结果卡片 UX 三点升级（owner 截图反馈，同批）
+
+- **默认缩略**：图片默认 `maxHeight=360 / maxWidth=480`（在 320–400 建议区间），点击或「放大」进灯箱，按钮切「还原」退出；灯箱带 `data-testid="chat-artifact-lightbox"`。
+- **自由缩放**：`+/-` 档位 `0.75/1/1.5/2`，按 `projectId + artifact.url/path` 记本次会话偏好（模块内 Map，上限 64 条、不落盘），切 tab/重挂载仍保留。
+- **多结果编号**：图片组 >1 时显示 `1/3 2/3 3/3` tabs（仅当前一张渲染，不垂直堆长串），元信息行保持现状。
+- HK-01 `ChatArtifactCard.ux.test.tsx` 红 3/3 → 绿 3/3；邻域 9 文件 66/66；静态门全绿。
+
+## §6 安全边界与待办
 
 - HTML sandbox 为 opaque origin，不能凭同源凭据调后端——预期安全边界，非缺陷。
 - 产物文件与元信息继续本地留存（dataDir/generated），会话预览不替代落盘；artifact-truth 契约未改。
