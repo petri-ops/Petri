@@ -39,7 +39,17 @@
 - **多结果编号**：图片组 >1 时显示 `1/3 2/3 3/3` tabs（仅当前一张渲染，不垂直堆长串），元信息行保持现状。
 - HK-01 `ChatArtifactCard.ux.test.tsx` 红 3/3 → 绿 3/3；邻域 9 文件 66/66；静态门全绿。
 
-## §6 安全边界与待办
+## §6 核心验收：产物驱动自动出卡（owner 纠正后钉死）
+
+owner 明确纠正：此前截图里的内嵌预览卡是手动要求 agent 现做的 HTML fragment，**不代表自动呈现已存在**。核心=生成工具成功返回时会话流自动出卡，零用户提示、零额外请求、回复无需特殊标记；截图卡的沙箱 iframe/复制图/导出/放大/元信息行只作设计参考。
+
+核真与实现（非跳过开发）：
+- 主会话渲染路径 `SimpleChatMessageRow.tsx:235` → `ConversationTimeline`；其 `generatedCards` 与 `ToolActivityList` 三处分支均从 `toolActivity.resultData` 读取 `generate.*` 成功活动的产物描述符自动挂卡。
+- `generatedArtifactsFromResult` 只接受 `/api/generated/` 受控 URL 的 descriptor（单/数组），无 toolJobId 也能挂；失败活动 fail-closed 不出卡。
+- 触发条件不含任何回复文本/marker：`name.startsWith('generate.') && status==='success' && resultData _descriptor`。
+- HK-01 `ChatArtifactCard.auto-trigger.test.tsx` 3/3：generate.image 三候选数组自动出 1/3 tabs、generate.model3d 单描述符自动出 3D 卡、status=error 不出卡；邻域 6 文件 63/63。
+
+## §7 安全边界与待办
 
 - HTML sandbox 为 opaque origin，不能凭同源凭据调后端——预期安全边界，非缺陷。
 - 产物文件与元信息继续本地留存（dataDir/generated），会话预览不替代落盘；artifact-truth 契约未改。
