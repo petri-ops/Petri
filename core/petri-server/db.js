@@ -1295,12 +1295,13 @@ function ackToolJob(ackToken, approve, scope = {}) {
   const row = db.prepare('SELECT * FROM tool_jobs WHERE ack_token=?').get(ackToken);
   if (!row) return null;
   if (!toolJobMatchesScope(row, scope)) return null;
-  // harness M1：CAS——仅当 ack_status 仍为 NULL（未被处理）才生效；并发重入返回 null。
+  // harness M1：CAS——仅当 ack_status 仍未被处理（NULL 或 createToolJob 写入的 'pending'）
+  // 才生效；已 approved/rejected 的并发重入返回 null。pending 是初始态，不可排除。
   if (approve) {
-    const changed = db.prepare('UPDATE tool_jobs SET ack_status=? WHERE id=? AND ack_status IS NULL').run('approved', row.id);
+    const changed = db.prepare("UPDATE tool_jobs SET ack_status=? WHERE id=? AND (ack_status IS NULL OR ack_status='pending')").run('approved', row.id);
     if (!changed.changes) return null;
   } else {
-    const changed = db.prepare('UPDATE tool_jobs SET ack_status=?, status=?, error=?, completed_at=? WHERE id=? AND ack_status IS NULL').run(
+    const changed = db.prepare("UPDATE tool_jobs SET ack_status=?, status=?, error=?, completed_at=? WHERE id=? AND (ack_status IS NULL OR ack_status='pending')").run(
       'rejected',
       'failed',
       '用户取消了该重操作',

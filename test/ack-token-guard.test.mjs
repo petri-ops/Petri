@@ -15,10 +15,11 @@ test('HK-01-1：ack_token 唯一索引（部分索引、NULL 不冲突、幂等�
   assert.match(schema, /CREATE UNIQUE INDEX IF NOT EXISTS[^\n]*ack_token[^\n]*WHERE ack_token IS NOT NULL/);
 });
 
-test('HK-01-2：ackToolJob approve 带 CAS 条件（ack_status IS NULL）', () => {
+test('HK-01-2：ackToolJob approve 带 CAS 条件（未处理 = NULL 或 pending）', () => {
   const at = db.indexOf('function ackToolJob(');
-  const fn = db.slice(at, at + 900);
-  assert.match(fn, /UPDATE tool_jobs SET ack_status=\? WHERE id=\? AND ack_status IS NULL/);
+  const fn = db.slice(at, at + 1200);
+  // createToolJob 初始写 'pending'，CAS 必须包含该态，否则所有确认都失败（item 82 CI 红）。
+  assert.match(fn, /UPDATE tool_jobs SET ack_status=\? WHERE id=\? AND \(ack_status IS NULL OR ack_status='pending'\)/);
   assert.match(fn, /\.changes/);
   assert.match(fn, /return null/);
 });

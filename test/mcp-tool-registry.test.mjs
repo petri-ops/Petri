@@ -4,11 +4,31 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
+import { createRequire } from 'node:module';
 
 const path = { join };
+const require_ = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // desktop-app/test → 仓库根/petri-server
 const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
+
+// 自举临时 DB：mcp/registry.js 模块加载期会 prepare projects 表；纯 checkout 的 CI
+// 无 dataDir 迁移，须在动态 import 前建库并跑全量迁移（真修，不 skip）。
+{
+  const fs_ = require_('node:fs');
+  const os_ = require_('node:os');
+  const path_ = require_('node:path');
+  const Database = require_(path.join(R_SERVER, 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fs_.mkdtempSync(path_.join(os_.tmpdir(), 'mcp-registry-db-'));
+  const boot = new Database(path_.join(tempDbDir, 'petri.db'));
+  const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
+  for (const f of fs_.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
+    boot.exec(fs_.readFileSync(path_.join(migrationsDir, f), 'utf8'));
+  }
+  boot.close();
+  process.env.PETRI_DB_PATH = path_.join(tempDbDir, 'petri.db');
+  process.on('exit', () => { try { fs_.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
+}
 
 const pluginLoader = await import(pathToFileURL(R_SERVER + '/plugin-loader.js').href);
 const registryModule = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'petri-server', 'mcp', 'registry.js')).href);
