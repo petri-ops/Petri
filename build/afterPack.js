@@ -9,6 +9,9 @@ function normalizeBuilderArch(arch) {
 }
 
 exports.normalizeBuilderArch = normalizeBuilderArch;
+exports.probeNativeLoad = probeNativeLoad;
+exports.resolveNativeSource = resolveNativeSource;
+exports.listElectronProbeBins = listElectronProbeBins;
 
 /**
  * BLOCK-353/C-48 — 原生模块 ABI 选源（fail-closed）。
@@ -22,19 +25,6 @@ exports.normalizeBuilderArch = normalizeBuilderArch;
  * 修法：枚举候选 → 用打包 Electron 运行时实测 dlopen → 取第一个能加载的作为
  * 权威副本；一个都不行就在构建期红，不把坏包交给用户。
  */
-function resolveElectronProbeBin(context) {
-  const name = context.packager.appInfo.productFilename;
-  const candidates = [
-    path.join(context.appOutDir, `${name}.app`, 'Contents', 'Frameworks',
-      `${name} Helper.app`, 'Contents', 'MacOS', `${name} Helper`),
-    path.join(context.packager.projectDir, 'node_modules', 'electron', 'dist',
-      'Electron.app', 'Contents', 'MacOS', 'Electron'),
-    path.join(context.packager.projectDir, 'node_modules', 'electron', 'dist', 'electron.exe'),
-    path.join(context.appOutDir, `${name}.exe`),
-  ];
-  return candidates.find((p) => fs.existsSync(p)) || null;
-}
-
 // true=可加载；false=ABI 不匹配；null=探针运行时本身不可用（不作 ABI 结论）
 function probeNativeLoad(probeBin, nativeBinary) {
   if (!probeBin) return null;
@@ -53,8 +43,69 @@ function probeNativeLoad(probeBin, nativeBinary) {
   }
 }
 
-function resolveNativeSource(context) {
-  const projectDir = context.packager.projectDir;
+// item 66 / HK-01 —— 探针时机修复：
+// 旧实现探针一次定生死，实测在 afterPack 时点探针运行时/原生产物可能尚未就绪
+//（两次 build:mac 均把可加载的 bin/darwin-arm64-149 误判，手动复测同一二进制
+// exit=0：acceptance/g1-release-pipeline/UNSIGNED-BUILD-EVIDENCE.md §2）。
+// 修法（fail-closed 语义不变）：
+// ①产物就绪门——候选存在且 size/mtime 在 settle 间隔内稳定才探（等 build/复制完成）；
+// ②幂等重试——探针运行时不可用（null）或探针窗口内产物仍在写时，有界预算内重扫重试；
+// ③探针二进制多候选回退（packaged Helper → node_modules Electron → …）；
+// ④预算耗尽仍无定论 → 维持 BLOCK-377 fail-closed（env 豁免口 PETRI_PACK_PROBE_FALLBACK=1
+//   保留、登记制留痕）；稳定产物的确定性 ABI_MISMATCH 不重试耗预算，立即红。
+const PROBE_SETTLE_MS_DEFAULT = 400;
+const PROBE_READY_TIMEOUT_MS_DEFAULT = 30000;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function statSignature(file) {
+  try {
+    const st = fs.statSync(file);
+    return `${st.size}:${st.mtimeMs}`;
+  } catch {
+    return null;
+  }
+}
+
+// 单轮探测：遍历所有探针二进制，任一 true 即采用；稳定窗口内的确定性 false
+// 为权威 mismatch；探针不可用（null）= pending，交由外层幂等重试。
+function probeOnce(probeBins, probe, file) {
+  if (!probeBins.length) return 'pending';
+  let definitiveFalse = false;
+  let sawPending = false;
+  for (const bin of probeBins) {
+    const before = statSignature(file);
+    const result = probe(bin, file);
+    const after = statSignature(file);
+    if (result === true) return 'ok';
+    if (result === false) {
+      // 探针窗口内产物被改写（build/复制竞态）→ 本轮结论不作数
+      if (before !== null && before === after) definitiveFalse = true;
+      else sawPending = true;
+    } else {
+      sawPending = true;
+    }
+  }
+  return definitiveFalse ? 'mismatch' : 'pending';
+}
+
+// 产物就绪门：不存在=false（外层重扫等复制完成）；存在则等一个 settle 间隔
+// 确认 size/mtime 未变（半成品不探）。预算耗尽=false（由外层 fail-closed 兜底）。
+async function waitForArtifactStable(file, deadline, settleMs) {
+  const sig = statSignature(file);
+  if (sig === null) return false;
+  while (Date.now() < deadline) {
+    await sleep(settleMs);
+    if (statSignature(file) === sig) return true;
+  }
+  return false;
+}
+
+// 候选枚举每轮重扫：bin/<platform>-<arch>-<modules>/ prebuild（版本降序）+
+// build/Release 兜底——晚就绪的产物在下轮可见。
+function enumerateNativeCandidates(projectDir) {
   const pkgRoot = path.join(projectDir, 'node_modules', 'better-sqlite3');
   const candidates = [];
   const binRoot = path.join(pkgRoot, 'bin');
@@ -69,32 +120,96 @@ function resolveNativeSource(context) {
       - Number(path.basename(path.dirname(a)).split('-').pop()));
   }
   candidates.push(path.join(pkgRoot, 'build', 'Release', 'better_sqlite3.node'));
+  return candidates;
+}
 
-  const probe = resolveElectronProbeBin(context);
-  const traces = [];
-  for (const file of candidates) {
-    if (!fs.existsSync(file)) continue;
-    const ok = probeNativeLoad(probe, file);
-    traces.push(`${path.relative(projectDir, file)}=${ok === true ? 'OK' : ok === false ? 'ABI_MISMATCH' : 'PROBE_UNAVAILABLE'}`);
-    if (ok === true) return file;
-    if (ok === null) {
-      // BLOCK-377（S2 §8.8）——PROBE_UNAVAILABLE 不再静默采用首候选：探针不可用=
-      // ABI 未实测，静默放行会把「没测过」伪装成「测过兼容」。显式 env 豁免口
-      // PETRI_PACK_PROBE_FALLBACK=1（登记制留痕）供探针基础设施缺失的受控场景。
-      if (process.env.PETRI_PACK_PROBE_FALLBACK === '1') {
-        console.warn(`[afterPack] ABI 实测不可用且 PETRI_PACK_PROBE_FALLBACK=1（显式豁免）：采用首候选 ${file}`);
-        return file;
+// 探针二进制取全部存在候选（旧实现取首个存在者即定——Helper 恰好时机不可用
+// 时 node_modules Electron 本可工作却被跳过）。
+function listElectronProbeBins(context) {
+  const name = context.packager.appInfo.productFilename;
+  const candidates = [
+    path.join(context.appOutDir, `${name}.app`, 'Contents', 'Frameworks',
+      `${name} Helper.app`, 'Contents', 'MacOS', `${name} Helper`),
+    path.join(context.packager.projectDir, 'node_modules', 'electron', 'dist',
+      'Electron.app', 'Contents', 'MacOS', 'Electron'),
+    path.join(context.packager.projectDir, 'node_modules', 'electron', 'dist', 'electron.exe'),
+    path.join(context.appOutDir, `${name}.exe`),
+  ];
+  return candidates.filter((p) => fs.existsSync(p));
+}
+
+async function resolveNativeSource(context, deps = {}) {
+  const projectDir = context.packager.projectDir;
+  const settleMs = deps.settleMs ?? PROBE_SETTLE_MS_DEFAULT;
+  const readyTimeoutMs = deps.readyTimeoutMs ?? PROBE_READY_TIMEOUT_MS_DEFAULT;
+  const probe = deps.probe || probeNativeLoad;
+  const probeBins = deps.probeBins || listElectronProbeBins(context);
+  const deadline = Date.now() + readyTimeoutMs;
+  const traces = new Map();
+  let adopted = null;
+  let definitiveSeen = false; // 任一候选已获确定性实测结论（OK / 稳定产物 mismatch）
+
+  while (Date.now() < deadline) {
+    let pendingSeen = false;
+    let unstableSeen = false;
+    let notReadySeen = false;
+    for (const file of enumerateNativeCandidates(projectDir)) {
+      const rel = path.relative(projectDir, file);
+      // ① 产物就绪门：等 better-sqlite3 build/复制完成再探
+      if (!(await waitForArtifactStable(file, deadline, settleMs))) {
+        const notReady = statSignature(file) === null;
+        traces.set(file, `${rel}=${notReady ? 'NOT_READY' : 'UNSTABLE'}`);
+        if (notReady) notReadySeen = true;
+        else unstableSeen = true;
+        continue;
       }
-      throw new Error(
-        `ABI 实测探针不可用且未设 PETRI_PACK_PROBE_FALLBACK=1（fail-closed，不静默放行）：${file}\n`
-        + '先修探针基础设施（probeNativeLoad），或显式设置豁免并登记原因。',
-      );
+      const verdict = probeOnce(probeBins, probe, file);
+      if (verdict === 'ok') {
+        traces.set(file, `${rel}=OK`);
+        adopted = file;
+        break;
+      }
+      if (verdict === 'mismatch') {
+        // 稳定产物的确定性 ABI 不匹配：不重试耗预算，保持红
+        traces.set(file, `${rel}=ABI_MISMATCH`);
+        definitiveSeen = true;
+      } else {
+        traces.set(file, `${rel}=PROBE_PENDING`);
+        pendingSeen = true;
+      }
     }
+    if (adopted) return adopted;
+    // 已有确定性结论时，一直未出现的候选不再拖重试（等它的理由只在没有
+    // 任何实测结论时成立——与旧实现「不存在即跳过」行为对齐）。
+    const sawPending = pendingSeen || unstableSeen || (notReadySeen && !definitiveSeen);
+    if (!sawPending) break;
+    await sleep(settleMs);
+  }
+
+  const labels = [...traces.values()].join(', ');
+  const anyPending = [...traces.values()].some((t) => t.endsWith('PROBE_PENDING') || t.endsWith('UNSTABLE'));
+  if (anyPending) {
+    // BLOCK-377（S2 §8.8）——探针不可用=ABI 未实测，静默放行会把「没测过」伪装成
+    // 「测过兼容」。显式 env 豁免口 PETRI_PACK_PROBE_FALLBACK=1（登记制留痕）保留，
+    // 供探针基础设施缺失的受控场景；豁免采用首个非确定性 mismatch 的候选。
+    if (process.env.PETRI_PACK_PROBE_FALLBACK === '1') {
+      const fallback = enumerateNativeCandidates(projectDir)
+        .find((f) => traces.get(f) !== `${path.relative(projectDir, f)}=ABI_MISMATCH` && fs.existsSync(f));
+      if (fallback) {
+        console.warn(`[afterPack] ABI 实测不可用且 PETRI_PACK_PROBE_FALLBACK=1（显式豁免）：采用候选 ${fallback}`);
+        return fallback;
+      }
+    }
+    throw new Error(
+      `ABI 实测探针不可用且未设 PETRI_PACK_PROBE_FALLBACK=1（fail-closed，不静默放行；\n`
+      + `已按产物就绪+幂等重试等待 ${readyTimeoutMs}ms）：${labels}\n`
+      + '先修探针基础设施（probeNativeLoad），或显式设置豁免并登记原因。',
+    );
   }
   throw new Error(
     '未找到匹配打包 Electron ABI 的 better-sqlite3 二进制。\n'
     + '先跑 npx electron-builder install-app-deps（构建中途不要 npm rebuild）；\n'
-    + `候选实测：${traces.join(', ')}`,
+    + `候选实测：${labels}`,
   );
 }
 
@@ -109,7 +224,7 @@ exports.default = async function afterPack(context) {
     context.appOutDir,
     process.platform === 'darwin' ? `${context.packager.appInfo.productFilename}.app/Contents/Resources` : 'resources',
   );
-  const source = resolveNativeSource(context);
+  const source = await resolveNativeSource(context);
   if (!fs.existsSync(source)) {
     throw new Error(`rebuilt better-sqlite3 binary not found: ${source}`);
   }

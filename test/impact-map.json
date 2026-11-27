@@ -8194,7 +8194,7 @@
     },
     {
       "id": "block377-post-nso-s2",
-      "note": "BLOCK-377 post-nso 蓝图 S2 执行准入与数据自证：FK 三面一致/链哈希 UPDATE 覆盖+legacy 分流/IPC file: 注册制/执行准入内核/manifest 字节自证+哈希链/execToken 删除裁决/句柄收敛/afterPack fail-closed/mcp degraded 汇入。",
+      "note": "BLOCK-377 post-nso 蓝图 S2 执行准入与数据自证：FK 三面一致/链哈希 UPDATE 覆盖+legacy 分流/IPC file: 注册制/执行准入内核/manifest 字节自证+哈希链/execToken 删除裁决/句柄收敛/afterPack fail-closed/mcp degraded 汇入。 2026-11-27 item66：+=test/afterpack-abi-probe-timing.test.mjs（afterPack ABI 探针时机修复，属 afterPack fail-closed 面）。",
       "patterns": [
         "docs/block-377-post-nso-s2-execution-admission-plan.md",
         "acceptance/post-nso-2026-11-06/stage-2/**",
@@ -8217,7 +8217,8 @@
         "test/nso-s2-handle-convergence.test.mjs",
         "test/nso-w2-ipc-trust.test.mjs",
         "test/nso-w2-workspace-roots.test.mjs",
-        "test/nso-b4-mcp-subject.test.mjs"
+        "test/nso-b4-mcp-subject.test.mjs",
+        "test/afterpack-abi-probe-timing.test.mjs"
       ],
       "commands": [
         "docs-check"
@@ -9844,7 +9845,7 @@
     },
     {
       "id": "closed-batch-evidence-dirs",
-      "note": "2026-11-21 补登记（R2 清偿批尾票）：已收口批次 acceptance 目录的 evidence.json 假设路径未映射致 test-affected 元测试红——各目录 owner：ui-711-live/ui-712-working-status/ui-713/ui-714/ui-715=各 UI-### 批；block509-c55-video-p4=BLOCK-509；block510=BLOCK-510；c56-skill-registration=C-56；project-evaluation-prompt-2026-11-20 与 project-status-assessment-2026-11-20=评估提示词/评估批（前批未跟踪遗留）；ui-visual-upgrade-2026-11-20=视觉升级总纲批。纯 patterns 登记，零内容触碰。 W5a 补登记（同批）：test/block509-video-p4.test.mjs=BLOCK-509、test/c56-paper-writing-skill.test.mjs=C-56、test/evo4-evidence-bugfix.test.mjs=EVO-4 漏挂规则（各批登记债）。 2026-11-21 清退票：+=acceptance/cleanup-retirement/**（笔锋版 sha 留证+block463 垃圾项目快照）。 2026-11-24 BLOCK-511 立项：+=acceptance/panoramic-remediation-2026-11-24/**（修复包证据目录，否则 test:changed FAIL_CLOSED）。 2026-11-24 BLOCK-512：+=acceptance/block512-local-sweep-2026-11-24/**（本地可闭环清扫包证据目录，同 charter）。 2026-11-24 BLOCK-513：+=acceptance/ui-593|ui-475|ui-522|ui-595|ui-693|c56-english-surface|q7-reopen-candidates/**（UI 补腿包证据目录+两份裁决材料，同 charter）。",
+      "note": "2026-11-21 补登记（R2 清偿批尾票）：已收口批次 acceptance 目录的 evidence.json 假设路径未映射致 test-affected 元测试红——各目录 owner：ui-711-live/ui-712-working-status/ui-713/ui-714/ui-715=各 UI-### 批；block509-c55-video-p4=BLOCK-509；block510=BLOCK-510；c56-skill-registration=C-56；project-evaluation-prompt-2026-11-20 与 project-status-assessment-2026-11-20=评估提示词/评估批（前批未跟踪遗留）；ui-visual-upgrade-2026-11-20=视觉升级总纲批。纯 patterns 登记，零内容触碰。 W5a 补登记（同批）：test/block509-video-p4.test.mjs=BLOCK-509、test/c56-paper-writing-skill.test.mjs=C-56、test/evo4-evidence-bugfix.test.mjs=EVO-4 漏挂规则（各批登记债）。 2026-11-21 清退票：+=acceptance/cleanup-retirement/**（笔锋版 sha 留证+block463 垃圾项目快照）。 2026-11-24 BLOCK-511 立项：+=acceptance/panoramic-remediation-2026-11-24/**（修复包证据目录，否则 test:changed FAIL_CLOSED）。 2026-11-24 BLOCK-512：+=acceptance/block512-local-sweep-2026-11-24/**（本地可闭环清扫包证据目录，同 charter）。 2026-11-24 BLOCK-513：+=acceptance/ui-593|ui-475|ui-522|ui-595|ui-693|c56-english-surface|q7-reopen-candidates/**（UI 补腿包证据目录+两份裁决材料，同 charter）。 2026-11-27 item66 补登记（同批登记债，纯 patterns 零内容触碰）：+=acceptance/brand-icon-integration|chat-identity-marker|ci-item82|conv-25806ab0-error-analysis|generation-intent-presets|harness-round2-assessment|petri-pack-create-blueprint|right-panel-audit|three-column-background|titlebar-native-assessment/**（前批合并遗留证据目录）；-=test/c56-user-manuscript-fidelity.test.mjs（全仓从未存在的悬空 tests 引用，致 test-affected 工具错误 exit 2 阻塞所有收口）。",
       "patterns": [
         "acceptance/ui-711-live/**",
         "acceptance/ui-712-working-status/**",
@@ -9876,7 +9877,17 @@
         "acceptance/q7-reopen-candidates/**",
         "acceptance/next-wave-rulings/**",
         "acceptance/block514-q7-cron/**",
-        "acceptance/block516-wakeup-ui/**"
+        "acceptance/block516-wakeup-ui/**",
+        "acceptance/brand-icon-integration/**",
+        "acceptance/chat-identity-marker/**",
+        "acceptance/ci-item82/**",
+        "acceptance/conv-25806ab0-error-analysis/**",
+        "acceptance/generation-intent-presets/**",
+        "acceptance/harness-round2-assessment/**",
+        "acceptance/petri-pack-create-blueprint/**",
+        "acceptance/right-panel-audit/**",
+        "acceptance/three-column-background/**",
+        "acceptance/titlebar-native-assessment/**"
       ],
       "tests": [
         "test/block509-video-p4.test.mjs",
@@ -9884,7 +9895,6 @@
         "test/c56-skill-drill.test.mjs",
         "test/c56-manuscript-rewrite-fidelity.test.mjs",
         "test/c56-web-sourced-fidelity.test.mjs",
-        "test/c56-user-manuscript-fidelity.test.mjs",
         "test/evo4-evidence-bugfix.test.mjs",
         "test/cache-manager-cleanup.test.mjs",
         "test/quit-guard-default-prevented.test.mjs",
