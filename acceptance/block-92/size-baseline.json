@@ -45,9 +45,9 @@
       "path": "frontend/src/pages/project-workspace.tsx",
       "wave": "B",
       "module": "W-02",
-      "lines": 1232,
-      "bytes": 61559,
-      "sha256": "a2d0c3191d3801b7378d3c027a102744e12e2ab5eb3d9ce17caaf1a95e36b5b6"
+      "lines": 1247,
+      "bytes": 62563,
+      "sha256": "2b13dc0ddcb3ebc4a45a6f1cda3457acc53248abc8174177e1dac0c3f146a168"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86904,
+  "total": 86919,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1272,6 +1272,19 @@
       "date": "2026-11-27",
       "from": null,
       "to": null
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.tsx",
+      "reason": "item90 CI lint 追加修复：react-hooks/refs 四处真修（ref 桥接改 state 直用+deps、pendingArtifactName 归属过滤 state 镜像 effect、关闭窗口脏计数 state 镜像）+15 行",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 1232,
+        "bytes": 61559
+      },
+      "to": {
+        "lines": 1247,
+        "bytes": 62563
+      }
     }
   ]
 }

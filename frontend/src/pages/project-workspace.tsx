@@ -369,12 +369,10 @@ export function ProjectWorkspace(): React.ReactElement {
   // 原四条路径（标题栏结果选择器 / 右栏结果入口 / 摘要卡 / handleOpenResult）各自
   // 再 updateWorkspaceMode('result') 的分支随中央四态退役一并消失。
   // item 90 阶段一完善 — flag off 时结果面入口全部闭合（tab 隐藏 + 自动打开 no-op）。
-  // 用同步 ref 桥接异步 flag：初值 false（fail-closed），fetch 回来后更新。
-  const resultStudioEnabledRef = useRef(false);
+  // flag hook 自带状态（fetch 完成即重渲染），回调以 state+deps 取最新值——渲染期不读 ref（react-hooks/refs）。
   const resultStudioEnabled = useResultStudioEnabled();
-  resultStudioEnabledRef.current = resultStudioEnabled;
   const openResultInRail = useCallback((jobId: string) => {
-    if (!resultStudioEnabledRef.current) return;
+    if (!resultStudioEnabled) return;
     beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.openStart);
     bindActiveJob(jobId);
     setRightOpen(true);
@@ -500,9 +498,9 @@ export function ProjectWorkspace(): React.ReactElement {
       openResultInRail(nextJobId);
       return;
     }
-    if (!resultStudioEnabledRef.current) return;
+    if (!resultStudioEnabled) return;
     openRightPanel('results');
-  }, [activeJobId, conversationJobs, openResultInRail, openRightPanel]);
+  }, [activeJobId, conversationJobs, openResultInRail, openRightPanel, resultStudioEnabled]);
   const handleOpenRightBrowser = useCallback(() => {
     openRightPanel('browser');
   }, [openRightPanel]);
@@ -872,6 +870,14 @@ export function ProjectWorkspace(): React.ReactElement {
     navigate,
     setPendingRequest,
   });
+  // item90 阶段一完善 — react-hooks/refs：渲染期不读 ref，pendingArtifactName 的
+  // 「归属 job 过滤」用 state 镜像（effect 内读 ref 合法；deps 变化即重算）。
+  const [pendingArtifactNameForActiveJob, setPendingArtifactNameForActiveJob] = useState<string | null>(null);
+  useEffect(() => {
+    setPendingArtifactNameForActiveJob(
+      pendingArtifactJobIdRef.current === activeJob?.id ? pendingArtifactName : null,
+    );
+  }, [pendingArtifactName, activeJob, activeJob?.id]);
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
   const handleAskAgent = useCallback((prompt: string, options?: { analysisMode?: boolean; compose?: boolean }) => {
     if (!options?.compose && activeConvId && isConversationRunning(activeConvId)) {
@@ -907,10 +913,10 @@ export function ProjectWorkspace(): React.ReactElement {
       openResultInRail(nextJobId);
       return;
     }
-    if (!resultStudioEnabledRef.current) return;
+    if (!resultStudioEnabled) return;
     setRightOpen(true);
     openRightPanel('results');
-  }, [activeJobId, conversationJobs, openResultInRail, openRightPanel, setRightOpen]);
+  }, [activeJobId, conversationJobs, openResultInRail, openRightPanel, setRightOpen, resultStudioEnabled]);
   // backendStatus.rRuntime 可为 null（状态查询失败 = 未知）。用 `=== false`
   // 严格判定"确认缺失"，避免偶发 IPC 异常时误弹缺失横幅。
   // BLOCK-86 P2 — 领域感知：只有已装领域包声明运行时才提示（无包不提运行时），
@@ -1039,7 +1045,7 @@ export function ProjectWorkspace(): React.ReactElement {
     openWorkspaceFiles,
     activeWorkspaceFile,
     setActiveWorkspaceFile,
-    pendingArtifactName: pendingArtifactJobIdRef.current === activeJob?.id ? pendingArtifactName : null,
+    pendingArtifactName: pendingArtifactNameForActiveJob,
     onPendingArtifactConsumed: () => {
       pendingArtifactNameRef.current = null;
       pendingArtifactJobIdRef.current = null;

@@ -26,18 +26,12 @@ const TABS: WorkSurfaceTab[] = [
   { id: 'tab-results', surfaceId: 'results', title: '结果' },
   { id: 'tab-files', surfaceId: 'files', title: '文件' },
   { id: 'tab-generated', surfaceId: 'generated', title: '生成文件' },
-] as unknown as WorkSurfaceTab[];
+];
 
 const TOOL_SURFACES = [
   { id: 'results', title: '结果', icon: 'bar-chart' },
   { id: 'files', title: '文件', icon: 'folder' },
-] as never[];
-
-function renderTitleBarRail(): void {
-  // 直接渲染 TitleBar 的 tab pills 派生消费端过重；此处渲染 LeftPanel 的
-  // 一级导航（走同一条 useWorkspaceTitleBar/registry 派生链）已由其它用例覆盖，
-  // 这里断言 filter 纯函数 + RightPanel 内容门控（渲染层）。
-}
+];
 
 import { RightPanel } from '@/components/workspace-panels/RightPanel';
 
@@ -51,7 +45,7 @@ const CTX = {
   activeWorkspaceFile: null,
   handleCloseWorkspaceFiles: () => undefined,
   handleReorderWorkspaceFiles: () => undefined,
-  handleRenameWorkspaceFile: async () => null,
+  handleRenameWorkspaceFile: () => null,
   handleReopenWorkspaceFile: () => undefined,
   hasReopenableWorkspaceFile: false,
   handleWorkspaceFileDirtyMapChange: () => undefined,
@@ -87,6 +81,7 @@ const CTX = {
   setBrowserUrl: () => undefined,
   setBottomTerminalOpen: () => undefined,
   setRightOpen: () => undefined,
+  workspaceMode: 'chat',
 } as never;
 
 afterEach(() => {
@@ -96,14 +91,14 @@ afterEach(() => {
 
 describe('resultStudio flag off → 「结果」tab 隐藏（item 90 阶段一完善）', () => {
   it('HK-90b-1：filterResultStudioTabs——off 时 results 从 pills 派生中过滤，on 时恢复', () => {
-    const off = filterResultStudioTabs(TABS, false, (tab) => tab.surfaceId);
-    expect(off.map((tab) => tab.surfaceId)).toEqual(['files', 'generated']);
-    const on = filterResultStudioTabs(TABS, true, (tab) => tab.surfaceId);
-    expect(on.map((tab) => tab.surfaceId)).toEqual(['results', 'files', 'generated']);
+    const off = filterResultStudioTabs(TABS, false, (tab) => tab.surfaceId ?? '');
+    expect(off.map((tab) => tab.surfaceId ?? '')).toEqual(['files', 'generated']);
+    const on = filterResultStudioTabs(TABS, true, (tab) => tab.surfaceId ?? '');
+    expect(on.map((tab) => tab.surfaceId ?? '')).toEqual(['results', 'files', 'generated']);
   });
 
   it('HK-90b-2：工具菜单同规则（off 隐藏 results 条目）', () => {
-    const off = filterResultStudioTabs(TOOL_SURFACES as never, false, (surface) => surface.id);
+    const off = filterResultStudioTabs(TOOL_SURFACES as never, false, (surface) => surface.id ?? '');
     expect(off.map((surface) => surface.id)).toEqual(['files']);
   });
 
@@ -112,7 +107,7 @@ describe('resultStudio flag off → 「结果」tab 隐藏（item 90 阶段一�
     render(
       <ThemeProvider>
         <MemoryRouter>
-          <RightPanel ctx={CTX} visible />
+          <RightPanel ctx={CTX} visible workspaceMode="chat" />
         </MemoryRouter>
       </ThemeProvider>,
     );
@@ -123,7 +118,7 @@ describe('resultStudio flag off → 「结果」tab 隐藏（item 90 阶段一�
     render(
       <ThemeProvider>
         <MemoryRouter>
-          <RightPanel ctx={CTX} visible />
+          <RightPanel ctx={CTX} visible workspaceMode="chat" />
         </MemoryRouter>
       </ThemeProvider>,
     );
