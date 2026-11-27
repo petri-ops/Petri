@@ -133,9 +133,9 @@
       "path": "core/petri-server/db.js",
       "wave": "C",
       "module": "P-01",
-      "lines": 1529,
-      "bytes": 53942,
-      "sha256": "36b813932f9f57872800bcba224ee03e8aa734afc9dd5a3cdad58cd6221eba23"
+      "lines": 1530,
+      "bytes": 54097,
+      "sha256": "32c27d7cf49569e9aea22f81337062de57c530417b44b056f43db0ae371b863d"
     },
     {
       "path": "core/shared-backend/result-studio-repository.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86811,
+  "total": 86812,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1061,6 +1061,19 @@
       "to": {
         "lines": 713,
         "bytes": 31812
+      }
+    },
+    {
+      "path": "core/petri-server/db.js",
+      "reason": "item82 CI红修复：ackToolJob CAS 兼容 createToolJob 初始 pending 态（保留重入拒绝），HK-01 ack-token-guard 3/3+approval 14/14",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 1529,
+        "bytes": 53942
+      },
+      "to": {
+        "lines": 1530,
+        "bytes": 54097
       }
     }
   ]
