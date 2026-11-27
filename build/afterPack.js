@@ -70,23 +70,18 @@ function statSignature(file) {
 }
 
 // 单轮探测：遍历所有探针二进制，任一 true 即采用；稳定窗口内的确定性 false
-// 为权威 mismatch；探针不可用（null）= pending，交由外层幂等重试。
+// 为权威 mismatch；探针不可用（null）或窗口内产物被改写 = 无定论（pending），
+// 交由外层幂等重试。
 function probeOnce(probeBins, probe, file) {
   if (!probeBins.length) return 'pending';
   let definitiveFalse = false;
-  let sawPending = false;
   for (const bin of probeBins) {
     const before = statSignature(file);
     const result = probe(bin, file);
     const after = statSignature(file);
     if (result === true) return 'ok';
-    if (result === false) {
-      // 探针窗口内产物被改写（build/复制竞态）→ 本轮结论不作数
-      if (before !== null && before === after) definitiveFalse = true;
-      else sawPending = true;
-    } else {
-      sawPending = true;
-    }
+    // 探针窗口内产物被改写（build/复制竞态）→ 本轮结论不作数
+    if (result === false && before !== null && before === after) definitiveFalse = true;
   }
   return definitiveFalse ? 'mismatch' : 'pending';
 }
