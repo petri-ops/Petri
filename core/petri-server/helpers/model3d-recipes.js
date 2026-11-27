@@ -299,7 +299,7 @@ function findRecipe(recipeId) {
   return RECIPES.find((recipe) => recipe.id === recipeId) || null;
 }
 
-function buildRecipe(recipeId, params = {}) {
+function buildRecipe(recipeId, params = {}, annotation = {}) {
   const recipe = findRecipe(recipeId);
   if (!recipe) return { ok: false, error: 'recipe_not_found' };
   const built = recipe.build(params && typeof params === 'object' ? params : {});
@@ -318,6 +318,12 @@ function buildRecipe(recipeId, params = {}) {
       generatedAt: new Date().toISOString(),
     },
   };
+  // item84：本地参数化近似必须如实标注，禁止冒充 AI 生成。
+  if (annotation && annotation.annotation === true) {
+    scene.metadata.title = `${scene.metadata.title} · 本地近似非 AI 生成`;
+    scene.metadata.provider = 'local';
+    scene.metadata.synthetic = true;
+  }
   const validated = scene3d.validateSceneSpec(scene);
   if (!validated.ok) return { ok: false, error: 'recipe_scene_invalid', errors: validated.errors };
   const taskSpec = {

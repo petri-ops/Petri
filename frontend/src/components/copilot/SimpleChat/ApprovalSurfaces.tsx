@@ -1,6 +1,7 @@
 // BLOCK-244 Q1-REM — 审批控制面收尾的渲染面：完全访问确认 / 编辑重发 checkpoint /
 // 结构化提问卡 + 送达失败提示。状态与回调见 hooks/useApprovalSurfaces.ts。
 import { UserQuestionCard } from './UserQuestionCard';
+import { Model3DFallbackDialog, MODEL3D_FALLBACK_PREFIX } from './Model3DFallbackDialog';
 import { FullAccessConfirmDialog } from './FullAccessConfirmDialog';
 import { EditCheckpointDialog } from './EditCheckpointDialog';
 import type { ApprovalSurfacesState } from './hooks/useApprovalSurfaces';
@@ -40,7 +41,16 @@ export function ApprovalSurfaces({ state }: { state: ApprovalSurfacesState }) {
       {userQuestionNotice && (
         <div className="sc-attachment-notice" role="alert" data-testid="user-question-notice">{userQuestionNotice}</div>
       )}
-      {pendingUserQuestion && (
+      {pendingUserQuestion && (pendingUserQuestion.questionId.startsWith(MODEL3D_FALLBACK_PREFIX) ? (
+        <Model3DFallbackDialog
+          open
+          question={pendingUserQuestion.question}
+          options={pendingUserQuestion.options}
+          busy={userQuestionBusy}
+          onSelect={(id) => handleAnswerQuestion({ selected: [id], text: '' })}
+          onCancel={() => handleAnswerQuestion({ selected: [], text: '（取消）' })}
+        />
+      ) : (
         <UserQuestionCard
           key={pendingUserQuestion.questionId}
           questionId={pendingUserQuestion.questionId}
@@ -51,7 +61,7 @@ export function ApprovalSurfaces({ state }: { state: ApprovalSurfacesState }) {
           busy={userQuestionBusy}
           onSubmit={handleAnswerQuestion}
         />
-      )}
+      ))}
     </>
   );
 }

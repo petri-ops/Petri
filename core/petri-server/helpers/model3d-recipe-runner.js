@@ -26,8 +26,9 @@ async function runModel3DRecipe({
   views,
   formats,
   signal,
+  annotation,
 } = {}) {
-  const built = recipes.buildRecipe(recipeId, params);
+  const built = recipes.buildRecipe(recipeId, params, annotation);
   if (!built.ok) return built;
   if (dryRun) {
     return {

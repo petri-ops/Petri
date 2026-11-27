@@ -38,5 +38,5 @@ function generateDefinition(name, description) {
 module.exports = [
   generateDefinition('generate.image', '图像生成：返回可直接引用的图像 artifact 描述符；provider 由已安装领域包决定。'),
   generateDefinition('generate.video', '视频生成：返回视频 artifact 描述符；provider 由已安装领域包决定。'),
-  generateDefinition('generate.model3d', '3D 生成：返回模型 artifact 描述符，可直接喂 3D 预览面板；provider 由已安装领域包决定。'),
+  generateDefinition('generate.model3d', '3D 生成：返回模型 artifact 描述符，可直接喂 3D 预览面板。图生/文生共用同一把 Ark key；task_failed 非凭据缺失，勿引导另配 key，失败可询问用户是否降级为本地参数化近似。'),
 ];

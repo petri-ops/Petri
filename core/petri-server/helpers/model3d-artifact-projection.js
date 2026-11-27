@@ -39,6 +39,8 @@ function buildModel3dArtifactRecords(projectId, outputs) {
       sha256: (output && output.sha256) || null,
     };
     if (url) record.url = url;
+    // item84：本地近似的 source 元信息透传到会话产物卡，保持标注不丢失。
+    if (output && output.source) record.source = output.source;
     return record;
   });
 }

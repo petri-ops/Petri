@@ -478,12 +478,23 @@ async function tool_model3d_bom(args = {}, ctx = {}) {
 }
 
 async function tool_model3d_recipe(args = {}, ctx = {}) {
+  // item84：降级产物必须如实标注为本地近似，不能冒充 AI 生成。
+  const annotation = { annotation: args.annotation === true };
+  const withSource = (result) => (annotation.annotation
+    ? {
+      ...result,
+      source: {
+        provider: 'local', mode: 'parametric-recipe', status: 'approximation',
+        synthetic: true, label: '本地近似非 AI 生成',
+      },
+    }
+    : result);
   if (args.dryRun !== false) {
-    return runModel3DRecipe({ recipeId: args.recipeId, params: args.params, dryRun: true });
+    return withSource(runModel3DRecipe({ recipeId: args.recipeId, params: args.params, dryRun: true, annotation }));
   }
   const workspace = await projectWorkspace(ctx);
   if (workspace.error) return workspace.error;
-  return runModel3DRecipe({
+  return withSource(runModel3DRecipe({
     recipeId: args.recipeId,
     params: args.params,
     workspaceRoot: workspace.root,
@@ -492,7 +503,8 @@ async function tool_model3d_recipe(args = {}, ctx = {}) {
     render: args.render,
     views: args.views,
     formats: args.formats,
-  });
+    annotation,
+  }));
 }
 
 /**

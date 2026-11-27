@@ -9,7 +9,9 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { buildGeneratedArtifactUrl } = require('../routes/generated-file');
+const { resolveDataDir } = require('../../shared-backend/data-paths');
 
 const DEFAULT_PACK_DIR = path.resolve(__dirname, '..', '..', '..', 'resources', 'built-in-packs', 'petri-pack-create');
 
@@ -23,6 +25,39 @@ function readToolRegistry(packRoot) {
   const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
   if (!parsed || !Array.isArray(parsed.tools)) throw new Error('generate_registry_invalid');
   return parsed;
+}
+
+function sha256File(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+/**
+ * item84：把 referenceArtifactId 解析成插件要的 data URL（裸 sha256 指向本会话 generate.image
+ * 产物）。解析不到一律 fail-closed，绝不静默退化成文生——那正是 owner 会话的误诊根因。
+ */
+async function resolveReferenceImage(input = {}, options = {}) {
+  if (typeof input.referenceImage === 'string' && input.referenceImage) return input.referenceImage;
+  const ref = input.referenceArtifactId;
+  if (typeof ref !== 'string' || !ref) return null;
+  if (/^(data:|https?:|file:)/i.test(ref)) return ref;
+  const dataDir = options.dataDir || resolveDataDir();
+  const imageDir = path.join(dataDir, 'generated', 'generate-image');
+  let matches = [];
+  try {
+    matches = fs.readdirSync(imageDir).map((name) => path.join(imageDir, name)).filter((filePath) => {
+      try {
+        return fs.statSync(filePath).isFile() && sha256File(filePath) === ref;
+      } catch { return false; }
+    });
+  } catch { /* 目录不存在按未解析处理 */ }
+  if (!matches.length) {
+    throw new Error(`reference_artifact_unresolved: referenceArtifactId ${ref} 无法解析为本地图片；请传 generate.image 返回的 url/path`);
+  }
+  if (matches.length > 1) throw new Error(`artifact_identity_ambiguous: referenceArtifactId ${ref} 命中多个产物`);
+  const { imageDataUrlFromBuffer } = require('./vision-image-io');
+  const encoded = imageDataUrlFromBuffer(fs.readFileSync(matches[0]), matches[0], path.basename(matches[0]));
+  if (encoded.error) throw new Error(`reference_artifact_unresolved: ${encoded.error}`);
+  return encoded.dataUrl;
 }
 
 function resolveCredential(provider, options) {
@@ -61,7 +96,11 @@ function createGenerateHandler(toolId, options = {}) {
       outDir,
       ...(options.deps || {}),
     };
-    const result = await fn(input, deps);
+    const resolvedInput = { ...input };
+    if (toolId === 'generate.model3d' && input.referenceArtifactId && !input.referenceImage) {
+      resolvedInput.referenceImage = await resolveReferenceImage(input, { dataDir: options.dataDir });
+    }
+    const result = await fn(resolvedInput, deps);
     // item 83：给产物描述符补受控读面 url（单一真值在 route 模块），落盘 path/sha256/mime/source 不改。
     const kind = String(toolId).split('.')[1] || '';
     const withUrl = (descriptor) => {
@@ -73,4 +112,4 @@ function createGenerateHandler(toolId, options = {}) {
   };
 }
 
-module.exports = { createGenerateHandler, resolveBuiltInPackRoot, readToolRegistry };
+module.exports = { createGenerateHandler, resolveBuiltInPackRoot, readToolRegistry, resolveReferenceImage };

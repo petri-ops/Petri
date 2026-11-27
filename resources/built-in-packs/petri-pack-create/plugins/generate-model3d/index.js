@@ -98,7 +98,9 @@ async function pollTask(taskId, opts) {
     if (!resp.ok) throw new Error(`${opts.tag}_http_${resp.status}`);
     const payload = await resp.json();
     if (payload.status === 'succeeded') return payload;
-    if (payload.status === 'failed' || payload.status === 'cancelled') throw new Error(`${opts.tag}_task_failed`);
+    if (payload.status === 'failed' || payload.status === 'cancelled') {
+      throw new Error(`${opts.tag}_task_failed: 模型未开通/不可用或任务失败；图生/文生共用同一把 Ark 凭据，无需独立 Hyper3D key`);
+    }
     await opts.sleep(interval);
   }
   throw new Error(`${opts.tag}_timeout`);
@@ -145,7 +147,7 @@ async function generateModel3D(input = {}, deps = {}) {
     source: {
       provider: cfg.provider, model, prompt, mode,
       kind: 'generate.model3d', taskId, status: result.status, archive: finalPath.endsWith('.zip'),
-      reference: input.referenceImage || null,
+      reference: input.referenceArtifactId || null,
       usage: { kind: 'generate.model3d', provider: cfg.provider, model, taskId },
     },
   };
