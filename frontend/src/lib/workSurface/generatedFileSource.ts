@@ -93,9 +93,62 @@ export function resolveGeneratedFilesPanelState(input: {
   loading: boolean;
   error?: string | null;
   fileCount: number;
+  /** item 85 — 生成产物（视频等）数量：也算面板内容，空态只看两边都为空 */
+  generatedArtifactCount?: number;
 }): GeneratedFilesPanelState {
   if (input.loading) return 'loading';
   if (input.error) return 'error';
-  if (input.fileCount === 0) return 'empty';
+  if (input.fileCount === 0 && (input.generatedArtifactCount ?? 0) === 0) return 'empty';
   return 'ready';
+}
+
+// ============================================================
+// item 85 — 文件面板的生成视频产物
+//
+// generate.* 产物落在 <dataDir>/generated（非 workspace），不进 files_changed
+// 权威清单；此处从 run.toolActivities 的 resultData 描述符（item 83 补的
+// /api/generated/ url 单一真值）归一化出视频产物，供生成文件面内嵌预览
+// 与一键系统播放器打开。只认受控读面 URL，fail-closed。
+// ============================================================
+
+export interface GeneratedVideoArtifact {
+  name: string;
+  /** 落盘绝对路径（系统播放器 openPath 用） */
+  path: string;
+  /** API 相对 url（/api/generated/file/video/...，预览供给唯一真值） */
+  url: string;
+}
+
+const GENERATED_VIDEO_URL_RE = /^\/api\/generated\/file\/video\//;
+const VIDEO_FILE_EXTENSIONS = new Set(['.mp4', '.webm', '.mov', '.m4v']);
+
+function videoExtensionOf(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return dot >= 0 ? name.slice(dot).toLowerCase() : '';
+}
+
+/** API 相对 /api/... url → 后端绝对地址（与 ChatArtifactCard.generatedApiUrl 同形，不引 copilot 模块）。 */
+export function absoluteGeneratedFileUrl(url: string, apiPrefix: string): string {
+  if (!url.startsWith('/api/')) return '';
+  return `${apiPrefix}${url.slice(4)}`;
+}
+
+export function generatedVideoArtifactsFromActivities(
+  activities: readonly ToolActivityItem[]
+): GeneratedVideoArtifact[] {
+  const byUrl = new Map<string, GeneratedVideoArtifact>();
+  for (const activity of activities) {
+    if (activity.status !== 'success') continue;
+    const items = Array.isArray(activity.resultData) ? activity.resultData : [activity.resultData];
+    for (const raw of items) {
+      if (!raw || typeof raw !== 'object') continue;
+      const descriptor = raw as Record<string, unknown>;
+      if (typeof descriptor.path !== 'string' || typeof descriptor.url !== 'string') continue;
+      if (!GENERATED_VIDEO_URL_RE.test(descriptor.url) || byUrl.has(descriptor.url)) continue;
+      const name = descriptor.path.split(/[\\/]/).pop() || '';
+      if (!VIDEO_FILE_EXTENSIONS.has(videoExtensionOf(name))) continue;
+      byUrl.set(descriptor.url, { name, path: descriptor.path, url: descriptor.url });
+    }
+  }
+  return [...byUrl.values()];
 }

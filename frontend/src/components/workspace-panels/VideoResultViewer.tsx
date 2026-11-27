@@ -33,7 +33,7 @@ function formatDuration(value: number): string | null {
  * 三态如实：读取中 / 解出来了（显示时长与真实分辨率）/ 失败（写明是取字节失败还是解码失败）。
  * 不自动播放——打开成果面不等于替用户决定开始看视频。
  */
-export function VideoResultViewer({ url, name }: { url: string; name: string }) {
+export function VideoResultViewer({ url, name, hint }: { url: string; name: string; /** item 85 — 消费方可覆写底部提示；缺省保留 Blender 导出语境原文 */ hint?: string | null }) {
   // BLOCK-250 同类纪律：换产物时的重置在 render 期派生，不在 effect 里同步 setState。
   const [state, setState] = React.useState<ViewerState>(() => initialState(url));
   if (state.url !== url) {
@@ -145,7 +145,7 @@ export function VideoResultViewer({ url, name }: { url: string; name: string }) 
       <div className={styles.metaRow}>
         <span className={styles.name} title={name}>{name}</span>
         {current.meta ? <span className={styles.stats}>{current.meta}</span> : null}
-        <span className={styles.hint}>序列帧与 mp4 由 Blender 内置 ffmpeg 产出；帧清单见导出报告的 frameAssets</span>
+        <span className={styles.hint}>{hint ?? '序列帧与 mp4 由 Blender 内置 ffmpeg 产出；帧清单见导出报告的 frameAssets'}</span>
       </div>
     </div>
   );

@@ -10297,7 +10297,7 @@
     },
     {
       "id": "create-pack-builtin-generate",
-      "note": "owner 裁决「包应内置」：创作包运行时随主仓内置，generate.image/video/model3d 默认进 agent 工具目录；内核零 provider 硬编码，通用 handler 从内置包 registry 动态派发并注入凭据。HK-01 红4/4→绿4/4，域/元数据/动词/基线同批同步。",
+      "note": "owner 裁决「包应内置」：创作包运行时随主仓内置，generate.image/video/model3d 默认进 agent 工具目录；内核零 provider 硬编码，通用 handler 从内置包 registry 动态派发并注入凭据。HK-01 红4/4→绿4/4，域/元数据/动词/基线同批同步。 2026-11-27 item85：+= 文件面板视频预览/系统播放器（GeneratedFilesSurface 产物段 + generatedFileSource 归一化 + VideoResultViewer hint 覆写 + file:open-path 视频扩展名白名单）。",
       "patterns": [
         "core/petri-server/agent-tools/generate-tools.js",
         "core/petri-server/agent-tools/agent-loop-control.js",
@@ -10320,7 +10320,13 @@
         "frontend/src/components/copilot/ChatArtifactCard.tsx",
         "frontend/src/components/copilot/ToolActivityList.tsx",
         "frontend/src/components/copilot/ConversationTimeline.tsx",
-        "acceptance/item83-artifact-preview/**"
+        "acceptance/item83-artifact-preview/**",
+        "frontend/src/components/work-surface/GeneratedFilesSurface.tsx",
+        "frontend/src/components/work-surface/GeneratedFilesSurface.test.tsx",
+        "frontend/src/lib/workSurface/generatedFileSource.ts",
+        "frontend/src/components/workspace-panels/VideoResultViewer.tsx",
+        "src/ipc/file-dialog.js",
+        "test/item85-video-open-path.test.mjs"
       ],
       "tests": [
         "test/generate-builtin-tools.test.mjs",
@@ -10348,7 +10354,11 @@
         "test/block116-decision-platform.test.mjs",
         "test/block157-skill-visibility.test.mjs",
         "test/block346-tool-defs-assembly.test.mjs",
-        "frontend/src/components/copilot/toolActivity.test.ts"
+        "frontend/src/components/copilot/toolActivity.test.ts",
+        "frontend/src/components/work-surface/GeneratedFilesSurface.test.tsx",
+        "frontend/src/lib/workSurface/generatedFileSource.test.ts",
+        "frontend/src/components/workspace-panels/VideoResultViewer.test.tsx",
+        "test/item85-video-open-path.test.mjs"
       ]
     }
   ]

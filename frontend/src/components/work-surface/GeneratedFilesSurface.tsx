@@ -4,14 +4,19 @@ import { getApiPrefix } from '@/lib/authClient';
 import { getBridge } from '@/lib/desktopBridge';
 import type { Project } from '@/lib/project-types';
 import type { ActiveWorkspaceFile } from '@/pages/project-workspace/types';
+import { VideoResultViewer } from '@/components/workspace-panels/VideoResultViewer';
+import { openGeneratedArtifact } from '@/lib/generatedArtifactActions';
 import {
   hydrateConversationFileChanges,
   useConversationFileChanges,
 } from '@/components/copilot/conversationChangesStore';
 import { useConversationRun } from '@/components/copilot/conversationRunStore';
 import {
+  absoluteGeneratedFileUrl,
+  generatedVideoArtifactsFromActivities,
   resolveGeneratedFileSource,
   resolveGeneratedFilesPanelState,
+  type GeneratedVideoArtifact,
 } from '@/lib/workSurface/generatedFileSource';
 import styles from './WorkSurfacePanels.module.css';
 
@@ -62,13 +67,28 @@ export function GeneratedFilesSurface({
 
   const loading = hydration.conv === conversationId && hydration.loading;
   const error = hydration.conv === conversationId ? hydration.error : null;
-  const panelState = resolveGeneratedFilesPanelState({ loading, error, fileCount: changes.length });
   const workspaceAvailable = Boolean(project.workspacePath);
+  // item 85 — 生成视频产物：来源是 generate.* 活动的描述符（非 workspace 写入），
+  // 预览走 /api/generated 受控读面（83 落的单一真值），一键系统播放器走 file:open-path。
+  const videoArtifacts = generatedVideoArtifactsFromActivities(run?.toolActivities ?? []);
+  const panelState = resolveGeneratedFilesPanelState({
+    loading,
+    error,
+    fileCount: changes.length,
+    generatedArtifactCount: videoArtifacts.length,
+  });
   const sources = changes.map((change) => resolveGeneratedFileSource({
     change,
     activities: run?.toolActivities ?? [],
     workspaceAvailable,
   }));
+
+  const openSystemPlayer = async (artifact: GeneratedVideoArtifact) => {
+    const result = await openGeneratedArtifact(artifact.path);
+    if (!result.ok && result.code !== 'canceled') {
+      setActionNotice(result.message || `无法用系统播放器打开：${result.code || '未知原因'}`);
+    }
+  };
 
   const openFile = (path: string) => {
     onOpenFile({
@@ -115,6 +135,35 @@ export function GeneratedFilesSurface({
       )}
 
       {actionNotice ? <p className={styles.error} role="alert">{actionNotice}</p> : null}
+
+      {panelState === 'ready' && videoArtifacts.length > 0 && (
+        <div className={styles.list} data-testid="generated-video-artifacts">
+          {videoArtifacts.map((artifact) => (
+            <article key={artifact.url} className={styles.row} data-testid="generated-video-artifact">
+              <div className={styles.rowHeader}>
+                <Icon name="play" size={13} />
+                <span className={styles.path} title={artifact.path}>{artifact.name}</span>
+                <span className={styles.badge}>视频</span>
+              </div>
+              <VideoResultViewer
+                url={absoluteGeneratedFileUrl(artifact.url, getApiPrefix())}
+                name={artifact.name}
+                hint="预览经本地受控读面供给；超过内嵌上限请用系统播放器打开"
+              />
+              <div className={styles.actions}>
+                <button
+                  type="button"
+                  className="petri-btn petri-btn--ghost petri-btn--sm"
+                  onClick={() => void openSystemPlayer(artifact)}
+                  title={`用系统默认播放器打开：${artifact.path}`}
+                >
+                  系统播放器打开
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
 
       {panelState === 'ready' && (
         <div className={styles.list}>

@@ -35,6 +35,8 @@ const ALLOWED_OPEN_EXTENSIONS = Object.freeze([
   ".py", ".r", ".R", ".sql", ".graphql", ".vue", ".svelte",
   // Images (commonly previewed)
   ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".bmp",
+  // item 85 — 视频媒体（系统默认播放器打开；非可执行，不进 DENIED 语义）
+  ".mp4", ".webm", ".mov", ".m4v",
   // Documents & archives
   ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
   ".zip", ".tar", ".gz", ".bz2", ".xz", ".rar",

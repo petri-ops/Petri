@@ -7,6 +7,12 @@ import type { ToolActivityItem } from '@/components/copilot/toolActivity';
 const state = vi.hoisted(() => ({
   changes: [] as Array<{ path: string; status: 'created' | 'modified'; lastChangedAt: number; tool?: string; iteration?: number }>,
   activities: [] as ToolActivityItem[],
+  openPath: vi.fn(() => Promise.resolve({ ok: true })),
+  showInFolder: vi.fn(() => Promise.resolve({ ok: true })),
+}));
+
+vi.mock('@/lib/desktopBridge', () => ({
+  getBridge: (ns: string) => (ns === 'files' ? { openPath: state.openPath, showInFolder: state.showInFolder } : undefined),
 }));
 
 vi.mock('@/components/copilot/conversationChangesStore', () => ({
@@ -28,6 +34,9 @@ afterEach(() => {
   cleanup();
   state.changes = [];
   state.activities = [];
+  state.openPath.mockClear();
+  state.showInFolder.mockClear();
+  vi.unstubAllGlobals();
 });
 
 describe('generated files surface', () => {
@@ -66,5 +75,47 @@ describe('generated files surface', () => {
       path: 'scripts/analysis.R',
       workspaceDir: 'C:/work',
     }));
+  });
+});
+
+describe('generated video artifacts (item 85 HK-01)', () => {
+  const VIDEO_ACTIVITY: ToolActivityItem = {
+    key: 'v1',
+    name: 'generate.video',
+    status: 'success',
+    actionLabel: '已生成视频',
+    resultData: {
+      path: '/data/generated/generate-video/clip.mp4',
+      url: '/api/generated/file/video/clip.mp4',
+      mime: 'video/mp4',
+    },
+  };
+
+  it('renders an inline preview supplied by the controlled read face', async () => {
+    state.activities = [VIDEO_ACTIVITY];
+    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('offline'))));
+    render(<GeneratedFilesSurface project={PROJECT as never} conversationId="conv-1" onOpenFile={vi.fn()} />);
+    expect(await screen.findByTestId('generated-video-artifact')).toBeTruthy();
+    expect(screen.getByTestId('video-result-viewer')).toBeTruthy();
+    // 预览供给走 /api/generated 受控读面（83 落的单一真值），不另立第二套 URL
+    const fetchMock = vi.mocked(fetch);
+    expect(fetchMock.mock.calls.some(([url]) => typeof url === 'string' && url.includes('/api/generated/file/video/clip.mp4'))).toBe(true);
+    // 面板整体不是 empty：生成产物也算内容
+    expect(screen.getByTestId('generated-files-surface').getAttribute('data-state')).toBe('ready');
+  });
+
+  it('opens the system player with the on-disk path through the files bridge', async () => {
+    state.activities = [VIDEO_ACTIVITY];
+    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('offline'))));
+    render(<GeneratedFilesSurface project={PROJECT as never} conversationId="conv-1" onOpenFile={vi.fn()} />);
+    fireEvent.click(await screen.findByRole('button', { name: '系统播放器打开' }));
+    expect(state.openPath).toHaveBeenCalledWith('/data/generated/generate-video/clip.mp4');
+  });
+
+  it('does not render video artifacts from failed activities (fail-closed)', async () => {
+    state.activities = [{ ...VIDEO_ACTIVITY, status: 'error' }];
+    render(<GeneratedFilesSurface project={PROJECT as never} conversationId="conv-1" onOpenFile={vi.fn()} />);
+    expect(await screen.findByText('当前会话还没有写入过工作区文件。')).toBeTruthy();
+    expect(screen.queryByTestId('generated-video-artifact')).toBeNull();
   });
 });
