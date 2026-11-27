@@ -108,3 +108,16 @@ test('HK-01-6：豁免口保留——PETRI_PACK_PROBE_FALLBACK=1 时探针不可
     fs.rmSync(ctx._tmp, { recursive: true, force: true });
   }
 });
+
+test('HK-01-7：异构探针 false+null 混合不作 mismatch——等可用探针就绪后采纳', async () => {
+  // x64 腿实测形态：arm64 Electron 对 x64 产物恒 false（结构性假象），
+  // 匹配架构的 Helper 恰好时机不可用（null）→ 应 pending 重试而非误判 mismatch。
+  const ctx = makeContext();
+  const probe = fakeProbe(({ probeBin, calls }) => {
+    if (probeBin === '/fake/helper') return calls >= 1 ? true : null; // 首轮不可用，次轮起可加载
+    return false; // 结构性假 false（架构不匹配的探针）
+  });
+  const source = await resolveNativeSource(ctx, { ...DEPS_FAST, probe, probeBins: ['/fake/helper', '/fake/electron-dist'] });
+  assert.ok(source.endsWith('better-sqlite3.node'), `应等 Helper 就绪后采纳，实际=${source}`);
+  fs.rmSync(ctx._tmp, { recursive: true, force: true });
+});

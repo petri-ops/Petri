@@ -33,12 +33,15 @@ function probeNativeLoad(probeBin, nativeBinary) {
       env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
       encoding: 'utf8',
       stdio: 'pipe',
-      timeout: 20000,
+      timeout: PROBE_SPAWN_TIMEOUT_MS,
     });
     return true;
   } catch (e) {
     const detail = `${e.stderr || ''}${e.message || ''}`;
     if (/NODE_MODULE_VERSION|ERR_DLOPEN_FAILED|dlopen|different Node\.js version/i.test(detail)) return false;
+    // 探针运行时自身失败（超时/被杀/无法执行）：留痕便于构建日志归因
+    //（item66 x64 腿实测：Helper 构建时点不可用、构建后手测可加载——时机问题）
+    console.warn(`[afterPack] 探针运行时不可用（${e.code || 'unknown'}）: ${probeBin} :: ${detail.slice(0, 200).replace(/\s+/g, ' ')}`);
     return null;
   }
 }
@@ -54,7 +57,10 @@ function probeNativeLoad(probeBin, nativeBinary) {
 // ④预算耗尽仍无定论 → 维持 BLOCK-377 fail-closed（env 豁免口 PETRI_PACK_PROBE_FALLBACK=1
 //   保留、登记制留痕）；稳定产物的确定性 ABI_MISMATCH 不重试耗预算，立即红。
 const PROBE_SETTLE_MS_DEFAULT = 400;
-const PROBE_READY_TIMEOUT_MS_DEFAULT = 30000;
+const PROBE_READY_TIMEOUT_MS_DEFAULT = 120000;
+// 单次探针超时：packaged Helper 首次执行可能触发 Rosetta 冷翻译（x64 腿实测
+// 构建时点超时不可用、构建后手测可加载），放宽到 60s 只影响失败路径耗时
+const PROBE_SPAWN_TIMEOUT_MS = 60000;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -69,21 +75,28 @@ function statSignature(file) {
   }
 }
 
-// 单轮探测：遍历所有探针二进制，任一 true 即采用；稳定窗口内的确定性 false
-// 为权威 mismatch；探针不可用（null）或窗口内产物被改写 = 无定论（pending），
-// 交由外层幂等重试。
+// 单轮探测：遍历所有探针二进制，任一 true 即采用；全部可用探针均确定性 false
+// 才判 mismatch；探针不可用（null）或窗口内产物被改写 = 无定论（pending）。
+// false+null 混合不作 mismatch 结论：不可用探针未给出反证（item66 x64 腿实测，
+// arm64 node_modules Electron 对 x64 产物的 false 是结构性假象），交由外层重试。
+// 返回 { verdict, perBin } — perBin 供 fail-closed 错误逐探针留痕。
 function probeOnce(probeBins, probe, file) {
-  if (!probeBins.length) return 'pending';
+  const perBin = [];
+  if (!probeBins.length) return { verdict: 'pending', perBin };
   let definitiveFalse = false;
+  let sawPending = false;
   for (const bin of probeBins) {
     const before = statSignature(file);
     const result = probe(bin, file);
     const after = statSignature(file);
-    if (result === true) return 'ok';
+    const label = `${path.basename(path.dirname(path.dirname(bin))) || bin}=${result === true ? 'OK' : result === false ? 'ABI_MISMATCH' : 'PROBE_UNAVAILABLE'}`;
+    perBin.push(label);
+    if (result === true) return { verdict: 'ok', perBin };
     // 探针窗口内产物被改写（build/复制竞态）→ 本轮结论不作数
     if (result === false && before !== null && before === after) definitiveFalse = true;
+    else sawPending = true;
   }
-  return definitiveFalse ? 'mismatch' : 'pending';
+  return { verdict: definitiveFalse && !sawPending ? 'mismatch' : 'pending', perBin };
 }
 
 // 产物就绪门：不存在=false（外层重扫等复制完成）；存在则等一个 settle 间隔
@@ -143,6 +156,7 @@ async function resolveNativeSource(context, deps = {}) {
   const traces = new Map();
   let adopted = null;
   let definitiveSeen = false; // 任一候选已获确定性实测结论（OK / 稳定产物 mismatch）
+  let sawAnyPending = false; // 任一轮出现过无定论候选（探针不可用/产物未就绪或仍在写）
 
   while (Date.now() < deadline) {
     let pendingSeen = false;
@@ -156,9 +170,10 @@ async function resolveNativeSource(context, deps = {}) {
         traces.set(file, `${rel}=${notReady ? 'NOT_READY' : 'UNSTABLE'}`);
         if (notReady) notReadySeen = true;
         else unstableSeen = true;
+        sawAnyPending = true;
         continue;
       }
-      const verdict = probeOnce(probeBins, probe, file);
+      const { verdict, perBin } = probeOnce(probeBins, probe, file);
       if (verdict === 'ok') {
         traces.set(file, `${rel}=OK`);
         adopted = file;
@@ -166,11 +181,12 @@ async function resolveNativeSource(context, deps = {}) {
       }
       if (verdict === 'mismatch') {
         // 稳定产物的确定性 ABI 不匹配：不重试耗预算，保持红
-        traces.set(file, `${rel}=ABI_MISMATCH`);
+        traces.set(file, `${rel}=ABI_MISMATCH[${perBin.join(',')}]`);
         definitiveSeen = true;
       } else {
-        traces.set(file, `${rel}=PROBE_PENDING`);
+        traces.set(file, `${rel}=PROBE_PENDING[${perBin.join(',')}]`);
         pendingSeen = true;
+        sawAnyPending = true;
       }
     }
     if (adopted) return adopted;
@@ -182,14 +198,13 @@ async function resolveNativeSource(context, deps = {}) {
   }
 
   const labels = [...traces.values()].join(', ');
-  const anyPending = [...traces.values()].some((t) => t.endsWith('PROBE_PENDING') || t.endsWith('UNSTABLE'));
-  if (anyPending) {
+  if (sawAnyPending) {
     // BLOCK-377（S2 §8.8）——探针不可用=ABI 未实测，静默放行会把「没测过」伪装成
     // 「测过兼容」。显式 env 豁免口 PETRI_PACK_PROBE_FALLBACK=1（登记制留痕）保留，
     // 供探针基础设施缺失的受控场景；豁免采用首个非确定性 mismatch 的候选。
     if (process.env.PETRI_PACK_PROBE_FALLBACK === '1') {
       const fallback = enumerateNativeCandidates(projectDir)
-        .find((f) => traces.get(f) !== `${path.relative(projectDir, f)}=ABI_MISMATCH` && fs.existsSync(f));
+        .find((f) => !String(traces.get(f) || '').startsWith(`${path.relative(projectDir, f)}=ABI_MISMATCH`) && fs.existsSync(f));
       if (fallback) {
         console.warn(`[afterPack] ABI 实测不可用且 PETRI_PACK_PROBE_FALLBACK=1（显式豁免）：采用候选 ${fallback}`);
         return fallback;
