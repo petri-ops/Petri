@@ -26,7 +26,7 @@ import {
  * 不是 3D 专用补丁——是所有产出工具的通用展示能力。
  */
 
-interface ChatArtifact {
+export interface ChatArtifact {
   name: string;
   filename?: string;
   path?: string;

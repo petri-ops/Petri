@@ -59,7 +59,16 @@ owner 明确纠正：此前截图里的内嵌预览卡是手动要求 agent 现�
 - **边界（owner 拍板）**：预览不做人工编辑（裁剪/标注/滤镜一律不做），只做查看+带出+复制；HK-01 断言无编辑入口。
 - HK-01：前端 `ChatArtifactCard.toolbar.test.tsx` 4/4、节点 `test/clipboard-ipc.test.mjs` 扩展至 6/6；邻域前端 41/41、节点 18/18、`quality:arch` 绿（src→core/shared-backend 合法边）。
 
-## §8 安全边界与待办
+## §8 追加④：同轮产物网格布局
+
+owner 截图反馈（`/Users/zhangdiandian/Library/Application Support/orca/agent-session-attachments/404bf440-.../orca-paste-...png`）：2 图 + 1 视频曾为三张全宽卡垂直堆叠、图片右侧大量留白。
+
+- `core` 侧无改动；前端新增 `frontend/src/lib/generatedArtifactGroups.ts`，按 `activity.iteration` 分组（UI-430 会合并相邻工具轮进同 segment，故不能按 segment 分组），只收 `generate.*` 成功且有 `/api/generated/` 描述符的活动。
+- 新增 `frontend/src/components/copilot/ChatArtifactGridCard.tsx`：每组一个 `section`（批次头「本轮产物 N 项」）+ `div data-testid=chat-artifact-grid`，`gridTemplateColumns:repeat(auto-fit,minmax(180px,1fr))`、`gap:var(--petri-space-3)`；视频/3D 瓦片 `gridColumn:'1 / -1'`（播放器需要宽度），图片/HTML 正常列；tile 复用 `ChatArtifactCard`，放大/工具条/blob 播放/沙箱行为不变。
+- 接线：`ConversationTimeline` 折叠态与 `ToolActivityList` 展开/独立态均渲染网格卡；不同轮次按 iteration 各自成卡，不跨轮合并。
+- HK-01 `ChatArtifactGridCard.test.tsx` 3/3：auto-fit 列数写法、视频跨整行与图片混排、批次头、跨轮分组（iteration 5/8 → 2 卡）；旧 `ChatArtifactCard.auto-trigger.test.tsx` 多候选断言由「单卡 tabs」更新为「3 个网格瓦片」。邻域 10 文件 107/107，11 静态门绿。
+
+## §9 安全边界与待办
 
 - HTML sandbox 为 opaque origin，不能凭同源凭据调后端——预期安全边界，非缺陷。
 - 产物文件与元信息继续本地留存（dataDir/generated），会话预览不替代落盘；artifact-truth 契约未改。

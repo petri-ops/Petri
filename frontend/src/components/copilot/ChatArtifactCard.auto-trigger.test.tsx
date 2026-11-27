@@ -37,15 +37,15 @@ function generateActivity(name: string, resultData: unknown): ToolActivityItem {
 afterEach(() => cleanup());
 
 describe('item 83 产物驱动自动出卡', () => {
-  it('HK-01 generate.image 多候选数组：成功即出编号 tabs，无需标记或 toolJobId', async () => {
+  it('HK-01 generate.image 多候选数组：成功即出 3 个网格瓦片，无需标记或 toolJobId', async () => {
     render(<ToolActivityList activities={[generateActivity('generate.image', [
       descriptor('image', 'image-1.png'),
       descriptor('image', 'image-2.png'),
       descriptor('image', 'image-3.png'),
     ])]} forceOpen projectId={null} />);
-    const tabs = await screen.findAllByTestId('chat-artifact-tab');
-    expect(tabs.map((t) => t.textContent)).toEqual(['1/3', '2/3', '3/3']);
-    expect(await screen.findByTestId('chat-artifact-card')).toBeTruthy();
+    // item83 追加④：多产物改网格卡（原单卡 tabs 已被网格瓦片取代）。
+    expect(await screen.findAllByTestId('chat-artifact-grid-tile')).toHaveLength(3);
+    expect(screen.getByTestId('chat-artifact-grid-header').textContent).toContain('本轮产物 3 项');
   });
 
   it('HK-01 generate.model3d 单描述符：成功即出 3D 卡', async () => {

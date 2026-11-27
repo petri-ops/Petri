@@ -354,20 +354,20 @@
       "sha256": "3331f07a288f1caf71fae7747939a5fcfffbed46dbefe4f1e4896de7048210cc"
     },
     {
-      "path": "frontend/src/components/copilot/ToolActivityList.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1037,
-      "bytes": 47831,
-      "sha256": "4f353c7255e3b2e7e4d41fbc9c4eee0672155a8386e9440bb30093fc84e64da9"
-    },
-    {
       "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1033,
       "bytes": 48507,
       "sha256": "958dbe933f0eb9a4c746bb3d3df82866c003fb50e1cb209e90d21bbdb093814c"
+    },
+    {
+      "path": "frontend/src/components/copilot/ToolActivityList.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1023,
+      "bytes": 47486,
+      "sha256": "976ab913b6818aa4d28dc16f3cf29de2863139edc61b5f38589fb01c3235e29f"
     },
     {
       "path": "core/shared-backend/result-replay-service/cohort-package.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86841,
+  "total": 86827,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",

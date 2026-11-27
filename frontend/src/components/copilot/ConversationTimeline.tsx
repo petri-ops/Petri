@@ -18,7 +18,9 @@ import { Icon } from '@/components/icons/Icon';
 
 import { formatToolDuration } from './toolActivity';
 import type { ConversationSegment, ReasoningSegment, ToolsSegment } from './conversationSegments';
-import { ChatArtifactCard, generatedArtifactsFromResult } from './ChatArtifactCard';
+import { ChatArtifactCard } from './ChatArtifactCard';
+import { ChatArtifactGridCard } from './ChatArtifactGridCard';
+import { groupGeneratedActivities } from '@/lib/generatedArtifactGroups';
 import { RowCopyButton, ToolActivityList } from './ToolActivityList';
 
 /**
@@ -186,26 +188,12 @@ export function ConversationTimeline({
     }
     return jobs;
   })();
-  const generatedCards = toolsSegments
-    .flatMap((segment) => segment.activities)
-    .flatMap((activity, index) => {
-      if (activity.name.startsWith('generate.') && activity.status === 'success') {
-        const artifacts = generatedArtifactsFromResult(activity.resultData);
-        if (artifacts) {
-          return [(
-            <ChatArtifactCard
-              key={`generated:${activity.key || index}`}
-              toolJobId=""
-              expanded
-              projectId={projectId}
-              durationMs={activity.durationMs ?? null}
-              artifacts={artifacts}
-            />
-          )];
-        }
-      }
-      return [];
-    });
+  const generatedCards = (
+    <ChatArtifactGridCard
+      groups={groupGeneratedActivities(toolsSegments.flatMap((segment) => segment.activities))}
+      projectId={projectId}
+    />
+  );
 
   const nodes: React.ReactNode[] = [];
   const progressTotal = segments.reduce(
