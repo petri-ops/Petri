@@ -293,9 +293,9 @@
       "path": "core/packages/shared-config/config-schema.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1198,
-      "bytes": 63190,
-      "sha256": "99998b378dc52429e930a67e75e60a5657dbd159d5b467cb3b85f4d123bc751c"
+      "lines": 1204,
+      "bytes": 63485,
+      "sha256": "a83d1e7f60168c711fe6cf1b16522d9503fa58489a1b81dbed17385b74034858"
     },
     {
       "path": "core/shared-backend/skill-runtime.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86827,
+  "total": 86833,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1100,6 +1100,19 @@
       "to": {
         "lines": 1059,
         "bytes": 49221
+      }
+    },
+    {
+      "path": "core/packages/shared-config/config-schema.js",
+      "reason": "item88工作台flag：point.workbench.enabled默认off配置注册（HK-01节点5/5+前端1/1）",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 1198,
+        "bytes": 63190
+      },
+      "to": {
+        "lines": 1204,
+        "bytes": 63485
       }
     }
   ]

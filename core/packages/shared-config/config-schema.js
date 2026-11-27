@@ -269,6 +269,12 @@ const CONFIG_KEYS = Object.freeze([
     mutable: true, ui: 'settings',
   },
   {
+    // item88 工作台总闸：默认 off；项目粒度灰度由 wb_project_settings 决定。
+    key: 'point.workbench.enabled', family: 'decision-points', path: 'workbench.enabled',
+    type: 'boolean', envKeys: ['PETRI_WORKBENCH'], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
     // 阈值数值本身受校准门约束：可改（设置页热调）但"改默认值"须先重校准 → mutable=true + 证据在注册表
     key: 'point.*.threshold', family: 'decision-points', path: '<point>.threshold',
     type: 'number', domain: { min: 0, max: 1 }, envKeys: [], aliases: [],

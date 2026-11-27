@@ -34,6 +34,8 @@ const RUNTIME_POINTS = {
   // BLOCK-199 P4② — report-guard 此前是注册表外的隐藏开关（只能靠 env 且设置页不可见不可持久化）。
   // 纳入后语义不变：enabledDefault=false（默认零出站零行为变化），env 0/1 照旧，多出的能力是设置页可显式开并落盘。
   'report-guard': { label: '子智能体汇报门（P2 试点）', enabledDefault: false, envKey: 'PETRI_JEV_REPORT_GUARD' },
+  // item88 工作台：默认 off，项目粒度灰度另由 wb_project_settings 决定；关 flag 零残留。
+  'workbench': { label: '项目工作台（第一波地基）', enabledDefault: false, envKey: 'PETRI_WORKBENCH' },
 };
 
 function configPath() {

@@ -47,19 +47,22 @@ for (const statement of [
   'ALTER TABLE ai_usage ADD COLUMN retryable INTEGER DEFAULT 0',
   'ALTER TABLE ai_usage ADD COLUMN context_exceeded INTEGER DEFAULT 0',
   'ALTER TABLE ai_usage ADD COLUMN cancelled_by_user INTEGER DEFAULT 0',
+  // item88 工作台：子任务粒度计量（additive；旧行 NULL = 未归因，不影响既有聚合）。
+  'ALTER TABLE ai_usage ADD COLUMN task_id TEXT',
 ]) {
   try { sqlite.exec(statement); } catch { /* already migrated */ }
 }
 try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_provider_ts ON ai_usage(provider, ts DESC)'); } catch {}
 try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_ai_usage_conv ON ai_usage(conversation_id)'); } catch {}
 
-function recordAiUsage({userId, kind, model, provider, promptTokens, completionTokens, cacheReadTokens, cacheCreationTokens, latencyMs, errorCode, conversationId, costCny, costStatus, attempt, retryable, contextExceeded, cancelledByUser}) {
+function recordAiUsage({userId, taskId, kind, model, provider, promptTokens, completionTokens, cacheReadTokens, cacheCreationTokens, latencyMs, errorCode, conversationId, costCny, costStatus, attempt, retryable, contextExceeded, cancelledByUser}) {
   try {
     const normalizedCost = Number.isFinite(Number(costCny)) ? Number(costCny) : null;
-    sqlite.prepare(`INSERT INTO ai_usage (user_id, ts, kind, model, provider, prompt_tokens, completion_tokens, latency_ms, cache_read_tokens, cache_creation_tokens, cost_cny, cost_status, error_code, conversation_id, attempt, retryable, context_exceeded, cancelled_by_user)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    sqlite.prepare(`INSERT INTO ai_usage (user_id, task_id, ts, kind, model, provider, prompt_tokens, completion_tokens, latency_ms, cache_read_tokens, cache_creation_tokens, cost_cny, cost_status, error_code, conversation_id, attempt, retryable, context_exceeded, cancelled_by_user)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
       .run(
         userId || null,
+        taskId || null,
         new Date().toISOString(),
         kind || 'other',
         model || null,
@@ -251,8 +254,25 @@ function estimateCostCNY(model, promptTokens, completionTokens) {
   return Math.round(cost * 1e6) / 1e6;
 }
 
+/** item88 工作台：子任务粒度用量聚合（ai_usage 加 task_id 列，纯加视图）。 */
+function summarizeTaskUsage({ taskId = null, userId = null } = {}) {
+  const empty = { calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, estimatedCostCny: 0, latencyMs: 0 };
+  if (!taskId) return empty;
+  const clauses = ['task_id = ?'];
+  const params = [taskId];
+  if (userId) { clauses.push('user_id = ?'); params.push(userId); }
+  const row = sqlite.prepare(`SELECT COUNT(*) AS calls,
+    COALESCE(SUM(prompt_tokens),0) AS inputTokens,
+    COALESCE(SUM(completion_tokens),0) AS outputTokens,
+    COALESCE(SUM(cost_cny),0) AS estimatedCostCny,
+    COALESCE(SUM(latency_ms),0) AS latencyMs
+    FROM ai_usage WHERE ${clauses.join(' AND ')}`).get(...params);
+  return { ...row, totalTokens: row.inputTokens + row.outputTokens };
+}
+
 module.exports = {
   recordAiUsage,
+  summarizeTaskUsage,
   summarizeAiUsage,
   summarizeProjectUsage,
   summarizeProviderUsage,

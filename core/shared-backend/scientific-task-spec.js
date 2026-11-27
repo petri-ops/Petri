@@ -260,6 +260,11 @@ function validateScientificTaskSpec(input, options = {}) {
   if (raw.execution?.accessMode !== undefined && !ACCESS_MODES.includes(raw.execution.accessMode)) issues.push(diagnostic('access_mode_invalid', 'execution.accessMode', 'Unknown access mode'));
   if (raw.execution?.automationMode !== undefined && !AUTOMATION_MODES.includes(raw.execution.automationMode)) issues.push(diagnostic('automation_mode_invalid', 'execution.automationMode', 'Unknown automation mode'));
   if (!Array.isArray(spec.inputs) || spec.inputs.length === 0) issues.push(diagnostic('inputs_required', 'inputs', 'At least one input snapshot is required'));
+  // item88 工作台：任务书缺验收标准即红（默认关，兼容既有 ScientificTaskSpec 调用）。
+  if (options.requireAcceptanceCriteria === true
+      && (!Array.isArray(spec.acceptanceCriteria) || spec.acceptanceCriteria.length === 0)) {
+    issues.push(diagnostic('acceptance_criteria_required', 'acceptanceCriteria', '任务书必须带可机器检验的验收标准'));
+  }
   for (const [index, item] of (Array.isArray(raw.inputs) ? raw.inputs : []).entries()) {
     if (!Number.isFinite(Number(item?.sizeBytes)) || Number(item.sizeBytes) < 0) issues.push(diagnostic('input_size_invalid', `inputs[${index}].sizeBytes`, 'sizeBytes must be an explicit non-negative number'));
   }

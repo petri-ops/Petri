@@ -117,6 +117,20 @@ module.exports = function mountMisc(app) {
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 
+  // item88 工作台：子任务粒度计量（ai_usage task_id 聚合 + task_events 轮数），只读投影。
+  app.get('/api/ai/usage-task', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    const taskId = String((req.query && req.query.taskId) || '').trim();
+    if (!taskId) return res.status(400).json({status:'error', error:'taskId 不能为空'});
+    try {
+      const usage = require('../helpers/ai-usage').summarizeTaskUsage({ taskId, userId });
+      const db = require('../db').getDatabase();
+      const roundsRow = db.prepare("SELECT COUNT(*) AS n FROM task_events WHERE task_id = ? AND event_type LIKE '%iter%'").get(taskId);
+      res.json({ status: 'ok', taskId, ...usage, rounds: roundsRow ? roundsRow.n : 0 });
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
   app.get('/api/ai/site-snapshot', (req, res) => {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});
