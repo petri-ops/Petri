@@ -7695,16 +7695,16 @@
         "core/petri-server/routes/svg.js",
         "frontend/src/components/svg-editor/**",
         "frontend/src/lib/svgEditClient.ts",
-      "frontend/src/components/result-studio/viewerRegistry.ts",
-      "acceptance/block-342/**",
-      "acceptance/petri-pack-create/**"
-    ],
+        "frontend/src/components/result-studio/viewerRegistry.ts",
+        "acceptance/block-342/**",
+        "acceptance/petri-pack-create/**"
+      ],
       "tests": [
         "test/block342-svg-ops.test.mjs",
         "test/block342-svg-tools.test.mjs",
-      "frontend/src/components/svg-editor/svgEditorModel.test.ts",
-      "frontend/src/components/svg-editor/svgEditorP3.test.ts",
-      "frontend/src/components/svg-editor/SvgEditorViewer.test.tsx",
+        "frontend/src/components/svg-editor/svgEditorModel.test.ts",
+        "frontend/src/components/svg-editor/svgEditorP3.test.ts",
+        "frontend/src/components/svg-editor/SvgEditorViewer.test.tsx",
         "frontend/src/components/result-studio/viewerRegistry.block342.test.ts",
         "frontend/src/components/result-studio/viewerRegistry.test.ts",
         "frontend/src/components/result-studio/viewerRegistry.block142.test.ts",
@@ -10477,6 +10477,20 @@
         "frontend/src/components/work-surface/ResultsSurface.test.tsx",
         "frontend/src/components/work-surface/EvidenceSurface.test.tsx"
       ]
+    },
+    {
+      "id": "item88-workbench-demo-seed",
+      "note": "item 88 演示数据令——scripts/item88-workbench-demo-seed.mjs（幂等 + --clean，写前 db.backup .bak 安全垫）：A 段 wb_* 目标+5 任务状态机五态（appendWorkbenchEvent 真 API 落 task_events 链；wb store API 尚不存在——INSERT 按 DDL 形状如实标注）+ B 段 loop_runs 1 primary + 5 running subagent（persistLoopRun/updateLoopRunStatus 真 API，parent_loop_run_id 置空镜像 resume 兜底连线现实）。数据源核真：overview 目标树/协作图实际读会话子代理快照（loop_runs resume），wb 表 wave2 尚无读取方——gap 已如实报。HK-01：test/item88-workbench-demo-seed.test.mjs 3 钉（幂等/clean 不误删/五态+依赖+咨询选项）+ WorkbenchOverview.projection.test.ts 2 钉（6 节点 5 连线/空输入诚实空）。 scripts/** 通配被 platform-branch-freeze 持有（规则互斥约束），脚本路径不重复登记；其测试经本规则 tests 直接锚定。 patterns=两测试文件（scripts/** 通配被 platform-branch-freeze 持有，规则互斥；脚本本身改动走该哨兵域）。 classifiesScripts=true + 精确路径（脚本分类恰好一规则纪律；与 platform-branch-freeze 的 scripts/** 无关——该规则非分类规则）。",
+      "patterns": [
+        "scripts/item88-workbench-demo-seed.mjs",
+        "test/item88-workbench-demo-seed.test.mjs",
+        "frontend/src/components/work-surface/WorkbenchOverview.projection.test.ts"
+      ],
+      "tests": [
+        "test/item88-workbench-demo-seed.test.mjs",
+        "frontend/src/components/work-surface/WorkbenchOverview.projection.test.ts"
+      ],
+      "classifiesScripts": true
     }
   ]
 }
