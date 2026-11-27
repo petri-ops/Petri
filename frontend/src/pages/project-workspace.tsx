@@ -378,7 +378,7 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightOpen(true);
     openRightPanel('results');
     syncResultQuery(jobId);
-  }, [bindActiveJob, openRightPanel, setRightOpen, syncResultQuery]);
+  }, [bindActiveJob, openRightPanel, resultStudioEnabled, setRightOpen, syncResultQuery]);
   // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
   useEffect(() => {
     return subscribePetriEvent(petriEvents.reviewOpenFile, () => {

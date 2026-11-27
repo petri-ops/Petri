@@ -25,10 +25,13 @@ function loadIgnored() {
     const clean = {};
     for (const [fingerprint, entry] of Object.entries(ignored)) {
       if (!FINGERPRINT_RE.test(fingerprint) || !entry || typeof entry !== 'object') continue;
-      clean[fingerprint] = {
-        at: typeof entry.at === 'string' ? entry.at.slice(0, 40) : '',
-        reason: typeof entry.reason === 'string' ? entry.reason.slice(0, 200) : undefined,
-      };
+      Object.defineProperty(clean, fingerprint, {
+        value: {
+          at: typeof entry.at === 'string' ? entry.at.slice(0, 40) : '',
+          reason: typeof entry.reason === 'string' ? entry.reason.slice(0, 200) : undefined,
+        },
+        writable: true, enumerable: true, configurable: true,
+      });
     }
     return clean;
   } catch {
@@ -40,7 +43,8 @@ function ignoreSuggestion(fingerprint, reason) {
   const key = String(fingerprint || '');
   if (!FINGERPRINT_RE.test(key)) return { ok: false, error: 'invalid_fingerprint' };
   const ignored = loadIgnored();
-  ignored[key] = { at: new Date().toISOString(), ...(reason ? { reason: String(reason).slice(0, 200) } : {}) };
+  const entry = { at: new Date().toISOString(), ...(reason ? { reason: String(reason).slice(0, 200) } : {}) };
+  Object.defineProperty(ignored, key, { value: entry, writable: true, enumerable: true, configurable: true });
   try {
     const target = prefsPath();
     fs.mkdirSync(path.dirname(target), { recursive: true });
@@ -56,7 +60,7 @@ function unignoreSuggestion(fingerprint) {
   if (!FINGERPRINT_RE.test(key)) return { ok: false, error: 'invalid_fingerprint' };
   const ignored = loadIgnored();
   if (!Object.prototype.hasOwnProperty.call(ignored, key)) return { ok: true, fingerprint: key, removed: false };
-  delete ignored[key];
+  Reflect.deleteProperty(ignored, key);
   try {
     fs.writeFileSync(prefsPath(), `${JSON.stringify({ version: 1, ignored }, null, 2)}\n`, 'utf8');
     return { ok: true, fingerprint: key, removed: true };

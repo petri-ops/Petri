@@ -65,15 +65,15 @@ const CI_HARNESS_TEST_FILES = [
 
 function parseArgs(argv) {
   const args = { root: REPO_ROOT, skipInstall: false, gates: null, keep: false, selfTest: false }; // selfTest 供测试驱动时辨识（当前仅精简输出占位）
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
-    if (arg === '--root') args.root = path.resolve(argv[++i]);
+  for (const [index, arg] of argv.entries()) {
+    const next = argv.at(index + 1);
+    if (arg === '--root') Object.defineProperty(args, 'root', { value: path.resolve(next ?? ''), writable: true, enumerable: true, configurable: true });
     else if (arg === '--skip-install') args.skipInstall = true;
-    else if (arg === '--gates') args.gates = argv[++i];
+    else if (arg === '--gates') args.gates = next;
     else if (arg === '--keep') args.keep = true;
     else if (arg === '--self-test') args.selfTest = true;
     else if (arg === '--help' || arg === '-h') args.help = true;
-    else {
+    else if (arg.startsWith('--')) {
       console.error(`[verify-clean] 未知参数：${arg}（--help 查看用法）`);
       process.exit(3);
     }

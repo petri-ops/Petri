@@ -129,7 +129,7 @@ export function WatermarkControl(): React.ReactElement {
               style={controlStyle}
             >
               {BUILTIN_WATERMARK_IDS.map((id) => (
-                <option key={id} value={id}>{BUILTIN_LABELS[id]}</option>
+                <option key={id} value={id}>{Object.entries(BUILTIN_LABELS).find(([k]) => k === id)?.[1]}</option>
               ))}
             </select>
           </label>

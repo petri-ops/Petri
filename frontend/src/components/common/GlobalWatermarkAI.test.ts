@@ -49,7 +49,8 @@ describe('内置水墨多候选（HK-01）', () => {
   it('6 个 builtin id 各自映射到对应 PNG，none 不出图、custom 沿用自定义逻辑', () => {
     for (const id of BUILTIN_WATERMARK_IDS) {
       const source = resolveWatermarkSource(`builtin:${id}`, '', '');
-      expect(source, `${id} 应映射到 ${ID_TO_FILE[id]}`).toContain(ID_TO_FILE[id]);
+      const file = Object.entries(ID_TO_FILE).find(([key]) => key === id)?.[1] ?? '';
+      expect(source, `${id} 应映射到 ${file}`).toContain(file);
     }
     expect(resolveWatermarkSource('none', 'data:image/png;base64,AA', '/x.png')).toBe('');
     expect(resolveWatermarkSource('custom', 'data:image/png;base64,AA', '/x.png')).toBe('data:image/png;base64,AA');

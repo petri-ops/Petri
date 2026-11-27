@@ -52,7 +52,7 @@ export function scan() {
     for (const file of walk(path.join(ROOT, root))) {
       const rel = path.relative(ROOT, file).split(path.sep).join('/');
       const n = countConsole(fs.readFileSync(file, 'utf8'));
-      if (n) counts[rel] = n;
+      if (n) Object.defineProperty(counts, rel, { value: n, writable: true, enumerable: true, configurable: true });
     }
   }
   return counts;
@@ -60,8 +60,9 @@ export function scan() {
 
 export function checkCounts(counts, baseline) {
   const violations = [];
+  const baselineFiles = baseline.files ?? {};
   for (const [file, count] of Object.entries(counts)) {
-    const allowed = (baseline.files && baseline.files[file]) || 0;
+    const allowed = Object.entries(baselineFiles).find(([key]) => key === file)?.[1] ?? 0;
     if (count > allowed) violations.push(`${file}: ${count} 处 > 基线 ${allowed}（新增 console）`);
   }
   return violations;
@@ -69,8 +70,8 @@ export function checkCounts(counts, baseline) {
 
 export function shrinkCandidates(counts, baseline) {
   return Object.entries(baseline.files || {})
-    .filter(([file, allowed]) => (counts[file] || 0) < allowed)
-    .map(([file, allowed]) => `${file} ${allowed}→${counts[file] || 0}`);
+    .filter(([file, allowed]) => (Object.entries(counts).find(([key]) => key === file)?.[1] ?? 0) < allowed)
+    .map(([file, allowed]) => `${file} ${allowed}→${Object.entries(counts).find(([key]) => key === file)?.[1] ?? 0}`);
 }
 
 function main() {

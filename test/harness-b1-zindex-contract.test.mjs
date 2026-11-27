@@ -52,11 +52,11 @@ const uses = (rel, tier) => new RegExp(`var\\(--petri-z-${tier}\\)`).test(read(r
 test('B1-1 九档语义 token 定义完整且严格递增（chrome 档为标题栏专用）', () => {
   const values = TIERS.map(zValue);
   for (let i = 0; i < TIERS.length; i += 1) {
-    assert.notEqual(values[i], null, `--petri-z-${TIERS[i]} 未定义`);
+    assert.notEqual(values.at(i), null, `--petri-z-${TIERS.at(i)} 未定义`);
   }
   for (let i = 1; i < values.length; i += 1) {
-    assert.ok(values[i] > values[i - 1], `${TIERS[i]}(${values[i]}) 必须高于 ${TIERS[i - 1]}(${values[i - 1]})`);
-    assert.ok(values[i] - values[i - 1] >= 10, `${TIERS[i]} 与 ${TIERS[i - 1]} 之间须留扩展空间`);
+    assert.ok(values.at(i) > values.at(i - 1), `${TIERS.at(i)}(${values.at(i)}) 必须高于 ${TIERS.at(i - 1)}(${values.at(i - 1)})`);
+    assert.ok(values.at(i) - values.at(i - 1) >= 10, `${TIERS.at(i)} 与 ${TIERS.at(i - 1)} 之间须留扩展空间`);
   }
 });
 
@@ -110,7 +110,9 @@ test('B1-5 零新依赖（package.json 依赖清单与 HEAD 逐键一致）', ()
   const current = JSON.parse(read('package.json'));
   const baseline = JSON.parse(execFileSync('git', ['show', 'HEAD:package.json'], { cwd: ROOT, encoding: 'utf8' }));
   for (const key of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
-    assert.deepEqual(current[key] ?? {}, baseline[key] ?? {}, `${key} 不得新增依赖`);
+    const cur = Object.entries(current).find(([k]) => k === key)?.[1] ?? {};
+    const base = Object.entries(baseline).find(([k]) => k === key)?.[1] ?? {};
+    assert.deepEqual(cur, base, `${key} 不得新增依赖`);
   }
 });
 

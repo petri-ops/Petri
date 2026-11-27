@@ -34,8 +34,14 @@ function makeDeps() {
       errorLog: { logError: (source, err, meta) => alarms.push({ source, err, meta }) },
       health: { buildHealthShape: (o) => { healthCalls.push(o); return { shape: true, ...o }; } },
       processEmitter: {
-        on: (ev, fn) => { (listeners[ev] ||= []).push(fn); },
-        off: (ev, fn) => { listeners[ev] = (listeners[ev] || []).filter((f) => f !== fn); },
+        on: (ev, fn) => {
+          const existing = Object.entries(listeners).find(([k]) => k === ev)?.[1] ?? [];
+          Object.assign(listeners, { [ev]: [...existing, fn] });
+        },
+        off: (ev, fn) => {
+          const existing = Object.entries(listeners).find(([k]) => k === ev)?.[1] ?? [];
+          Object.assign(listeners, { [ev]: existing.filter((f) => f !== fn) });
+        },
       },
     },
   };

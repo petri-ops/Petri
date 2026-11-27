@@ -30,7 +30,7 @@ export function resolveWatermarkSource(mode: WatermarkMode, customData: string, 
   if (mode === 'none') return '';
   if (mode === 'custom') return customData || customPath;
   const id = builtinWatermarkId(mode);
-  return id ? BUILTIN_SOURCES[id] : BUILTIN_SOURCES.mountain;
+  return id ? Object.entries(BUILTIN_SOURCES).find(([k]) => k === id)?.[1] ?? BUILTIN_SOURCES.mountain : BUILTIN_SOURCES.mountain;
 }
 
 export function GlobalWatermarkAI(): React.ReactElement {

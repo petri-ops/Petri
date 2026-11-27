@@ -81,10 +81,13 @@ function nowIso() {
 /** 结构化决策讲解（钉①）：decision/why/domainConvention 必填非空，forkOptions 可选数组。 */
 function validateDecisionExplanation(explanation) {
   if (!explanation || typeof explanation !== 'object') return fail('讲解输入缺失');
-  for (const field of ['decision', 'why', 'domainConvention']) {
-    const value = explanation[field];
-    if (typeof value !== 'string' || !value.trim()) return fail(`决策讲解缺 ${field}（每决策点必须有讲解记录）`);
-    if (value.length > 2000) return fail(`决策讲解 ${field} 超限（≤2000 字符）`);
+  const decisionText = typeof explanation.decision === 'string' ? explanation.decision.trim() : '';
+  const whyText = typeof explanation.why === 'string' ? explanation.why.trim() : '';
+  const conventionText = typeof explanation.domainConvention === 'string' ? explanation.domainConvention.trim() : '';
+  if (!decisionText || whyText.length === 0) return fail('决策讲解缺 decision/why（每决策点必须有讲解记录）');
+  if (!conventionText) return fail('决策讲解缺 domainConvention（每决策点必须有讲解记录）');
+  if (decisionText.length > 2000 || whyText.length > 2000 || conventionText.length > 2000) {
+    return fail('决策讲解字段超限（≤2000 字符）');
   }
   if (explanation.forkOptions !== undefined && !Array.isArray(explanation.forkOptions)) {
     return fail('forkOptions 必须是数组（岔路口选项）');
@@ -166,12 +169,17 @@ function validateDivergences(divergences) {
   }
   for (const [index, item] of divergences.entries()) {
     if (!item || typeof item !== 'object') return fail(`分歧点 #${index} 非对象`);
-    for (const field of ['decision', 'userChoice', 'domainConvention', 'costOfDeviation', 'sourceRef']) {
-      const value = item[field];
-      if (typeof value !== 'string' || !value.trim()) {
-        return fail(`分歧点 #${index} 缺结构化字段 ${field}（自由文本拒绝）`);
-      }
-      if (value.length > 1000) return fail(`分歧点 #${index} ${field} 超限（≤1000 字符）`);
+    const str = (value) => (typeof value === 'string' ? value.trim() : '');
+    const decision = str(item.decision);
+    const userChoice = str(item.userChoice);
+    const domainConvention = str(item.domainConvention);
+    const costOfDeviation = str(item.costOfDeviation);
+    const sourceRef = str(item.sourceRef);
+    if (!decision || !userChoice || !domainConvention || !costOfDeviation || !sourceRef) {
+      return fail(`分歧点 #${index} 缺结构化字段（decision/userChoice/domainConvention/costOfDeviation/sourceRef 必填，自由文本拒绝）`);
+    }
+    for (const value of [decision, userChoice, domainConvention, costOfDeviation, sourceRef]) {
+      if (value.length > 1000) return fail('分歧点字段超限（≤1000 字符）');
     }
   }
   return { ok: true };
@@ -211,10 +219,11 @@ function listDivergences(db, { userId, domain }) {
 /** 品味样本入库（幂等按 sample_id；bio 试点域白名单）。 */
 function insertTasteSample(db, sample) {
   if (!PILOT_DOMAINS.includes(sample.domain)) return fail(`域 ${sample.domain} 不在试点白名单`);
-  for (const field of ['dimension', 'good', 'bad', 'rationale']) {
-    const value = sample[field];
-    if (typeof value !== 'string' || !value.trim()) return fail(`品味样本缺 ${field}`);
-  }
+  const dimension = typeof sample.dimension === 'string' ? sample.dimension.trim() : '';
+  const good = typeof sample.good === 'string' ? sample.good.trim() : '';
+  const bad = typeof sample.bad === 'string' ? sample.bad.trim() : '';
+  const rationale = typeof sample.rationale === 'string' ? sample.rationale.trim() : '';
+  if (!dimension || !good || !bad || !rationale) return fail('品味样本缺 dimension/good/bad/rationale');
   const sampleId = sample.sampleId || newId('dosample');
   const existing = db.prepare('SELECT sample_id FROM do_sample_libraries WHERE sample_id = ?').get(sampleId);
   if (existing) return { ok: true, sampleId, existed: true };

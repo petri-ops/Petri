@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **lint:ledger 棘轮收口批同批登记（2026-11-27）**：为收敛 lint:ledger 三域超基线（P+66/T+18/S+6 累积自 item83 三轮/86/88 waves/89/90 多批合并），消除新增 detect-object-injection 族警告 66+ 条（已并入 main 的 do-sources 键表封闭重写/permissions-contract ownGet-ownSet 先例/do-coaching 显式字段/.metrics entries+Reflect.deleteProperty/.plugin-lifecycle-audit Object.assign/.utility-host entries/.workbench 三件显式解构/.web-tools .at()/.watermark 系 entries+defineProperty/.console-ratchet defineProperty+entries/.harness 与 p6 测试 .at()/.generate-tools/.verify-clean/.do-ingest entries）。**warnings 基线 --update 下调至 P1476/T416/S537（全部只降）**；touched files --no-cache 0 errors。**状态**：in_progress（纯警告消除零观感变化）。
+
 > **item 90 阶段一完善 右栏「结果」tab 隐藏同批登记（2026-11-27）**：flag off 时「结果」tab 从右栏 tab 条直接隐藏（不再显示 off 占位）：pills/工具菜单经 filterResultStudioTabs 纯函数过滤 + RightPanel results 内容渲染门控 + 三处自动打开入口 no-op；flag on 恢复显示（回滚不变）。HK-01 4/4（HK-90b-1~4）。**状态**：in_progress（代码级完成；CDP 实证留 owner 实机，观感零代签）。 **CI lint 追加修复（同日）**：eslint --no-cache 复现 CI 7 errors——project-workspace.tsx 4×react-hooks/refs（resultStudioEnabledRef 渲染期写 + pendingArtifactName 归属过滤/关闭窗口脏计数渲染期读 ref，改 state 镜像+effect 读 ref 合法模式）+ resultStudioTabFlag.test.tsx 3×（renderTitleBarRail 死代码/\d 模板字面量转义丢层/handleRename async 无 await）；本地 --no-cache 全量 0 errors 复验。教训：--cache 掩盖未再 lint 文件的规则版本级错误，防复发=涉及 .ts/.tsx 的批次收口必跑 --no-cache。
 
 > **item 87 第二波教练循环同批登记（2026-11-27）**：总览面新增教练条（data-testid=coaching-strip，相位/决策讲解数/复盘分歧数只读展示，仅 bio 试点域有 run 时出现——诚实隐匿）；wb 目标树/协作图保持既有形状。**状态**：in_progress（引擎+路由+总览条代码级完成；CDP 实证以 attempt2 同实例链路为准，本波新面待 owner 实机过目，观感零代签）。

@@ -35,10 +35,12 @@ const EVENT_TARGET = Object.freeze({
 
 function transitionRun(state, event) {
   if (!STATES.includes(state)) return { ok: false, error: 'invalid_state', from: state, event };
-  if (!(TRANSITIONS[state] || []).includes(event)) {
+  const transitions = Object.entries(TRANSITIONS).find(([key]) => key === state)?.[1] || [];
+  if (!transitions.includes(event)) {
     return { ok: false, error: 'invalid_transition', from: state, event };
   }
-  return { ok: true, state: EVENT_TARGET[event] };
+  const target = Object.entries(EVENT_TARGET).find(([key]) => key === event)?.[1];
+  return { ok: true, state: target };
 }
 
 /** 每次状态变更机械落 task_events（append-only，seq 由 store 侧保证）。 */

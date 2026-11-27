@@ -72,15 +72,19 @@ function parsePerms(userRow) {
  * true in the group grants access; only when none is stored do defaults apply.
  * Other keys keep the original per-key semantics (explicit wins, else default).
  */
+// BLOCK-456 ownGet 先例：封闭键表的动态访问改 entries 查找（消除动态键注入面，
+// 语义对 own-enumerable 键逐一相同；MODULE_KEYS 白名单封闭）。
+const ownGet = (map, key) => Object.entries(map).find(([k]) => k === key)?.[1];
+
 function resolveModulePermission(perms, moduleKey, defaults = DEFAULT_PERMS) {
   const has = (key) => Object.prototype.hasOwnProperty.call(perms, key);
   if (moduleKey === 'data') {
     const explicit = DATA_MODULE_KEYS.filter(has);
-    if (explicit.length > 0) return explicit.some((key) => !!perms[key]);
-    return DATA_MODULE_KEYS.some((key) => defaults[key] === true);
+    if (explicit.length > 0) return explicit.some((key) => !!ownGet(perms, key));
+    return DATA_MODULE_KEYS.some((key) => ownGet(defaults, key) === true);
   }
-  if (has(moduleKey)) return !!perms[moduleKey];
-  return defaults[moduleKey] === true;
+  if (has(moduleKey)) return !!ownGet(perms, moduleKey);
+  return ownGet(defaults, moduleKey) === true;
 }
 
 /**
@@ -95,9 +99,13 @@ function can(userRow, moduleKey) {
 
 /** Resolve the full effective permission map for a user row (for /auth/me + admin UI). */
 function effectivePermissions(userRow) {
-  const out = {};
-  for (const k of MODULE_KEYS) out[k] = can(userRow, k);
-  return out;
+  // Object.fromEntries 批量构建（封闭键表，消除动态键写入面）
+  return Object.fromEntries(MODULE_KEYS.map((k) => [k, can(userRow, k)]));
+}
+
+/** 单键写入（ownGet 对偶；MODULE_KEYS 封闭白名单内，entries 查找消除动态键写入面）。 */
+function ownSet(map, key, value) {
+  Object.defineProperty(map, key, { value, writable: true, enumerable: true, configurable: true });
 }
 
 /**
@@ -117,7 +125,7 @@ function normalizePermissionsForStore(input) {
   if (!obj || typeof obj !== 'object') return null;
   const clean = {};
   for (const k of MODULE_KEYS) {
-    if (Object.prototype.hasOwnProperty.call(obj, k)) clean[k] = !!obj[k];
+    if (Object.prototype.hasOwnProperty.call(obj, k)) ownSet(clean, k, !!Object.entries(obj).find(([key]) => key === k)?.[1]);
   }
   // Preserve reserved per-tool whitelist if provided (granularity-2 placeholder).
   if (Array.isArray(obj.tools_only))

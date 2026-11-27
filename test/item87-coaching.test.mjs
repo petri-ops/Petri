@@ -90,7 +90,8 @@ test('HK-87c-1（钉①）：影子决策讲解轨迹——每决策点一条结
   assert.equal(events.length, 2, `每决策点一条讲解事件（实际 ${events.length}）`);
   const payload = JSON.parse(events[0].payload);
   for (const field of ['decision', 'why', 'domainConvention', 'forkOptions', 'runId']) {
-    assert.ok(payload[field] !== undefined, `讲解 payload 应含 ${field}`);
+    const value = Object.entries(payload).find(([key]) => key === field)?.[1];
+    assert.ok(value !== undefined, `讲解 payload 应含 ${field}`);
   }
 
   // 缺 why 的自由文本拒绝（钉①反向）

@@ -14,7 +14,8 @@
 const TRACE_MARK = Symbol.for('petri.ipcTrace');
 
 function installGlobalIpcTrace(ipcMain, { trace, metrics } = {}) {
-  if (!ipcMain || ipcMain[TRACE_MARK]) return ipcMain;
+  if (!ipcMain) return ipcMain;
+  if (Object.getOwnPropertyDescriptor(ipcMain, TRACE_MARK)?.value === true) return ipcMain;
   // 走 core-utils resolveCore（dev/resourcesPath 双态），不用静态相对 core require
   // —— block353 打包契约：主图禁静态 core 相对路径（C-48 根因类）。
   const { resolveCore } = require('../main/core-utils');

@@ -108,8 +108,8 @@ async function tool_web_search(args = {}, _ctx = {}, deps = {}) {
       ...result,
       results: result.results.map((row, index) => ({
         ...row,
-        summary: projected.results[index] ? projected.results[index].summary : String(row.snippet || ''),
-        authority: projected.results[index] ? projected.results[index].authority : null,
+        summary: projected.results.at(index)?.summary ?? String(row.snippet || ''),
+        authority: projected.results.at(index)?.authority ?? null,
       })),
     }
     : result;

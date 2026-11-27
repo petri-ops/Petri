@@ -32,11 +32,12 @@ function formatAuditEvent(event) {
   if (!event || !VALID_KINDS.has(String(event.kind))) return null;
   const clean = { at: String(event.at || '').slice(0, 40), actor: String(event.actor || '').slice(0, 80), kind: event.kind };
   for (const key of ['from', 'to']) {
-    if (event[key] !== undefined && event[key] !== null) clean[key] = String(event[key]).slice(0, 160);
+    const value = Object.entries(event).find(([k]) => k === key)?.[1];
+    if (value !== undefined && value !== null) Object.assign(clean, { [key]: String(value).slice(0, 160) });
   }
   for (const key of Object.keys(event)) {
     if (SENSITIVE_KEYS.has(key)) continue;
-    if (!['at', 'actor', 'kind', 'from', 'to'].includes(key)) clean[key] = event[key];
+    if (!['at', 'actor', 'kind', 'from', 'to'].includes(key)) Object.assign(clean, { [key]: Object.entries(event).find(([k]) => k === key)?.[1] });
   }
   return JSON.stringify(clean);
 }

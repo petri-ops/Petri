@@ -103,7 +103,7 @@ test('OB-002 全局 handle 包装：rid 尾参被摘走、handler 参数零漂�
   const metrics = require(METRICS);
   trace.clearTraces();
   metrics.resetMetrics();
-  const fake = { handlers: {}, handle(ch, fn) { this.handlers[ch] = fn; } };
+  const fake = { handlers: {}, handle(ch, fn) { Object.defineProperty(this.handlers, ch, { value: fn, writable: true, enumerable: true, configurable: true }); } };
   installGlobalIpcTrace(fake, { trace, metrics });
   let got = null;
   fake.handle('p1:probe', (_event, a, b) => { got = [a, b]; return 'ok'; });

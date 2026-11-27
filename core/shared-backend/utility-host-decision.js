@@ -38,7 +38,8 @@ function evaluateForkAdmission(input = {}) {
   }
   const messages = host.messages && typeof host.messages === 'object' ? host.messages : {};
   for (const direction of ['inbound', 'outbound']) {
-    const names = Array.isArray(messages[direction]) ? messages[direction] : [];
+    const names = Array.isArray(Object.entries(messages).find(([k]) => k === direction)?.[1])
+      ? Object.entries(messages).find(([k]) => k === direction)[1] : [];
     if (names.some((name) => !/^[A-Za-z][A-Za-z0-9_.:-]{0,63}$/.test(String(name)))) {
       return { allowed: false, error: 'invalid_message_whitelist' };
     }
@@ -55,7 +56,8 @@ function evaluateForkAdmission(input = {}) {
 /** 生命周期状态机：非法跃迁返回 error，不改状态。 */
 function reduceHostState(current = { status: 'stopped' }, event) {
   const status = STATES.has(current.status) ? current.status : 'stopped';
-  const next = (TRANSITIONS[status] || {})[String(event || '')];
+  const transitions = Object.entries(TRANSITIONS).find(([k]) => k === status)?.[1] ?? {};
+  const next = Object.entries(transitions).find(([k]) => k === String(event || ''))?.[1];
   if (!next) return { ...current, error: 'invalid_transition' };
   return { ...current, status: next, error: null };
 }

@@ -17,8 +17,9 @@ const supervisor = { observations: 0, byReason: Object.create(null) };
 
 function channelBucket(channel) {
   const key = String(channel || 'unknown');
-  if (!ipc.byChannel[key]) ipc.byChannel[key] = { total: 0, failed: 0, lastMs: 0 };
-  return ipc.byChannel[key];
+  const existing = Object.entries(ipc.byChannel).find(([k]) => k === key)?.[1];
+  if (!existing) Object.assign(ipc.byChannel, { [key]: { total: 0, failed: 0, lastMs: 0 } });
+  return Object.entries(ipc.byChannel).find(([k]) => k === key)?.[1];
 }
 
 function recordIpc({ channel, durationMs = 0, ok = true } = {}) {
@@ -52,7 +53,8 @@ function setBreakerState(name, state) {
 function recordSupervisorObservation({ reasonCode = 'unspecified' } = {}) {
   supervisor.observations += 1;
   const key = String(reasonCode);
-  supervisor.byReason[key] = (supervisor.byReason[key] || 0) + 1;
+  const prev = Number(Object.entries(supervisor.byReason).find(([k]) => k === key)?.[1]) || 0;
+  Object.assign(supervisor.byReason, { [key]: prev + 1 });
 }
 
 function getMetricsSnapshot() {
@@ -81,14 +83,14 @@ function getMetricsSnapshot() {
 function resetMetrics() {
   ipc.total = 0;
   ipc.failed = 0;
-  for (const k of Object.keys(ipc.byChannel)) delete ipc.byChannel[k];
+  for (const key of Object.keys(ipc.byChannel)) Reflect.deleteProperty(ipc.byChannel, key);
   db.writeCount = 0;
   db.writeTotalMs = 0;
   db.recentMs.length = 0;
   backend.restarts = 0;
-  for (const k of Object.keys(breakers)) delete breakers[k];
+  for (const key of Object.keys(breakers)) Reflect.deleteProperty(breakers, key);
   supervisor.observations = 0;
-  for (const k of Object.keys(supervisor.byReason)) delete supervisor.byReason[k];
+  for (const key of Object.keys(supervisor.byReason)) Reflect.deleteProperty(supervisor.byReason, key);
 }
 
 module.exports = {

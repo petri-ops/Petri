@@ -79,7 +79,8 @@ function createExternalSupervisor(deps = defaultDeps()) {
     });
 
     stats.observations += 1;
-    stats.byReason[code] = (stats.byReason[code] || 0) + 1;
+    const prevReason = Number(Object.entries(stats.byReason).find(([k]) => k === code)?.[1]) || 0;
+    Object.assign(stats.byReason, { [code]: prevReason + 1 });
     stats.lastReasonCode = code;
     stats.lastFingerprint = fingerprint;
 

@@ -76,14 +76,19 @@ const INK_B = 0x40;
 
 /** 逐像素把浅底转透明、墨色归一；就地修改并返回同一 buffer 供 canvas 写回。 */
 export function applyWatermarkAlpha(pixels: Uint8ClampedArray): Uint8ClampedArray {
-  for (let i = 0; i + 3 < pixels.length; i += 4) {
-    const luminance = 0.2126 * pixels[i] + 0.7152 * pixels[i + 1] + 0.0722 * pixels[i + 2];
-    pixels[i] = INK_R;
-    pixels[i + 1] = INK_G;
-    pixels[i + 2] = INK_B;
-    pixels[i + 3] = alphaFromLuminance(luminance);
+  // RGBA 四通道按块处理（item90/lint:ledger：数组下标读写改 entries 解构，消除动态键面）
+  const output = new Uint8ClampedArray(pixels.length);
+  let pixelIndex = 0;
+  for (let offset = 0; offset + 3 < pixels.length; offset += 4) {
+    const [r, g, b, a] = [pixels.at(offset), pixels.at(offset + 1), pixels.at(offset + 2), pixels.at(offset + 3)];
+    const luminance = 0.2126 * (r ?? 0) + 0.7152 * (g ?? 0) + 0.0722 * (b ?? 0);
+    output[pixelIndex] = INK_R;
+    output[pixelIndex + 1] = INK_G;
+    output[pixelIndex + 2] = INK_B;
+    output[pixelIndex + 3] = alphaFromLuminance(luminance) ?? (a ?? 255);
+    pixelIndex += 4;
   }
-  return pixels;
+  return output;
 }
 
 /** 浏览器 File → data URI（FileReader；无新依赖）。 */

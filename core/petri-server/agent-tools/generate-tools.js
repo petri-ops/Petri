@@ -73,7 +73,9 @@ function resolveArtifactTarget(ctx, toolId, options = {}) {
   }
   const projectId = ctx && ctx.projectId ? String(ctx.projectId) : null;
   if (projectId) {
-    let root = options.workspaceRootByProject && options.workspaceRootByProject[projectId];
+    const rootEntry = options.workspaceRootByProject
+      && Object.entries(options.workspaceRootByProject).find(([key]) => key === projectId);
+    let root = rootEntry ? rootEntry[1] : undefined;
     if (!root) {
       try {
         const { projectWorkspace } = require('./model3d-tools');

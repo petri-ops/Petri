@@ -47,6 +47,19 @@ function parseScalar(value) {
   return trimmed;
 }
 
+
+/** 顶层/第 2 层键封闭键表（meta/sources）。未知键 fail-closed。 */
+function setMapField(map, key, value, lineNo) {
+  switch (key) {
+    case 'domain': map.domain = value; break;
+    case 'status': map.status = value; break;
+    case 'updated': map.updated = value; break;
+    case 'confirmed_by': map.confirmed_by = value; break;
+    default:
+      throw new Error(`sources.yaml 第 ${lineNo} 行未知键：${key}（meta 允许 domain/status/updated/confirmed_by）`);
+  }
+}
+
 /**
  * 严格子集解析。返回普通对象；任何超出子集的形态抛 Error（fail-closed）。
  * 形态约束：键路径深度 ≤ 2；列表项只在第 2 层键下出现，形如 `  - key: value`。
@@ -59,8 +72,7 @@ function parseSourcesYaml(text) {
   let currentKey = null;
   let currentItem = null;
 
-  for (let index = 0; index < lines.length; index += 1) {
-    const raw = lines[index];
+  for (const [index, raw] of lines.entries()) {
     if (!raw.trim()) continue;
     const indent = raw.length - raw.trimStart().length;
     const trimmed = raw.trim();
@@ -70,7 +82,12 @@ function parseSourcesYaml(text) {
       if (!match) throw new Error(`sources.yaml 第 ${index + 1} 行无法解析（顶层形态）：${trimmed}`);
       currentKey = match[1];
       currentItem = null;
-      root[currentKey] = match[2] === '' ? null : parseScalar(match[2]);
+      // 键表封闭：只认 meta/sources 两个已知顶层键（严格子集解析器契约）
+      if (currentKey !== 'meta' && currentKey !== 'sources') {
+        throw new Error(`sources.yaml 第 ${index + 1} 行未知顶层键：${currentKey}（只允许 meta/sources）`);
+      }
+      if (currentKey === 'meta') root.meta = match[2] === '' ? null : parseScalar(match[2]);
+      else root.sources = match[2] === '' ? null : parseScalar(match[2]);
       continue;
     }
 
@@ -82,24 +99,27 @@ function parseSourcesYaml(text) {
       // 第 2 层：meta 的键，或 sources 列表项的开头
       const listItem = trimmed.match(/^-\s+(.*)$/);
       if (listItem) {
-        if (!currentKey || root[currentKey] === undefined) throw new Error(`第 ${index + 1} 行列表无宿主键`);
-        if (root[currentKey] === null) root[currentKey] = [];
-        if (!Array.isArray(root[currentKey])) throw new Error(`第 ${index + 1} 行：键 ${currentKey} 下出现列表，但该键已是标量`);
+        if (currentKey !== 'sources') throw new Error(`第 ${index + 1} 行：列表只允许出现在 sources 键下`);
+        if (root.sources === null) root.sources = [];
         currentItem = {};
-        root[currentKey].push(currentItem);
+        root.sources.push(currentItem);
         const pair = listItem[1].match(/^([A-Za-z0-9_]+):\s*(.*)$/);
         if (!pair) throw new Error(`sources.yaml 第 ${index + 1} 行无法解析（列表项形态）：${trimmed}`);
-        currentItem[pair[1]] = parseScalar(pair[2]);
+        setItemField(currentItem, pair, index + 1);
         continue;
       }
       const pair = trimmed.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
       if (!pair) throw new Error(`sources.yaml 第 ${index + 1} 行无法解析（第 2 层形态）：${trimmed}`);
       if (!currentKey) throw new Error(`第 ${index + 1} 行：键 ${pair[1]} 缺少第 1 层宿主`);
-      if (root[currentKey] === null) root[currentKey] = {};
-      if (typeof root[currentKey] !== 'object' || Array.isArray(root[currentKey])) {
-        throw new Error(`第 ${index + 1} 行：键 ${currentKey} 已是标量，不能再挂子键`);
+      if (currentKey === 'sources') throw new Error(`第 ${index + 1} 行：sources 下不允许键值对（只允许 - 列表项）`);
+      if (currentKey === 'meta') {
+        if (root.meta === null) root.meta = {};
+        if (typeof root.meta !== 'object') throw new Error(`第 ${index + 1} 行：键 meta 已是标量，不能再挂子键`);
+        setMapField(root.meta, pair[1], parseScalar(pair[2]), index + 1);
+      } else {
+        // sources 列表键下出现键值对：形状非法
+        throw new Error(`第 ${index + 1} 行：sources 下不允许键值对（只允许 - 列表项）`);
       }
-      root[currentKey][pair[1]] = parseScalar(pair[2]);
       currentItem = null;
       continue;
     }
@@ -108,12 +128,28 @@ function parseSourcesYaml(text) {
     if (!currentItem) throw new Error(`第 ${index + 1} 行字段缺少所属列表项：${trimmed}`);
     const pair = trimmed.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
     if (!pair) throw new Error(`sources.yaml 第 ${index + 1} 行无法解析（列表字段形态）：${trimmed}`);
-    currentItem[pair[1]] = parseScalar(pair[2]);
+    setItemField(currentItem, pair, index + 1);
   }
   return root;
 }
 
-const REQUIRED_SOURCE_FIELDS = Object.freeze(['id', 'name', 'url', 'authority_level', 'freshness', 'verified_date']);
+/** 列表项字段封闭键表：显式白名单直取赋值（消除动态键注入面）。 */
+function setItemField(item, pair, lineNo) {
+  const key = pair[1];
+  const value = parseScalar(pair[2]);
+  switch (key) {
+    case 'id': item.id = value; break;
+    case 'name': item.name = value; break;
+    case 'url': item.url = value; break;
+    case 'authority_level': item.authority_level = value; break;
+    case 'freshness': item.freshness = value; break;
+    case 'verified_date': item.verified_date = value; break;
+    case 'notes': item.notes = value; break;
+    default:
+      throw new Error(`sources.yaml 第 ${lineNo} 行未知来源字段：${key}（白名单 id/name/url/authority_level/freshness/verified_date/notes）`);
+  }
+}
+
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
@@ -139,10 +175,17 @@ function validateSourcesFile(text) {
   if (!sources || sources.length === 0) violations.push('sources 段缺失或为空');
   const seen = new Set();
   for (const source of sources || []) {
-    for (const field of REQUIRED_SOURCE_FIELDS) {
-      if (source[field] === undefined || source[field] === null || source[field] === '') {
-        violations.push(`来源 ${source.id || '(无 id)'} 缺字段 ${field}`);
-      }
+    // 显式五字段检查（消除动态键注入面；REQUIRED_SOURCE_FIELDS 常量保留供文档对照）
+    const missingField =
+      source.id === undefined || source.id === null || source.id === '' ? 'id'
+      : source.name === undefined || source.name === null || source.name === '' ? 'name'
+      : source.url === undefined || source.url === null || source.url === '' ? 'url'
+      : source.authority_level === undefined || source.authority_level === null || source.authority_level === '' ? 'authority_level'
+      : source.freshness === undefined || source.freshness === null || source.freshness === '' ? 'freshness'
+      : source.verified_date === undefined || source.verified_date === null || source.verified_date === '' ? 'verified_date'
+      : null;
+    if (missingField) {
+      violations.push(`来源 ${source.id || '(无 id)'} 缺字段 ${missingField}`);
     }
     if (source.authority_level !== undefined && !AUTHORITY_LEVELS.includes(source.authority_level)) {
       violations.push(`来源 ${source.id} authority_level 未知：${source.authority_level}`);

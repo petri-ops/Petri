@@ -224,7 +224,7 @@ export function WorkspaceFilePreview({
         if (!cancelled) setStatus('error');
       });
     return () => { cancelled = true; };
-  }, [file, isCsv, isHtml, isImage, isJson, isMarkdown, isModel3dFile, isPdf, isSpreadsheet, isText, officeKind, previewUrl]);
+  }, [file, isCsv, isHtml, isImage, isJson, isMarkdown, isModel3dFile, isPdf, isSpreadsheet, isSvgEditor, isText, officeKind, previewUrl]);
 
   // BLOCK-20 — 文件切换时重置保存基准线和 Markdown 视图
   useEffect(() => {

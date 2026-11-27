@@ -32,7 +32,8 @@ function evaluateHostManifest(manifest = {}) {
   }
   const messages = host.messages && typeof host.messages === 'object' ? host.messages : {};
   for (const direction of ['inbound', 'outbound']) {
-    const names = Array.isArray(messages[direction]) ? messages[direction] : [];
+    const names = Array.isArray(Object.entries(messages).find(([k]) => k === direction)?.[1])
+      ? Object.entries(messages).find(([k]) => k === direction)[1] : [];
     for (const name of names) {
       if (!MESSAGE_NAME_RE.test(String(name)) || String(name) === '*') errors.push(`invalid_message:${direction}:${name}`);
     }

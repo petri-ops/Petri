@@ -94,8 +94,8 @@ test('OOP 判据树纯函数行为：无 target / 无 pack target / ready 握手
   let depth = 0;
   let end = -1;
   for (let i = s.indexOf('{', start); i < s.length; i += 1) {
-    if (s[i] === '{') depth += 1;
-    else if (s[i] === '}') { depth -= 1; if (depth === 0) { end = i + 1; break; } }
+    if (s.at(i) === '{') depth += 1;
+    else if (s.at(i) === '}') { depth -= 1; if (depth === 0) { end = i + 1; break; } }
   }
   assert.ok(end > start, '函数体须可完整截取');
   const evaluateOopProbe = new Function(`return (${s.slice(start, end)})`)();

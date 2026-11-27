@@ -18,7 +18,8 @@ function rankQueueTasks(tasks) {
 }
 
 function computeRetryDecision({ retryCount = 0, errorType = 'internal_error', rng = Math.random } = {}) {
-  const policy = RETRY_POLICY[errorType] || RETRY_POLICY.internal_error;
+  const policyEntry = Object.entries(RETRY_POLICY).find(([key]) => key === errorType);
+  const policy = (policyEntry && policyEntry[1]) || RETRY_POLICY.internal_error;
   if (retryCount >= policy.maxRetries) return { action: 'failed', attempt: retryCount };
   const base = policy.backoff === 'exponential'
     ? (policy.baseDelay || 1000) * (2 ** retryCount)

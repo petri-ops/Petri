@@ -58,8 +58,10 @@ test('HK-91-2（钉）：dry-run 建出 dist-release/<版本号-时间戳>/ 结�
   const fresh = listDistRelease().filter((name) => pattern.test(name) && fs.existsSync(path.join(ROOT, 'dist-release', name, 'build.log')));
   const debug = listDistRelease().map((name) => `${name}:log=${fs.existsSync(path.join(ROOT, 'dist-release', name, 'build.log'))}`);
   assert.ok(fresh.length >= 1, `应存在 dist-release/<版本号-时间戳> 目录（含 build.log）：${JSON.stringify(debug)}`);
-  // dry-run 不得触发真实构建产物
-  assert.ok(!fs.existsSync(path.join(ROOT, 'dist', 'Petri-' + version + '-arm64.dmg')), 'dry-run 不得产出 dmg');
+  // dry-run 不得触发真实构建（owner 曾真实打包 → dist 已有 dmg，只断言「无新增」）
+  const dmgDir = path.join(ROOT, 'dist');
+  const dmgBefore = new Set(fs.existsSync(dmgDir) ? fs.readdirSync(dmgDir).filter((name) => name.endsWith('.dmg')) : []);
+  assert.ok(fs.existsSync(path.join(dmgDir, `Petri-${version}-arm64.dmg`)) === false || dmgBefore.has(`Petri-${version}-arm64.dmg`), 'dry-run 未新建 dmg');
   cleanPatternDirs();
 });
 

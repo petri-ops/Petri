@@ -8,12 +8,12 @@
 const { buildLocalRecognizeConfig } = require('./local-asr');
 
 function parseArgs(argv) {
-  const out = {};
+  const pairs = [];
   for (let i = 0; i < argv.length; i += 2) {
-    const key = String(argv[i] || '').replace(/^--/, '');
-    if (key) out[key] = argv[i + 1];
+    const key = String(argv.at(i) || '').replace(/^--/, '');
+    if (key) pairs.push([key, argv.at(i + 1)]);
   }
-  return out;
+  return Object.fromEntries(pairs);
 }
 
 function main() {

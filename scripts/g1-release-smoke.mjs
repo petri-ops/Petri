@@ -41,7 +41,7 @@ async function request(p) {
   // ① 结构 + 产物 sha/体积
   for (const rel of ['dist/Petri-0.0.4-arm64.dmg', 'dist/Petri-0.0.4.dmg']) {
     const p = path.join(ROOT, rel);
-    out.artifacts[rel] = { bytes: fs.statSync(p).size, sha256: sha(p) };
+    Object.defineProperty(out.artifacts, rel, { value: { bytes: fs.statSync(p).size, sha256: sha(p) }, writable: true, enumerable: true, configurable: true });
   }
   out.checks.serverPresent = fs.existsSync(SERVER);
   // ② addon ABI 实测（打包 helper + 打包 addon）

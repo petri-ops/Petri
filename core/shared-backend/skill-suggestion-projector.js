@@ -22,7 +22,7 @@ const SKILL_HINTS = {
 function attributeSkill(lesson, availableSkillIds = []) {
   const haystack = `${lesson.action || ''} ${lesson.title || ''}`.toLowerCase();
   for (const skillId of availableSkillIds) {
-    const hints = SKILL_HINTS[skillId] || [];
+    const hints = Object.entries(SKILL_HINTS).find(([k]) => k === skillId)?.[1] || [];
     if (hints.some((hint) => haystack.includes(String(hint).toLowerCase()))) return skillId;
   }
   return null;

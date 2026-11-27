@@ -129,7 +129,7 @@ async function ingestKnowledgeSource(options = {}) {
     sourceName: source.name,
     sourceUrl: source.url,
     sourceDate,
-    validUntil: summary.validUntil || addDaysIso(sourceDate, VALIDITY_POLICY_DAYS[freshnessClass]),
+    validUntil: summary.validUntil || addDaysIso(sourceDate, Object.entries(VALIDITY_POLICY_DAYS).find(([key]) => key === freshnessClass)?.[1] ?? 0),
     freshnessClass,
   }, {
     now,

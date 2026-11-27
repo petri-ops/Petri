@@ -62,7 +62,7 @@ function resolveGenerationParams({ intentPreset = '', generation = {}, detected 
   // 不再有 'env' source。产品化后能力通道=config/API（intentPreset）+ 旧 generation 兼容 + 自动档。
   // 1) 意图覆盖（用户在设置页选了意图）
   if (intentPreset && Object.prototype.hasOwnProperty.call(PRESETS, intentPreset)) {
-    const p = PRESETS[intentPreset];
+    const p = Object.entries(PRESETS).find(([k]) => k === intentPreset)?.[1];
     return { temperature: p.temperature, maxTokens: p.maxTokens, source: 'intent_override' };
   }
   // 2) 旧 generation 裸值兼容（今天行为零突变）
@@ -75,7 +75,7 @@ function resolveGenerationParams({ intentPreset = '', generation = {}, detected 
   }
   // 3) 自动档（默认）：本地规则判定，未知档落平衡
   const preset = Object.prototype.hasOwnProperty.call(PRESETS, detected) ? detected : 'balanced';
-  const p = PRESETS[preset];
+  const p = Object.entries(PRESETS).find(([k]) => k === preset)?.[1];
   return { temperature: p.temperature, maxTokens: p.maxTokens, source: 'auto' };
 }
 
