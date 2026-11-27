@@ -365,9 +365,9 @@
       "path": "frontend/src/components/copilot/ToolActivityList.tsx",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1023,
-      "bytes": 47486,
-      "sha256": "976ab913b6818aa4d28dc16f3cf29de2863139edc61b5f38589fb01c3235e29f"
+      "lines": 1029,
+      "bytes": 47898,
+      "sha256": "afd0d3f1a098c9a103eb07fc0a28f13a5e36ca7da32dff5edab750f1e3f99e11"
     },
     {
       "path": "core/shared-backend/result-replay-service/cohort-package.js",
@@ -405,9 +405,9 @@
       "path": "frontend/src/components/copilot/toolActivity.ts",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 950,
-      "bytes": 40289,
-      "sha256": "74fc88a5f58579ba5ba947a299bfea04c65844650b2cabb3e01aca11c33a694e"
+      "lines": 954,
+      "bytes": 40546,
+      "sha256": "d9d8804e125657d0c85b92fc2b8bb17d1ead517254f15eb60e78ef091cf194cf"
     },
     {
       "path": "src/main.js",
@@ -501,9 +501,9 @@
       "path": "core/petri-server/agent-tools/tool-events.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 808,
-      "bytes": 36082,
-      "sha256": "1dcc8828a37df042b4f2c8f55721c49cf4571e6f34c6a1350fd8cb0948b26426"
+      "lines": 810,
+      "bytes": 36407,
+      "sha256": "f7fb0d98149cca180c8b43828212fb4cd564d6b43f3740ed65ec8bca753678c9"
     },
     {
       "path": "frontend/src/components/icons/Icon.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86872,
+  "total": 86884,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -1165,6 +1165,45 @@
       "to": {
         "lines": 1042,
         "bytes": 58349
+      }
+    },
+    {
+      "path": "frontend/src/components/copilot/toolActivity.ts",
+      "reason": "item83第二轮：失败原因message字段透传（HK-01失败原因卡）",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 950,
+        "bytes": 40289
+      },
+      "to": {
+        "lines": 954,
+        "bytes": 40546
+      }
+    },
+    {
+      "path": "core/petri-server/agent-tools/tool-events.js",
+      "reason": "item83第二轮：tool_result事件带失败原因原文",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 808,
+        "bytes": 36082
+      },
+      "to": {
+        "lines": 810,
+        "bytes": 36407
+      }
+    },
+    {
+      "path": "frontend/src/components/copilot/ToolActivityList.tsx",
+      "reason": "item83第二轮：两处失败行渲染原因卡",
+      "date": "2026-11-27",
+      "from": {
+        "lines": 1023,
+        "bytes": 47486
+      },
+      "to": {
+        "lines": 1029,
+        "bytes": 47898
       }
     }
   ]

@@ -122,6 +122,17 @@ export interface GeneratedVideoArtifact {
 const GENERATED_VIDEO_URL_RE = /^\/api\/generated\/file\/video\//;
 const GENERATED_ARTIFACT_URL_RE = /^\/api\/generated\/file\/(image|video|model3d|html)\//;
 
+/** 项目工作区产物 URL 没有 kind 段，按路径扩展名归类（含 .scene3d.json）。 */
+function artifactKindFromPath(p: string): GeneratedArtifactKind | null {
+  if (/\.scene3d\.json$/i.test(p)) return 'model3d';
+  const ext = p.toLowerCase().split('.').pop() || '';
+  if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) return 'image';
+  if (['mp4', 'webm', 'mov', 'm4v'].includes(ext)) return 'video';
+  if (['glb', 'gltf'].includes(ext)) return 'model3d';
+  if (['html', 'htm'].includes(ext)) return 'html';
+  return null;
+}
+
 type GeneratedArtifactKind = 'image' | 'video' | 'model3d' | 'html';
 
 export interface GeneratedArtifact {
@@ -142,9 +153,12 @@ export function generatedArtifactsFromActivities(activities: readonly ToolActivi
       const d = raw as Record<string, unknown>;
       if (typeof d.path !== 'string' || typeof d.url !== 'string') continue;
       const match = GENERATED_ARTIFACT_URL_RE.exec(d.url);
-      if (!match || byUrl.has(d.url)) continue;
+      const kind = match
+        ? match[1] as GeneratedArtifactKind
+        : (d.url.startsWith('/api/workspaces/') ? artifactKindFromPath(d.path) : null);
+      if (!kind || byUrl.has(d.url)) continue;
       const name = d.path.split(/[\\/]/).pop() || '';
-      byUrl.set(d.url, { kind: match[1] as GeneratedArtifactKind, name, path: d.path, url: d.url });
+      byUrl.set(d.url, { kind, name, path: d.path, url: d.url });
     }
   }
   return [...byUrl.values()];

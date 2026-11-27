@@ -545,6 +545,7 @@ async function tool_model3d_blend_ops(args, ctx) {
 }
 
 module.exports = {
+  projectWorkspace,
   tool_model3d_blend_ops,
   tool_model3d_inspect,
   tool_model3d_validate,

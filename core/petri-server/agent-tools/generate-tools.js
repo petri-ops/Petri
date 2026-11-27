@@ -11,6 +11,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { buildGeneratedArtifactUrl } = require('../routes/generated-file');
+const { buildWorkspaceArtifactUrl } = require('../helpers/model3d-artifact-projection');
 const { resolveDataDir } = require('../../shared-backend/data-paths');
 
 const DEFAULT_PACK_DIR = path.resolve(__dirname, '..', '..', '..', 'resources', 'built-in-packs', 'petri-pack-create');
@@ -60,16 +61,57 @@ async function resolveReferenceImage(input = {}, options = {}) {
   return encoded.dataUrl;
 }
 
-/** item83 返工：描述符 path 必须落在受控 outDir 且 url 与 basename 强一致，否则红。 */
-function verifyGeneratedDescriptor(descriptor, outDir, kind) {
+/**
+ * item83 第二轮：产物归属当前项目工作区（可见 generated/<kind>/）。
+ * 无 projectId 或测试注入 outDir 时保持旧 dataDir + /api/generated/ 兼容层。
+ */
+function resolveArtifactTarget(ctx, toolId, options = {}) {
+  const kind = String(toolId).split('.')[1] || '';
+  const legacyUrl = (filePath) => buildGeneratedArtifactUrl(kind, path.basename(filePath));
+  if (options.outDir) {
+    return { outDir: options.outDir, scope: 'data', kind, projectId: null, urlFor: legacyUrl };
+  }
+  const projectId = ctx && ctx.projectId ? String(ctx.projectId) : null;
+  if (projectId) {
+    let root = options.workspaceRootByProject && options.workspaceRootByProject[projectId];
+    if (!root) {
+      try {
+        const { projectWorkspace } = require('./model3d-tools');
+        const ws = projectWorkspace(ctx);
+        if (ws && !ws.error && ws.root) root = ws.root;
+      } catch { /* 无项目上下文 → 回落 dataDir */ }
+    }
+    if (root) {
+      const relativeDir = `generated/${kind}`;
+      return {
+        outDir: path.join(root, relativeDir),
+        root,
+        relativeDir,
+        scope: 'workspace',
+        kind,
+        projectId,
+        urlFor: (filePath) => buildWorkspaceArtifactUrl(projectId, path.relative(root, filePath).split(path.sep).join('/')),
+      };
+    }
+  }
+  return {
+    outDir: path.join(options.dataDir || resolveDataDir(), 'generated', `generate-${kind}`),
+    scope: 'data', kind, projectId: null, urlFor: legacyUrl,
+  };
+}
+
+/** 描述符 path 必须落在 outDir 且 url（若已存在）与来源读面强一致，否则红。 */
+function verifyGeneratedDescriptor(descriptor, outDir, kind, urlFor = null) {
   if (!descriptor || typeof descriptor !== 'object') return descriptor;
   const filePath = typeof descriptor.path === 'string' ? descriptor.path : '';
   const root = path.resolve(outDir);
   if (!filePath || !path.resolve(filePath).startsWith(`${root}${path.sep}`)) {
     throw new Error('generated_path_out_of_controlled_dir');
   }
-  const expectedUrl = buildGeneratedArtifactUrl(kind, path.basename(filePath));
-  // url 由上层 withUrl 补；已存在时必须与实际 basename 一致，缺失不算漂移。
+  const expectedUrl = urlFor
+    ? urlFor(filePath)
+    : buildGeneratedArtifactUrl(kind, path.basename(filePath));
+  // url 由上层补；已存在时必须与实际路径一致，缺失不算漂移。
   if (expectedUrl && typeof descriptor.url === 'string' && descriptor.url !== expectedUrl) {
     throw new Error('generated_descriptor_url_mismatch');
   }
@@ -88,22 +130,73 @@ function resolveCredential(provider, options) {
  * @param {object} [options] 测试/运维注入：packRoot/apiKey/fetch/outDir/deps
  */
 function createGenerateHandler(toolId, options = {}) {
-  return async function generateHandler(input = {}) {
-    // item83 返工：HTML 是本地静态产物（无云 provider），统一走受控目录 + UTF-8 写入。
+  return async function generateHandler(input = {}, ctx = {}) {
+    const kind = String(toolId).split('.')[1] || '';
+    const target = resolveArtifactTarget(ctx, toolId, options);
+    const startedAt = Date.now();
+    const recordUsage = options.recordAiUsage || require('../helpers/ai-usage').recordAiUsage;
+    const record = (extra = {}) => {
+      try {
+        recordUsage({
+          userId: (ctx && ctx.userId) || null,
+          taskId: (ctx && ctx.taskId) || null,
+          conversationId: (ctx && ctx.conversationId) || null,
+          kind: toolId,
+          model: extra.model || null,
+          provider: extra.provider || null,
+          promptTokens: 0,
+          completionTokens: 0,
+          latencyMs: Date.now() - startedAt,
+          costStatus: 'unknown', // 生成模型无定价，不调 estimateCostCNY，不伪造费用
+          errorCode: extra.errorCode || null,
+        });
+      } catch { /* 记账失败不影响产物交付 */ }
+    };
+
+    // item83 第二轮：params.mode='local' 必须走本地近似，绝不打 Ark。
+    if (toolId === 'generate.model3d' && input.params && input.params.mode === 'local') {
+      if (typeof options.localRecipeRunner !== 'function') throw new Error('local_recipe_unavailable');
+      const local = await options.localRecipeRunner({
+        recipeId: input.recipeId || 'box-enclosure',
+        params: input.params,
+        dryRun: false,
+        render: false,
+        annotation: true,
+        workspaceRoot: target.root || null,
+      });
+      if (!local || local.ok === false) throw new Error(`local_recipe_failed: ${(local && local.error) || 'unknown'}`);
+      const rel = (local.written && local.written.path) || `generated/model3d/${(local.recipe && local.recipe.id) || 'local'}.scene3d.json`;
+      const filePath = path.isAbsolute(rel) ? rel : path.join(target.root || options.dataDir || resolveDataDir(), rel);
+      const descriptor = {
+        path: filePath,
+        sha256: fs.existsSync(filePath) ? sha256File(filePath) : null,
+        mime: 'application/json',
+        source: local.source || { provider: 'local', mode: 'parametric-recipe', status: 'approximation', synthetic: true, label: '本地近似非 AI 生成' },
+        scope: target.scope,
+        projectId: target.projectId,
+        url: target.urlFor(filePath),
+      };
+      record({ model: 'parametric-recipe', provider: 'local' });
+      return descriptor;
+    }
+
+    // HTML 是本地静态产物（无云 provider），UTF-8 写入当前项目工作区。
     if (toolId === 'generate.html') {
       const content = typeof input.content === 'string' ? input.content : '';
       if (!content) throw new Error('html_content_required');
       const filename = String(input.filename || 'artifact.html').split(/[\\/]/).pop() || 'artifact.html';
-      const htmlDir = options.outDir || path.join(options.dataDir || resolveDataDir(), 'generated', 'generate-html');
-      fs.mkdirSync(htmlDir, { recursive: true });
-      const filePath = path.join(htmlDir, filename);
+      fs.mkdirSync(target.outDir, { recursive: true });
+      const filePath = path.join(target.outDir, filename);
       fs.writeFileSync(filePath, content, { encoding: 'utf8' });
+      record({ model: 'html-static', provider: 'local' });
       return {
         path: filePath,
         sha256: sha256File(filePath),
         mime: 'text/html',
         source: { provider: 'local', model: 'html-static', kind: 'generate.html', filename },
-        url: buildGeneratedArtifactUrl('html', filename),
+        scope: target.scope,
+        projectId: target.projectId,
+        url: target.urlFor(filePath),
       };
     }
     const packRoot = path.resolve(options.packRoot || resolveBuiltInPackRoot());
@@ -120,32 +213,44 @@ function createGenerateHandler(toolId, options = {}) {
     const apiKey = resolveCredential(entry.credentialProvider, options);
     if (!apiKey) throw new Error('generate_credential_missing');
 
-    const outDir = options.outDir || path.join(
-      require('../../shared-backend/data-paths').resolveDataDir(), 'generated', toolId.replace('.', '-'),
-    );
     const deps = {
       apiKey,
       fetch: options.fetch || globalThis.fetch,
-      outDir,
+      outDir: target.outDir,
       ...(options.deps || {}),
     };
     const resolvedInput = { ...input };
     if (toolId === 'generate.model3d' && input.referenceArtifactId && !input.referenceImage) {
       resolvedInput.referenceImage = await resolveReferenceImage(input, { dataDir: options.dataDir });
     }
-    const rawResult = await fn(resolvedInput, deps);
-    // item83 返工：先校验落盘路径强一致，再补受控读面 url。
-    const kind = String(toolId).split('.')[1] || '';
+    let rawResult;
+    try {
+      rawResult = await fn(resolvedInput, deps);
+    } catch (error) {
+      record({ errorCode: (error && error.message ? error.message : String(error)).split(':')[0] });
+      throw error;
+    }
+    // 路径强一致校验 + 补读面 url（workspace 或 legacy 兼容层）。
     const checked = Array.isArray(rawResult)
-      ? rawResult.map((d) => verifyGeneratedDescriptor(d, outDir, kind))
-      : verifyGeneratedDescriptor(rawResult, outDir, kind);
+      ? rawResult.map((d) => verifyGeneratedDescriptor(d, target.outDir, kind, target.urlFor))
+      : verifyGeneratedDescriptor(rawResult, target.outDir, kind, target.urlFor);
     const withUrl = (descriptor) => {
       if (!descriptor || typeof descriptor !== 'object' || typeof descriptor.path !== 'string') return descriptor;
-      const url = buildGeneratedArtifactUrl(kind, path.basename(descriptor.path));
-      return url ? { ...descriptor, url } : descriptor;
+      return {
+        ...descriptor,
+        scope: target.scope,
+        projectId: target.projectId,
+        url: descriptor.url || target.urlFor(descriptor.path),
+      };
     };
-    return Array.isArray(checked) ? checked.map(withUrl) : withUrl(checked);
+    const final = Array.isArray(checked) ? checked.map(withUrl) : withUrl(checked);
+    const first = Array.isArray(final) ? final[0] : final;
+    record({
+      model: (first && first.source && first.source.model) || null,
+      provider: (first && first.source && first.source.provider) || null,
+    });
+    return final;
   };
 }
 
-module.exports = { createGenerateHandler, resolveBuiltInPackRoot, readToolRegistry, resolveReferenceImage, verifyGeneratedDescriptor };
+module.exports = { createGenerateHandler, resolveBuiltInPackRoot, readToolRegistry, resolveReferenceImage, verifyGeneratedDescriptor, resolveArtifactTarget };

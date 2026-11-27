@@ -67,7 +67,9 @@ export function generatedArtifactsFromResult(resultData: unknown): ChatArtifact[
   for (const raw of items) {
     if (!raw || typeof raw !== 'object') continue;
     const d = raw as Record<string, unknown>;
-    if (typeof d.path !== 'string' || typeof d.url !== 'string' || !d.url.startsWith('/api/generated/')) continue;
+    // item83 第二轮：产物主路径是当前项目工作区读面；/api/generated/ 仅留历史兼容。
+    if (typeof d.path !== 'string' || typeof d.url !== 'string'
+        || !(d.url.startsWith('/api/generated/') || d.url.startsWith('/api/workspaces/'))) continue;
     artifacts.push({
       name: d.path.split(/[\\/]/).pop() || 'artifact',
       path: d.path,
@@ -81,7 +83,7 @@ export function generatedArtifactsFromResult(resultData: unknown): ChatArtifact[
 }
 
 function generatedApiUrl(artifact: ChatArtifact): string {
-  return typeof artifact.url === 'string' && artifact.url.startsWith('/api/generated/')
+  return typeof artifact.url === 'string' && artifact.url.startsWith('/api/')
     ? `${getApiPrefix()}${artifact.url.slice(4)}`
     : '';
 }

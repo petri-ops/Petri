@@ -146,13 +146,15 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
     ? Array.isArray(result)
       ? `返回 ${result.length} 条`
       : result.error
-        ? `错误: ${result.error}`
+        ? `错误: ${result.error}${typeof result.message === 'string' && result.message ? ` · ${result.message.slice(0, 240)}` : ''}`
         : summarizeResultObject(result) || 'ok'
     : String(result);
   const evt = {
     event: 'tool_result',
     name: envelope.tool,
     summary,
+    // item83 第二轮：失败原因原文随事件进 frontend 活动项，汇总不再只剩 tool_failed。
+    ...(typeof result?.message === 'string' && result.message ? { message: result.message.slice(0, 240) } : {}),
     ...(Number.isFinite(options.iteration) ? { iteration: options.iteration } : {}),
     toolResult: {
       contractVersion: envelope.contractVersion,

@@ -83,6 +83,8 @@ export interface ToolActivityItem {
   sideEffects?: ToolSideEffects;
   changeDiff?: ToolActivityChangeDiff;
   summary?: string;
+  /** item83 第二轮：失败原因原文（有界），仅在失败活动展示。 */
+  message?: string;
   actionLabel: string;
   actionDetail?: string;
   output?: ToolActivityOutput;
@@ -185,6 +187,7 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
     sideEffects,
     changeDiff: parseChangeDiff(raw.changeDiff),
     summary: typeof raw.summary === 'string' ? raw.summary : undefined,
+    message: typeof raw.message === 'string' ? raw.message : undefined,
     actionLabel: typeof raw.actionLabel === 'string' ? raw.actionLabel : '已调用',
     actionDetail: typeof raw.actionDetail === 'string' ? raw.actionDetail : undefined,
     // UI-315 — 终端块恢复：完整命令 + 流式输出尾部（均为有界形状）
@@ -860,6 +863,7 @@ export function mergeToolResultActivity(
     sideEffects: result?.sideEffects,
     changeDiff: parseChangeDiff(result?.changeDiff),
     summary: event.summary,
+    message: typeof event.message === 'string' ? event.message : undefined,
     // BLOCK-33 P3 — tool_result 合并时保留运行期累积的流式输出尾部
     output: index >= 0 ? current[index].output : undefined,
     // UI-315 优化 — exec 终端块：完整命令 + shell 标签（result 事件 data.shell 派生）

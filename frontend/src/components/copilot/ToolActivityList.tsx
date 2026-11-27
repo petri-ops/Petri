@@ -245,6 +245,9 @@ function TerminalBody({ activity }: { activity: ToolActivityItem }) {
       {activity.status === 'error' && activity.terminationReason && (
         <div className="sc-tool-term-err">原因：{activity.terminationReason}</div>
       )}
+      {activity.status === 'error' && activity.message && (
+        <div className="sc-tool-term-err" data-testid="tool-failure-reason" title={activity.message}>失败原因：{activity.message}</div>
+      )}
     </div>
   );
 }
@@ -437,6 +440,9 @@ function ActivityBody({ activity, subSnap }: {
       )}
       {showReason && activity.terminationReason && (
         <span className="sc-tool-activity-reason">原因：{activity.terminationReason}</span>
+      )}
+      {showReason && activity.message && (
+        <span className="sc-tool-activity-reason" data-testid="tool-failure-reason" title={activity.message}>失败原因：{activity.message}</span>
       )}
       {activity.output?.tail && (
         <pre

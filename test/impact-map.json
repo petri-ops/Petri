@@ -10347,6 +10347,8 @@
         "frontend/src/lib/conversationSelection.ts",
         "frontend/src/lib/conversationSelection.test.ts",
         "frontend/src/components/copilot/ChatArtifactCard.model3d-real.test.tsx",
+        "test/item83-second-round.test.mjs",
+        "frontend/src/components/copilot/item83-failure-reason.test.ts",
         "core/petri-server/helpers/workbench-interaction.js",
         "core/petri-server/helpers/workbench-writeback.js",
         "core/petri-server/helpers/workbench-change-order.js",

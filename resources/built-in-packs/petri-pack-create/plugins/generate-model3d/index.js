@@ -82,10 +82,17 @@ async function createTask(input, opts) {
     headers: headers(opts.apiKey),
     body: JSON.stringify(body),
   });
-  if (!resp.ok) throw new Error(`${opts.tag}_http_${resp.status}`);
+  if (!resp.ok) throw arkHttpError(resp.status, opts.tag);
   const payload = await resp.json();
   if (!payload || !payload.id) throw new Error(`${opts.tag}_task_missing`);
   return payload.id;
+}
+
+/** item83 第二轮：稳定错误码——401/403 可分辨未开通/未订阅，避免只剩 hyper3d_task_failed 文案。 */
+function arkHttpError(status, tag) {
+  if (status === 401) return new Error('generate_ark_unauthorized: Ark 凭据未授权或已失效');
+  if (status === 403) return new Error('generate_ark_not_subscribed: 模型未开通/未订阅，请在方舟控制台确认');
+  return new Error(`generate_ark_task_failed: ${tag}_http_${status} 模型未开通/不可用或任务失败`);
 }
 
 async function pollTask(taskId, opts) {
@@ -95,11 +102,11 @@ async function pollTask(taskId, opts) {
     const resp = await opts.fetch(`${API_BASE}/contents/generations/tasks/${encodeURIComponent(taskId)}`, {
       method: 'GET', headers: headers(opts.apiKey),
     });
-    if (!resp.ok) throw new Error(`${opts.tag}_http_${resp.status}`);
+    if (!resp.ok) throw arkHttpError(resp.status, opts.tag);
     const payload = await resp.json();
     if (payload.status === 'succeeded') return payload;
     if (payload.status === 'failed' || payload.status === 'cancelled') {
-      throw new Error(`${opts.tag}_task_failed: 模型未开通/不可用或任务失败；图生/文生共用同一把 Ark 凭据，无需独立 Hyper3D key`);
+      throw new Error('generate_ark_task_failed: 模型未开通/不可用或任务失败；图生/文生共用同一把 Ark 凭据，无需独立 Hyper3D key');
     }
     await opts.sleep(interval);
   }

@@ -89,6 +89,8 @@ export interface StructuredToolResult {
   tool: string;
   status: 'success' | 'error' | 'denied';
   terminationReason: string;
+  /** item83 第二轮：失败原因原文（有界），用于任务卡失败原因展示。 */
+  message?: string;
   durationMs: number;
   /** The source result exceeded a configured safety bound. */
   sourceTruncated?: boolean;

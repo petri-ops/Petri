@@ -91,7 +91,15 @@ owner 截图：`mesh_textured_pbr…21.8MB` 点击后是「二进制文件」兜
 
 HK-01 `WorkspaceFilePreview.model3d.test.tsx` 1/1：点击 GLB → 3D 查看器挂载（mock 钉，避开 jsdom WebGL 限制）、无二进制兜底文案、两个次级操作在场；文件预览邻域 12/12。
 
-## §12 安全边界与待办
+## §12 第二轮返工（owner 拍板 + 三 bug）
+
+- 只读取证：conv_705d7a21-89a / msg_a810a45b-e62（2026-11-27T08:21:35Z）两次 `generate.model3d`，`params.mode='ark'`/`'local'`，resultData 完全相同 `hyper3d_task_failed`——mode 从内核到插件从不被读取。
+- 产物归属：`generateHandler(input, ctx)` 接 ctx 的 projectId；`resolveArtifactTarget` 派生可见 `generated/<kind>/`，descriptor 带 `scope:'workspace'` 与 `/api/workspaces/:id/file` URL；无 projectId/测试注入仍走 dataDir + `/api/generated/`（历史不迁移、IPC copyImage 保留）。
+- 3D 双路径：`mode='local'` 走 `localRecipeRunner`（render:false 写 SceneSpec，source provider=local + 本地近似标注，零 Ark fetch）；Ark 401/403 映射 `generate_ark_unauthorized`/`generate_ark_not_subscribed`，任务失败 `generate_ark_task_failed`；失败原文进 tool_result message 与 ToolActivityList 原因卡（两处）。
+- 记账：generateHandler 成功/失败都调 `recordAiUsage`，`kind='generate.*'`、真实 model/provider/latency/conversationId/taskId、`cost_cny=NULL`、`cost_status='unknown'`；禁 `estimateCostCNY`/`AI_PRICING`（无生成模型定价，会伪造费用）。
+- HK-01 `test/item83-second-round.test.mjs` 4/4、`item83-failure-reason.test.ts` 1/1；回归 14/14 + 56/56；11 静态门绿；toolActivity/tool-events/ToolActivityList 行数增长 `--write --allow-grow` 留因。
+
+## §13 安全边界与待办
 
 - HTML sandbox 为 opaque origin，不能凭同源凭据调后端——预期安全边界，非缺陷。
 - 产物文件与元信息继续本地留存（dataDir/generated），会话预览不替代落盘；artifact-truth 契约未改。

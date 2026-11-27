@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **item83 第二轮返工同批登记（2026-11-27）**：owner 拍板产物归属改当前项目工作区（可见 `generated/<kind>/`），`/api/generated/` 留历史兼容；3D 双路径核真 `params.mode='ark'/'local'` 从不被读取导致两次都打 Ark，修 local→model3d_recipe（render:false 写 SceneSpec + 本地近似标注）、Ark 401/403 稳定 code、失败原因原文进 event/活动行；生成类工具补 ai_usage 记账（cost_status='unknown'、禁伪造费用）。HK-01 节点 4/4 + 前端 1/1，回归 14/14 + 56/56。**状态**：in_progress（观感 pending_human_eye 零代签）。
+
 > **item88 第二波同批登记（2026-11-27）**：三档交互（`WorkbenchApprovalCard` 独立卡 + `WorkbenchFlagGate` total gate，审批走 approval-request-store、咨询走 question store）；双通道回写单一幂等入口 `workbench-writeback.js`；变更单 `workbench-change-order.js`（wb_changes + wb_documents chain）；2D 总览 `WorkbenchOverviewSurface`（目标树/OrchestrationGraph/TraceSurface，纯只读）+ registry `overview` tab；调度队列纯函数 `rankQueueTasks`/`computeRetryDecision`；flag `workbench.enabled` 默认 off，开发态用既有 decisions endpoint 开。HK-01 节点 5/5 + 前端 3/3，回归 13/13+35/35。**状态**：in_progress（观感 pending_human_eye 零代签）。
 > **item 86 arch-cycles 修绿同批登记（2026-11-27）**：环解耦涉及三处 UI 文件，**零观感/零交互/零样式变化**（HK-01 判据=行为等价，前端邻域 105/105 绿）：①`FileTreeItem ↔ FileTreeList` 树形互递归双向 import 消环——FileTreeList 组件并入 FileTreeItem.tsx（逐字未动），原文件改 barrel re-export，导入路径不变；②`PetriOpenFileDevBridge.tsx` 自引用 re-export（`export {...} from './本模块'` 自环）改同模块直出 default（App.tsx lazy import 语义不变）；③`permissions.js` 纯面抽至 permissions-contract.js（权限 UI 数据形状零变化）。**状态**：in_progress（代码级完成，观感无变化故无 pending_human_eye 项——文件树/开发桥/权限面像素级不变）。同批 core 面：kernel-registry 组合根 locator（A/B/C 族环反转）、tool-defs 纯数据化（D 族）、基线 13→0（post-s7-h9-cycle-decay 值岗断言同步收紧）。
 
