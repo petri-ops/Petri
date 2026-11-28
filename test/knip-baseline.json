@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-27",
+  "updatedAt": "2026-11-28",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -24,9 +24,11 @@
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::selectPageTarget",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::withInputShield",
     "exports::frontend/src/components/result-studio/viewerRegistry.ts::viewerProfileCanCompare",
-    "exports::frontend/src/lib/resultStudioFlag.ts::__resetResultStudioFlagForTest",
+    "exports::frontend/src/components/workspace-panels/ResultView.tsx::ResultView",
+    "exports::frontend/src/lib/workSurface/packResultData.ts::usePackResultData",
     "exports::frontend/src/lib/workSurface/packWriteBridge.ts::PACK_WRITE_BRIDGE_VERSION",
     "exports::frontend/src/lib/workSurface/packWriteBridge.ts::validateSurfaceWritesDecl",
+    "exports::frontend/src/lib/workSurface/usePackTabData.ts::usePackTabData",
     "exports::src/ipc/utility-host.js::shutdownUtilityHosts",
     "exports::src/main/core-utils.js::IS_DEV",
     "exports::src/main/core-utils.js::resolveCoreRoot",
@@ -356,8 +358,6 @@
     "types::frontend/src/components/editor/integration/PetriOpenFileDevBridge.tsx::DispatchOpenFileFn",
     "types::frontend/src/components/knowledge/useKnowledgeConsole.ts::ConsoleEntryStatus",
     "types::frontend/src/components/knowledge/useKnowledgeConsole.ts::ConsoleMessageEntry",
-    "types::frontend/src/components/result-studio/ResultEditPanel.tsx::EditSubmissionOrigin",
-    "types::frontend/src/components/result-studio/ResultEditPanel.tsx::ResultEditCompletionExpectation",
     "types::frontend/src/components/result-studio/ResultStudioChangeSetPanel/display.tsx::AvailableEnrichmentDirection",
     "types::frontend/src/components/result-studio/ResultStudioChangeSetPanel/display.tsx::EnrichmentDirectionChange",
     "types::frontend/src/components/result-studio/ResultStudioChangeSetPanel/display.tsx::EnrichmentDirectionEntry",
@@ -424,7 +424,6 @@
     "types::frontend/src/lib/result-manifest.ts::ResultSectionRecord",
     "types::frontend/src/lib/result-studio-interaction-client.ts::ResultStudioContextAgentView",
     "types::frontend/src/lib/result-studio-interaction-client.ts::ResultStudioContextDiagnostic",
-    "types::frontend/src/lib/result-studio-interaction-client.ts::ResultStudioEditControlGroup",
     "types::frontend/src/lib/result-studio-interaction-client.ts::ResultTableColumn",
     "types::frontend/src/lib/tool-catalog.ts::CatalogOutputDef",
     "types::frontend/src/lib/wbOverviewClient.ts::WbOverviewGoal",
@@ -560,6 +559,21 @@
       "key": "types::frontend/src/components/work-surface/WorkbenchOverviewSurface.tsx::CoachingSummary",
       "reason": "item87 同上（runs+divergences 摘要形状）",
       "date": "2026-11-27"
+    },
+    {
+      "key": "exports::frontend/src/components/workspace-panels/ResultView.tsx::ResultView",
+      "reason": "item90 phase2 red-line preserved component",
+      "date": "2026-11-28"
+    },
+    {
+      "key": "exports::frontend/src/lib/workSurface/packResultData.ts::usePackResultData",
+      "reason": "item90 phase2 preserved domain-pack work-surface hook",
+      "date": "2026-11-28"
+    },
+    {
+      "key": "exports::frontend/src/lib/workSurface/usePackTabData.ts::usePackTabData",
+      "reason": "item90 phase2 preserved domain-pack work-surface hook",
+      "date": "2026-11-28"
     }
   ]
 }

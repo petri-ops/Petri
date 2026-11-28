@@ -85,8 +85,6 @@
     "test/result-summary-tool.test.mjs",
     "test/routes-ai-agent-subdomains.test.cjs",
     "test/routes-harness-subdomains.test.mjs",
-    "test/routes-result-studio-facade.test.mjs",
-    "test/routes-result-studio-subdomains.test.mjs",
     "test/runtime-resource-probe.test.mjs",
     "test/runtime-resource-snapshot.test.mjs",
     "test/rw06-p405b-dimension-annotations.test.mjs",

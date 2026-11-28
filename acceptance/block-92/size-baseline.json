@@ -45,9 +45,9 @@
       "path": "frontend/src/pages/project-workspace.tsx",
       "wave": "B",
       "module": "W-02",
-      "lines": 1247,
-      "bytes": 62584,
-      "sha256": "5f6a83eca9b21f73efdb0a3701cf859952f1382b1b80e5312612643831582eba"
+      "lines": 1105,
+      "bytes": 54963,
+      "sha256": "5928edd210ef5a23530607ae8283c4f2a2436fb2162f56acae0a5851a91f325d"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
@@ -293,9 +293,9 @@
       "path": "core/packages/shared-config/config-schema.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1210,
-      "bytes": 63804,
-      "sha256": "f4d7508fef2318a2310d0aeaac5ae5e5d56b3566de878dabc9035f06027e236f"
+      "lines": 1204,
+      "bytes": 63485,
+      "sha256": "a83d1e7f60168c711fe6cf1b16522d9503fa58489a1b81dbed17385b74034858"
     },
     {
       "path": "core/shared-backend/skill-runtime.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86919,
+  "total": 86771,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",

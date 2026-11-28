@@ -1,16 +1,10 @@
 import React from 'react';
-import type { Project, ToolJob } from '@/lib/project-types';
+import type { Project } from '@/lib/project-types';
 import type { Model3DOpenDetail } from '@/lib/events';
 import type { BackendStatus } from '@/lib/electron';
-import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
-import type { ResultEditSubmission } from '@/components/result-studio/ResultEditPanel';
-import type { ResultAgentComposerContext } from '@/components/result-studio/ResultAgentComposer';
-import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
 import { trackResizeGlow } from '@/lib/resize-glow';
-import { useResultStudioEnabled } from '@/lib/resultStudioFlag';
 import {
-  type ActiveArtifact,
   type ActiveWorkspaceFile,
   EmptyResult,
   readLastPanel,
@@ -34,10 +28,7 @@ import { LlmTranscriptViewer } from '@/components/copilot/LlmTranscriptViewer';
 // UI-385 — 子智能体实时详情面板（原独立专属窗迁入右栏）
 import { AgentRunPanel } from '@/components/workspace-panels/AgentRunPanel';
 import { GeneratedFilesSurface } from '@/components/work-surface/GeneratedFilesSurface';
-// BLOCK-334 — 结果查看自中央四态接管迁入右栏：本 surface 是「结果」tab 的唯一宿主
-import { ResultsSurface } from '@/components/work-surface/ResultsSurface';
 import { PlanSurface } from '@/components/work-surface/PlanSurface';
-import { EvidenceSurface } from '@/components/work-surface/EvidenceSurface';
 // BLOCK-248（Q3）— 事件级执行轨迹（与模型 I/O 互相链接，不互相替代）
 import { TraceSurface } from '@/components/work-surface/TraceSurface';
 import { PackSurfaceFrame } from '@/components/work-surface/PackSurfaceFrame';
@@ -79,28 +70,9 @@ export interface RightPanelContext {
   uiActions?: PackUiActionDescriptor[];
 
   // Tab content data
-  activeJob: ToolJob | null;
-  activeWorkflow: HarnessWorkflowJobState | null;
-  onWorkflowChanged: () => void;
-  activeArtifact: ActiveArtifact | null;
-  setActiveArtifact: (a: ActiveArtifact | null) => void;
-  /** BLOCK-334 — 结果宿主所需：项目任务列表（无 activeJob 时的 ResultsLibrary）。 */
-  jobs: ToolJob[];
-  /** BLOCK-216 Q5 — pack 贡献的结果面（无匹配时保留核心 transitional 面）。 */
-  packResultSurfaces: WorkSurfaceDescriptor[];
-  /** G0-RS-P3: Agent 上下文就绪状态，由后端 context-envelope 投影而来（含 contextToken）。 */
-  resultContext?: ResultAgentComposerContext | null;
-  /** G0-RS-P4: Schema 驱动的编辑控件，与 Agent 可见参数同源。 */
-  resultEditControls?: ResultStudioEditControls | null;
-  resultEditSubmitting?: boolean;
-  resultAgentDraft: string;
-  setResultAgentDraft: (draft: string) => void;
-  onResultEditSubmit?: (submission: ResultEditSubmission) => boolean | void;
   openWorkspaceFiles: ActiveWorkspaceFile[];
   activeWorkspaceFile: ActiveWorkspaceFile | null;
   setActiveWorkspaceFile: (f: ActiveWorkspaceFile | null) => void;
-  pendingArtifactName: string | null;
-  onPendingArtifactConsumed: () => void;
   backendStatus: BackendStatus;
   browserUrl: string;
 
@@ -109,10 +81,6 @@ export interface RightPanelContext {
   setRightOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setActiveConvId: (id: string | null) => void;
   handleAskAgent: (prompt: string, options?: { analysisMode?: boolean; compose?: boolean }) => boolean | void;
-  /** BLOCK-334 — 结果壳「打开修订对应工作区文件」出口（事件走 projectOpenWorkspaceFile）。 */
-  openRevisionWorkspaceFile: (relativePath: string) => void;
-  /** BLOCK-334 — 结果壳「查看 HTML 报告」：写浏览器 URL 并切到 browser tab。 */
-  openResultBrowser: (url: string) => void;
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
   /** UI-451 — tab 点击激活（传数组既有对象，身份不变 → 预览不重载 → 草稿保留）。 */
   handleActivateWorkspaceFile: (file: ActiveWorkspaceFile) => void;
@@ -128,13 +96,9 @@ export interface RightPanelContext {
   hasReopenableWorkspaceFile: boolean;
   /** UI-451 加映 v3（P2-7/P2-8）— 脏位图上抛（守卫/淘汰环/关窗共用同一真相；稳定引用）。 */
   handleWorkspaceFileDirtyMapChange: (dirtyMap: Record<string, boolean>) => void;
-  handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<boolean>;
-  handleOpenRightResults: () => void;
   handleOpenRightBrowser: () => void;
   handleOpenRightFiles: () => void;
   handleOpenRightChat: () => void;
-  /** UI-713 — 从结果/Studio 深度面返回中央聊天。 */
-  handleBackToChat: () => void;
   setBrowserUrl: (url: string) => void;
   setBrowserCanGoBack: (value: boolean) => void;
   setBrowserCanGoForward: (value: boolean) => void;
@@ -162,9 +126,6 @@ export function RightPanel({
 }: RightPanelProps): React.ReactElement | null {
   // item88 第二波：总览三视图只读投影；数据来自既有子任务快照，零新账本。
   const overviewTasks = useSubAgentTasksForConversation(ctx.activeConvId);
-  // item 90 阶段一完善 — resultStudio flag off 时「结果」tab 内容也不渲染
-  // （tab pill 已在 useWorkspaceTitleBar 过滤；此处兜住持久化 tab 的内容面）。
-  const resultStudioEnabled = useResultStudioEnabled();
   const handleBrowserNavigationStateChange = React.useCallback(
     ({ canGoBack, canGoForward }: { canGoBack: boolean; canGoForward: boolean }) => {
       ctx.setBrowserCanGoBack(canGoBack);
@@ -224,7 +185,6 @@ export function RightPanel({
                 {tab === 'home' && (
                   <EmptyResult
                     recentPanel={recentPanel}
-                    onOpenResults={ctx.handleOpenRightResults}
                     onOpenBrowser={ctx.handleOpenRightBrowser}
                     onOpenFiles={ctx.handleOpenRightFiles}
                     onOpenChat={ctx.handleOpenRightChat}
@@ -251,49 +211,6 @@ export function RightPanel({
                     projectId={ctx.projectId}
                     initialOpen={ctx.model3dOpenRequest || null}
                     active={ctx.rightTab === tab}
-                  />
-                )}
-                {tab === 'results' && resultStudioEnabled && (
-                  <ResultsSurface
-                    active={ctx.rightTab === tab}
-                    onBackToChat={ctx.handleBackToChat}
-                    ctx={{
-                      project: ctx.project,
-                      projectId: ctx.projectId,
-                      conversationId: ctx.activeConvId,
-                      activeJob: ctx.activeJob,
-                      activeWorkflow: ctx.activeWorkflow,
-                      activeArtifact: ctx.activeArtifact,
-                      setActiveArtifact: ctx.setActiveArtifact,
-                      jobs: ctx.jobs,
-                      packResultSurfaces: ctx.packResultSurfaces,
-                      resultContext: ctx.resultContext ?? null,
-                      resultEditControls: ctx.resultEditControls ?? null,
-                      resultEditSubmitting: ctx.resultEditSubmitting === true,
-                      resultAgentDraft: ctx.resultAgentDraft,
-                      setResultAgentDraft: ctx.setResultAgentDraft,
-                      onResultEditSubmit: ctx.onResultEditSubmit ?? (() => undefined),
-                      pendingArtifactName: ctx.pendingArtifactName,
-                      onPendingArtifactConsumed: ctx.onPendingArtifactConsumed,
-                      onWorkflowChanged: ctx.onWorkflowChanged,
-                      handleAskAgent: ctx.handleAskAgent,
-                      handleOpenResult: ctx.handleOpenResult,
-                      openRevisionWorkspaceFile: ctx.openRevisionWorkspaceFile,
-                      openResultBrowser: ctx.openResultBrowser,
-                    }}
-                  />
-                )}
-                {/* 右栏裁决③（owner msg_44b2179358ea）：证据并入结果面板呈现，治理语义不动 */}
-                {tab === 'results' && resultStudioEnabled && (
-                  <EvidenceSurface
-                    activeJob={ctx.activeJob}
-                    activeWorkflow={ctx.activeWorkflow}
-                    activeArtifact={ctx.activeArtifact}
-                    conversationId={ctx.activeConvId}
-                    onOpenResults={() => ctx.openRightPanel('results')}
-                    onOpenReview={() => ctx.openRightPanel('review')}
-                    onOpenPlan={() => ctx.openRightPanel('plan')}
-                    onOpenTrace={() => ctx.openRightPanel('trace')}
                   />
                 )}
                 {tab === 'files' && (

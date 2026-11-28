@@ -10,7 +10,7 @@ export interface ResultEditBridgeSubmission {
   contextToken?: string | null;
 }
 
-export function isResultStudioContextToken(value: unknown): value is string {
+function isResultStudioContextToken(value: unknown): value is string {
   return typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 }
 

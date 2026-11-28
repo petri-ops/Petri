@@ -126,6 +126,10 @@ git commit -m "feat(migration): add your_table for feature X"
 ### 008_add_projects_description.sql
 - 补齐 `projects.description` 列
 
+### 028_drop_result_studio_tables.sql（item 90 阶段二 · 2026-11-28）
+- Result Studio 物理退役：forward migration 执行 `DROP TABLE IF EXISTS` 清理 10 张 RS 专属表（`result_tags` / `result_versions` / `results` / `result_workflow_graphs` / `result_ref_transactions` / `git_repository_bindings` / `scientific_change_sets` / `artifact_revisions` / `result_selection_contexts` / `workspace_revision_checkpoints`）
+- `result_annotations`（015/018/019/020）为 PDF/图片/文本/速记板共享批注能力，显式保留不删除（历史迁移 001–027 保持不可修改）
+
 ## 运行时元数据表（不在 migration 中）
 
 以下表由 `core/r-server/db.js` 直接创建，因为它们是**运行时元数据**（非用户数据持久化）：

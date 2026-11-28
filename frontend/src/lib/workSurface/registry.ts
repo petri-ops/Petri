@@ -12,7 +12,6 @@ import type {
 export const CORE_WORK_SURFACE_IDS = {
   overview: 'overview',
   home: 'home',
-  results: 'results',
   files: 'files',
   generated: 'generated',
   model3d: 'model3d',
@@ -53,7 +52,6 @@ function coreSurface(
 export const CORE_WORK_SURFACES: readonly WorkSurfaceDescriptor[] = Object.freeze([
   coreSurface('home', '工作台', 'home', 0, { closeable: false, persist: false }),
   coreSurface('overview', '项目总览', 'layers', 5, { emptyState: '目标树 / 协作关系图 / 审计流水（只读投影）。' }),
-  coreSurface('results', '结果', 'bar-chart', 10),
   coreSurface('files', '文件', 'folder', 20),
   coreSurface('generated', '生成文件', 'file', 25, { emptyState: '当前会话还没有写入过工作区文件。' }),
   coreSurface('model3d', '3D 模型', 'layers', 27, { emptyState: '打开一个 SceneSpec 或导入 GLB/GLTF 开始预览。' }),

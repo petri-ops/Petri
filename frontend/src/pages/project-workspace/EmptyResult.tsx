@@ -37,7 +37,6 @@ export function writeLastPanel(projectId: string | null | undefined, tab: string
 }
 
 export function EmptyResult({
-  onOpenResults,
   onOpenBrowser,
   onOpenFiles,
   onOpenChat,
@@ -49,7 +48,6 @@ export function EmptyResult({
   reviewCount,
   reviewStat,
 }: {
-  onOpenResults?: () => void;
   // UI-348 — 「后端」卡已删除（BLOCK-72 后端管理面在左栏入口的全局 /backend 页，
   // 右栏不再保留跳转卡；用户裁决：右侧栏中的后端应该删除）
   onOpenBrowser?: () => void;
@@ -84,13 +82,6 @@ export function EmptyResult({
           </p>
         </div>
         <div className={styles.emptyResultLaunchpad}>
-          <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenResults} disabled={!onOpenResults}>
-            <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="bar-chart" size={16} /></span>
-            <span className={styles.emptyResultLaunchText}>
-              <span className={styles.emptyResultLaunchTitle}>结果</span>
-              <span className={styles.emptyResultLaunchDesc}>查看 Agent 作业的产物与运行结果</span>{recentPanel === "results" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-results">上次使用</span> : null}
-            </span>
-          </button>
           <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenBrowser} disabled={!onOpenBrowser}>
             <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="globe" size={16} /></span>
             <span className={styles.emptyResultLaunchText}>

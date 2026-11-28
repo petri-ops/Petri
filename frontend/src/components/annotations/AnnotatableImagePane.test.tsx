@@ -72,7 +72,7 @@ describe('AnnotatableImagePane', () => {
       if (url.includes('/annotations?') && (!init || !init.method)) {
         return jsonResponse({ annotations: [], count: 0, limit: 200 });
       }
-      if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
+      if (url.endsWith('/api/annotations') && init?.method === 'POST') {
         return jsonResponse({ annotation: createdAnnotation, count: 1 });
       }
       return jsonResponse({ error: 'unexpected' }, 500);
@@ -152,7 +152,7 @@ describe('AnnotatableImagePane', () => {
       if (url.includes('/annotations?') && (!init || !init.method)) {
         return jsonResponse({ annotations: [], count: 0, limit: 200 });
       }
-      if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
+      if (url.endsWith('/api/annotations') && init?.method === 'POST') {
         return jsonResponse({ annotation: createdAnnotation, count: 1 });
       }
       if (url.includes('/annotations/ann-created') && init?.method === 'DELETE') {
@@ -209,7 +209,7 @@ describe('AnnotatableImagePane', () => {
       if (url.includes('/annotations/ann-existing') && init?.method === 'DELETE') {
         return jsonResponse({ deleted: true });
       }
-      if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
+      if (url.endsWith('/api/annotations') && init?.method === 'POST') {
         return jsonResponse({ annotation: { ...existing, annotationId: 'ann-restored' }, count: 1 });
       }
       return jsonResponse({ error: 'unexpected' }, 500);
@@ -253,7 +253,7 @@ describe('AnnotatableImagePane', () => {
       if (url.includes('/annotations?') && (!init || !init.method)) {
         return jsonResponse({ annotations: [], count: 0, limit: 200 });
       }
-      if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
+      if (url.endsWith('/api/annotations') && init?.method === 'POST') {
         const body = parseBody(init);
         posts.push(body);
         return jsonResponse({ annotation: { ...createdAnnotation, ...body, annotationId: `ann-${posts.length}` }, count: posts.length });
@@ -320,7 +320,7 @@ describe('AnnotatableImagePane', () => {
       if (url.includes('/annotations?') && (!init || !init.method)) {
         return jsonResponse({ annotations: [], count: 0, limit: 200 });
       }
-      if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
+      if (url.endsWith('/api/annotations') && init?.method === 'POST') {
         const body = parseBody(init);
         posts.push(body);
         return jsonResponse({ annotation: { ...createdAnnotation, ...body, annotationId: `ann-${posts.length}` }, count: posts.length });

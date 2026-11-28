@@ -90,27 +90,12 @@ const expectedSchema = {
   // migration 005
   branches: ['id', 'project_id', 'name', 'parent_branch_id', 'created_at', 'updated_at', 'is_active'],
   messages: ['id', 'branch_id', 'role', 'content', 'metadata', 'created_at'],
-  
-  // migration 006 + 007
-  results: ['id', 'project_id', 'type', 'name', 'data', 'config', 'source_branch_id', 'created_at', 'updated_at'],
-  result_tags: ['id', 'result_id', 'tag'],
-  result_versions: ['id', 'result_id', 'version', 'data', 'config', 'created_at', 'created_by_branch_id'],
-  
-  // migration 001 - Result Studio
-  git_repository_bindings: ['project_id', 'contract_version', 'mode', 'workspace_root', 'git_dir', 'work_tree', 'managed_paths_json', 'status', 'created_at', 'updated_at'],
-  scientific_change_sets: ['change_set_id', 'project_id', 'base_commit', 'candidate_commit', 'working_branch_ref', 'status', 'created_at', 'updated_at'],
-  artifact_revisions: ['revision_id', 'project_id', 'artifact_family_id', 'artifact_id', 'revision_ordinal', 'source_commit', 'output_path', 'validation_status', 'change_set_id', 'is_current', 'created_at'],
-  result_selection_contexts: ['selection_id', 'project_id', 'artifact_id', 'entity_type', 'entity_ids_json', 'created_at', 'updated_at'],
-  workspace_revision_checkpoints: ['checkpoint_id', 'project_id', 'base_commit', 'current_revision_ids_json', 'checkpoint_hash', 'created_at', 'updated_at'],
-  
-  // migration 002
-  result_workflow_graphs: ['graph_id', 'project_id', 'root_tool_job_id', 'source_digest', 'nodes_json', 'edges_json', 'validation_status', 'created_at', 'updated_at'],
-  
-  // migration 003
-  result_ref_transactions: ['operation_id', 'project_id', 'change_set_id', 'operation_kind', 'state', 'ref_updates_json', 'checkpoint_json', 'created_at', 'updated_at'],
-  
+
   // migration 004
   git_repository_consents: ['project_id', 'contract_version', 'allow_existing_repository', 'decision_source', 'created_at', 'updated_at'],
+
+  // migration 015 + 018 + 019 + 020（共享批注表；item 90 阶段二显式保留，028 已 DROP 其余 10 张 RS 专属表）
+  result_annotations: ['annotation_id', 'project_id', 'surface', 'kind', 'rect_json', 'comment', 'color', 'author', 'created_at', 'updated_at', 'anchor_json', 'entry_id', 'path_json'],
 };
 
 /**

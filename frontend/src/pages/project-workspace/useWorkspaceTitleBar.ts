@@ -7,7 +7,6 @@ import type { WorkSurfaceDescriptor, WorkSurfaceTab } from '@/lib/workSurface/ty
 import { isTabSurface } from '@/lib/workSurface/registry';
 // UI-446 — 审阅 tab 未读圆点数据源（当前会话工作区改动索引）
 import { useConversationUnreviewedCount, useConversationShortstat } from '@/components/copilot/conversationChangesStore';
-import { useResultStudioEnabled } from '@/lib/resultStudioFlag';
 
 // BLOCK-92 Wave B-1 — TitleBar 注册 effect 簇外迁（原 ProjectWorkspace 内联，纯搬运零行为变化）。
 // TitleBar 注册 —— 8f3d55a5 曾误删整段（右侧工具菜单「+」/ 标签 pills / 结果
@@ -38,8 +37,8 @@ interface UseWorkspaceTitleBarOptions {
   conversations: readonly unknown[];
   activeConvId: string | null;
   handleSwitchConversation: unknown;
-  handleOpenRightResults: () => void;
-  handleSelectTitleBarResult: (jobId: string) => void;
+  handleOpenRightResults?: () => void;
+  handleSelectTitleBarResult?: (jobId: string) => void;
   openRightPanel: (tab: RightPanelMode) => void;
   closeRightPanelTab: (tab: RightPanelMode) => void;
   closeOtherTabs?: (tabId: string) => void;
@@ -56,38 +55,20 @@ interface UseWorkspaceTitleBarOptions {
   onToggleSideChat: () => void;
 }
 
-/**
- * item 90 阶段一完善 — resultStudio flag off 时「结果」tab 从 pills/工具菜单直接隐藏
- * （不再显示 off 态占位）；flag on 恢复显示（回滚能力不变）。纯函数单源可测。
- */
-export function filterResultStudioTabs<T extends { surfaceId?: string; id?: string }>(
-  items: readonly T[],
-  enabled: boolean,
-  surfaceIdOf: (item: T) => string,
-): T[] {
-  if (enabled) return [...items];
-  return items.filter((item) => surfaceIdOf(item) !== 'results');
-}
-
 export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void {
   const {
     updateTitleBar,
-    projectName,
     projectId,
     titleBarTitle,
     rightTab,
     rightToolMenuOpen,
     tabs,
     surfaces,
-    activeJobId,
-    conversationJobs,
     browserCanGoBack,
     browserCanGoForward,
     conversations,
     activeConvId,
     handleSwitchConversation,
-    handleOpenRightResults,
-    handleSelectTitleBarResult,
     openRightPanel,
     closeRightPanelTab,
     closeOtherTabs,
@@ -106,14 +87,10 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
   // UI-449（C-16）— ±行数（权威源=git shortstat；有未审改动才拉，TTL 节流）
   const reviewStat = useConversationShortstat(activeConvId, projectId ?? null, reviewCount > 0);
 
-  const resultStudioEnabled = useResultStudioEnabled();
   const titleBarTabs = useMemo(
     () =>
-      filterResultStudioTabs(
-        tabs.filter((tab) => tab.surfaceId !== 'home'),
-        resultStudioEnabled,
-        (tab) => tab.surfaceId,
-      )
+      tabs
+        .filter((tab) => tab.surfaceId !== 'home' && tab.surfaceId !== 'results')
         .map((tab) => {
           const descriptor = surfaces.find((candidate) => candidate.id === tab.surfaceId);
           return {
@@ -128,20 +105,16 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
                 : undefined,
           };
         }),
-    [tabs, surfaces, reviewCount, reviewStat, resultStudioEnabled]
+    [tabs, surfaces, reviewCount, reviewStat]
   );
   const toolSurfaceItems = useMemo(
     () =>
-      filterResultStudioTabs(
-        surfaces.filter((surface) => surface.id !== 'home' && isTabSurface(surface)),
-        resultStudioEnabled,
-        (surface) => surface.id,
-      ),
-    [surfaces, resultStudioEnabled]
+      surfaces.filter((surface) => surface.id !== 'home' && surface.id !== 'results' && isTabSurface(surface)),
+    [surfaces]
   );
 /** 右侧栏审计（owner msg_26327e7a3def）：工具菜单四组呈现（纯分组、不改面板去留/顺序语义） */
 const MENU_GROUPS = [
-  { title: '主工作区', ids: ['results', 'files', 'generated', 'model3d', 'browser'] },
+  { title: '主工作区', ids: ['files', 'generated', 'model3d', 'browser'] },
   { title: '分析治理', ids: ['analyze', 'review', 'jobs'] },
   { title: '审计证据', ids: ['trace', 'io', 'agent', 'plan'] },
   { title: '环境入口', ids: ['host:terminal', 'host:side-chat'] },
@@ -159,26 +132,6 @@ function menuGroupRank(id: string): number {
     // UI-627 — 侧聊为原生独立窗，主窗无法感知开关态，高亮退场（标签保留）
     { id: 'host:side-chat', label: '侧聊', icon: 'message-circle' as const },
   ], [bottomTerminalOpen]);
-  const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
-    const status = job.status === 'done'
-      ? '完成'
-      : job.status === 'failed'
-        ? '失败'
-        : job.status === 'running'
-          ? '运行中'
-          : '排队中';
-    return {
-      id: job.id,
-      label: job.name || job.tool_id || '分析结果',
-      status: `${status} · ${new Date(job.created_at).toLocaleTimeString('zh-CN', {
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      })}`,
-    };
-  }), [conversationJobs]);
-
   // 标题栏是壳层共享状态：复位只放在**卸载**（effect cleanup 每次重跑都会 setState；
   // 与依赖抖动叠加会形成 "Maximum update depth" 环——BLOCK-250 实机抓真）。
   useEffect(() => () => {
@@ -216,10 +169,6 @@ function menuGroupRank(id: string): number {
       reviewCount,
       reviewStat: reviewStat ? { added: reviewStat.tracked.added, removed: reviewStat.tracked.removed } : null,
       onSelectTab: (tabId) => {
-        if (tabId === 'results') {
-          handleOpenRightResults();
-          return;
-        }
         setRightTab(tabId as RightPanelMode);
         setRightToolMenuOpen(false);
         setRightOpen(true);
@@ -251,17 +200,12 @@ function menuGroupRank(id: string): number {
           setRightToolMenuOpen(false);
           return;
         }
-        if (itemId === 'results') {
-          handleOpenRightResults();
-          setRightToolMenuOpen(false);
-          return;
-        }
         openRightPanel(itemId as RightPanelMode);
         setRightToolMenuOpen(false);
       },
-      resultItems: titleBarResultItems,
-      activeResultId: conversationJobs.some((job) => job.id === activeJobId) ? activeJobId : null,
-      onSelectResult: handleSelectTitleBarResult,
+      resultItems: [],
+      activeResultId: null,
+      onSelectResult: null,
       canGoBack: rightTab === 'browser' && browserCanGoBack,
       canGoForward: rightTab === 'browser' && browserCanGoForward,
       onGoBack:
@@ -274,7 +218,6 @@ function menuGroupRank(id: string): number {
           : null,
     });
   }, [
-    activeJobId,
     closeRightPanelTab,
     closeOtherTabs,
     closeTabsToRight,
@@ -288,20 +231,17 @@ function menuGroupRank(id: string): number {
     hostToolItems,
     onToggleBottomTerminal,
     onToggleSideChat,
-    projectName,
     titleBarTitle,
     rightTab,
-    handleOpenRightResults,
-    handleSelectTitleBarResult,
     rightToolMenuOpen,
     setRightOpen,
     setRightToolMenuOpen,
     setRightTab,
     titleBarTabs,
-    titleBarResultItems,
     updateTitleBar,
     // UI-449（C-16）— 缺失会让 ±行数徽章闭包过期
     projectId,
+    reviewCount,
     reviewStat,
     // UI-309：旧版遗漏——缺失会让顶栏会话选择器持有过期闭包
     conversations,

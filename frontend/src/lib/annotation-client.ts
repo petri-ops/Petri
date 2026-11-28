@@ -6,9 +6,9 @@ import type {
 } from '@/lib/annotations';
 
 /**
- * annotation-client.ts — BLOCK-219 Q6 批注 REST 客户端。
+ * annotation-client.ts — BLOCK-219 Q6 批注 REST 客户端（item 90 阶段二迁至独立 /api/annotations）。
  *
- * 三条端点唯一来源 = `core/petri-server/routes/result-studio/annotations.js`；
+ * 端点唯一来源 = `core/petri-server/routes/annotations.js`；
  * 前端不推导 scope（`surface` 决定 artifact/revision 还是 filePath），也不做
  * 二次上限判断——服务端 409 才是裁决，这里只把响应归一成可显示的错误。
  */
@@ -73,7 +73,7 @@ export async function fetchAnnotations(
   scope: AnnotationScope,
   options: { signal?: AbortSignal } = {},
 ): Promise<AnnotationListResult> {
-  const response = await fetch(`${getApiPrefix()}/result-studio/annotations?${scopeQuery(scope).toString()}`, {
+  const response = await fetch(`${getApiPrefix()}/annotations?${scopeQuery(scope).toString()}`, {
     headers: headers(),
     signal: options.signal,
   });
@@ -114,7 +114,7 @@ export async function createAnnotation(
         ? { entryId: input.entryId }
         : { filePath: input.filePath }),
   };
-  const response = await fetch(`${getApiPrefix()}/result-studio/annotations`, {
+  const response = await fetch(`${getApiPrefix()}/annotations`, {
     method: 'POST',
     headers: headers(true),
     body: JSON.stringify(body),
@@ -132,7 +132,7 @@ export async function updateAnnotationGeometry(
   geometry: { rect?: number[]; path?: number[][] },
 ): Promise<ArtifactAnnotation> {
   const response = await fetch(
-    `${getApiPrefix()}/result-studio/annotations/${encodeURIComponent(annotationId)}/geometry`,
+    `${getApiPrefix()}/annotations/${encodeURIComponent(annotationId)}/geometry`,
     {
       method: 'PATCH',
       headers: headers(true),
@@ -147,7 +147,7 @@ export async function updateAnnotationGeometry(
 
 export async function deleteAnnotation(annotationId: string): Promise<void> {
   const response = await fetch(
-    `${getApiPrefix()}/result-studio/annotations/${encodeURIComponent(annotationId)}`,
+    `${getApiPrefix()}/annotations/${encodeURIComponent(annotationId)}`,
     { method: 'DELETE', headers: headers() },
   );
   if (!response.ok) throw await readError(response);

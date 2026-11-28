@@ -1,32 +1,35 @@
 'use strict';
 
 /**
- * routes/result-studio/annotations.js — BLOCK-219 Q6 批注子域
+ * routes/annotations.js — 旁路批注 REST 路由（原自 routes/result-studio/annotations.js 迁出独立）
  *
  * 端点：
- *   POST   /api/result-studio/annotations         创建一条旁路批注
- *   GET    /api/result-studio/annotations         按 scope 列出批注
- *   DELETE /api/result-studio/annotations/:id     删除一条批注
+ *   POST   /api/annotations                      创建一条旁路批注
+ *   GET    /api/annotations                      按 scope 列出批注
+ *   PATCH  /api/annotations/:annotationId/geometry 拖拽更新几何坐标
+ *   DELETE /api/annotations/:annotationId        删除一条批注
  *
  * 纪律：
- * - 批注是旁路元数据：不写原始产物文件、不建第二套 artifact/truth。
+ * - 批注是旁路元数据（result_annotations 表，015/018/019/020）：不写原始产物文件、不建第二套 artifact/truth。
+ * - item 90 阶段二：Result Studio 物理删除后，PDF/图片/文本/速记板批注仍作为共享能力保留；
+ *   /api/result-studio/* 全域 404，本路由独立挂载 /api/annotations。
  * - scope 判定与上限计数共用 shared-backend/result-annotation-contracts.js
  *   （`annotationScopeOf` + `MAX_ANNOTATIONS_PER_SCOPE`），路由不复制词汇。
  * - 项目访问一律 `canAccessProject` fail-closed；未知项目 404、越权 403。
  * - 写路径超限返回 409 并**不落库**；校验失败 400 带可读 details。
  */
 
-const db = require('../../db');
+const db = require('../db');
 const sqlite = db.db;
-const { canAccessProject } = require('../_helpers/validate');
+const { canAccessProject } = require('./_helpers/validate');
 const {
   ANNOTATION_SURFACES,
   MAX_ANNOTATIONS_PER_SCOPE,
   annotationScopeOf,
   isSafeRelativePath,
   normalizeAnnotationInput,
-} = require('../../../shared-backend/result-annotation-contracts');
-const { createResultAnnotationStore } = require('../../../shared-backend/result-annotation-store');
+} = require('../../shared-backend/result-annotation-contracts');
+const { createResultAnnotationStore } = require('../../shared-backend/result-annotation-store');
 
 function readProject(req, res) {
   const projectId = String((req.query && req.query.projectId) || (req.body && req.body.projectId) || '').trim();
@@ -49,7 +52,7 @@ function readProject(req, res) {
 module.exports = {
   register(app, options) {
     if (typeof app.get !== 'function') {
-      throw new Error('result-studio/annotations register requires an Express app');
+      throw new Error('annotations register requires an Express app');
     }
     const storeOptions = options && options.ensureSchema === false ? { ensureSchema: false } : {};
     let storeInstance = null;
@@ -58,7 +61,7 @@ module.exports = {
       return storeInstance;
     }
 
-    app.post('/api/result-studio/annotations', (req, res) => {
+    app.post('/api/annotations', (req, res) => {
       const body = req.body && typeof req.body === 'object' ? req.body : {};
       const project = readProject(req, res);
       if (!project) return undefined;
@@ -85,7 +88,7 @@ module.exports = {
       }
     });
 
-    app.get('/api/result-studio/annotations', (req, res) => {
+    app.get('/api/annotations', (req, res) => {
       const project = readProject(req, res);
       if (!project) return undefined;
 
@@ -120,7 +123,7 @@ module.exports = {
     // BLOCK-307 — 拖拽移动：只改几何（rect/path），不动评论/颜色/scope 身份。
     // 校验语义：rect 必须四元有限 0..1；path 每点必须 [x,y] 有限 0..1；与既有 kind 的
     // 定位方式一致（rect 族只收 rect、path 族只收 path，文本锚点批注不适用直接 400）。
-    app.patch('/api/result-studio/annotations/:annotationId/geometry', (req, res) => {
+    app.patch('/api/annotations/:annotationId/geometry', (req, res) => {
       const annotationId = String((req.params && req.params.annotationId) || '').trim();
       if (!annotationId) {
         res.status(400).json({ error: 'annotation_id_required' });
@@ -174,7 +177,7 @@ module.exports = {
       return undefined;
     });
 
-    app.delete('/api/result-studio/annotations/:annotationId', (req, res) => {
+    app.delete('/api/annotations/:annotationId', (req, res) => {
       const annotationId = String((req.params && req.params.annotationId) || '').trim();
       if (!annotationId) return res.status(400).json({ error: 'annotation_id_required' });
       const existing = store().get(annotationId);

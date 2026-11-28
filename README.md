@@ -12,7 +12,7 @@ Petri is a general-purpose agent running entirely on your machine — local sove
 - 🧬 **垂直领域内容包** — 首发全组学学习与实战内容（基因组/转录组/蛋白组学习路径 + DESeq2 等实战 golden path），领域以内容包形态入驻，内核零改动
 - 🔌 **MCP 原生** — stdio / streamable HTTP 双传输 MCP 客户端，第三方工具即插即审
 - 🛡️ **Local-first** — 本地文件存储 + SQLite + 内嵌运行时本地执行；分析在本地 R/Python 运行时完成，数据不出本机
-- 🖥️ **桌面体验** — Electron + React 18 + Vite；项目工作区、Result Studio 成果面、知识库、联邦协作（P2P 桌面互联）
+- 🖥️ **桌面体验** — Electron + React 18 + Vite；项目工作区（会话产物卡 / 文件预览 / 批注 / 项目总览）、知识库、联邦协作（P2P 桌面互联）
 
 ## Quick Start / 快速开始
 
@@ -31,7 +31,7 @@ npm run dev
 
 生产构建（SPA + 站点）：`npm run build:all`；桌面打包：`npm run build:win` / `npm run build:mac`。
 
-> 当前处于 G0 开发期，版本以 `package.json` 为准；Result Studio 为 `implemented_unverified / experimental`；签名/公证/远程分发属后续阶段，尚不可用。
+> 当前处于 G0 maintained + G1 进行中，版本以 `package.json` 为准；Result Studio 已于 item 90 阶段二（2026-11-28）**物理退役**（见 [清理影响面清单](./acceptance/item90-result-studio-phase1/IMPACT-INVENTORY.md) 与 [退役记录](./docs/g0-result-studio-plan.md)），查看场景由会话区产物卡与文件面板承接；签名/公证/远程分发按 G1 顺序推进。
 
 ## Architecture / 架构一览
 
@@ -44,7 +44,7 @@ npm run dev
 | 数据 | better-sqlite3 + 迁移 | `src/migrations/`、`core/petri-server/db/` |
 
 - IPC 通道唯一注册表：`src/ipc/channels.js`（渲染进程只经 `frontend/src/lib/desktopBridge.ts`）
-- 领域分析能力由**插件/领域包 + Result Studio** 承载（`/extensions` 货架）
+- 领域分析能力由**插件/领域包**承载（`/extensions` 货架；Result Studio 已于 item 90 阶段二退役，产物展示由 `ChatArtifactCard` 与 `GeneratedFilesSurface` 承接）
 
 ## Development / 开发
 

@@ -181,7 +181,7 @@ export interface ResultStudioContextDiagnostic {
  * 也不自行推断 impact。`scientificallyNeutral` 只在 presentation 分组为真，
  * UI 只能在为真时声称"不改变科学结论"。
  */
-export interface ResultStudioEditControl {
+interface ResultStudioEditControl {
   name: string;
   controlType: 'number' | 'text' | 'select' | 'color' | 'boolean';
   impact: string;
@@ -194,13 +194,13 @@ export interface ResultStudioEditControl {
   scientificallyNeutral: boolean;
 }
 
-export interface ResultStudioEditControlGroup {
+interface ResultStudioEditControlGroup {
   group: 'presentation' | 'data' | 'scientific' | 'workflow';
   label: string;
   parameterNames: string[];
 }
 
-export interface ResultStudioEditControls {
+interface ResultStudioEditControls {
   controlsVersion: 1;
   groups: ResultStudioEditControlGroup[];
   controls: ResultStudioEditControl[];

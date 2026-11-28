@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -759,18 +760,7 @@ test('P5 cohort ReplayPackage binds and independently validates every per-Job pa
   assert.equal(validateResultChangeSetReplayPackage(packageDir).ok, false);
 });
 
-test('P5 HTTP replay preserves generated downstream Artifact lineage through the registered tool boundary', () => {
-  // result-studio 路由已按域拆分为 routes/result-studio/*.js；replay 在 revisions.js，
-  // compare 在 changesets.js。此处直接读各自文件，不依赖旧的单文件布局。
-  const revisionsSource = readFileSync(
-    join(import.meta.dirname, '..', 'core/petri-server/routes/result-studio/revisions.js'),
-    'utf8',
-  );
-  const replayRouteStart = revisionsSource.indexOf("app.post('/api/result-studio/revisions/:revisionId/replay'");
-  assert.ok(replayRouteStart >= 0, 'controlled replay route is unavailable');
-  const replayRoute = revisionsSource.slice(replayRouteStart);
-  assert.match(replayRoute, /const persistedConversationId = persistedToolJobConversation\(sourceJob\)/);
-  assert.match(replayRoute, /const conversationId = persistedConversationId \|\| requestedConversationId/);
-  assert.match(replayRoute, /executeJob:\s*async\s*\(\{[\s\S]*?resultStudioInputLineage\s*=\s*null[\s\S]*?\}\)\s*=>/);
-  assert.match(replayRoute, /mcpRegistry\.callTool\([\s\S]*?conversationId,[\s\S]*?resultStudioInputLineage[\s\S]*?\);/);
+test('P5 HTTP replay route in routes/result-studio/revisions.js is retired in item 90 Phase 2', () => {
+  const retiredRoutePath = join(import.meta.dirname, '..', 'core/petri-server/routes/result-studio/revisions.js');
+  assert.equal(existsSync(retiredRoutePath), false, 'retired result-studio revisions route must not exist');
 });

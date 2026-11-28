@@ -18,8 +18,8 @@
     },
     {
       "path": "frontend/src/pages/project-workspace.tsx",
-      "lines": 1233,
-      "sha256": "13909672de538c578b4a078384ec2bbd4fadb9f25638456f610a50aff126f3d7",
+      "lines": 1105,
+      "sha256": "5928edd210ef5a23530607ae8283c4f2a2436fb2162f56acae0a5851a91f325d",
       "missing": false
     },
     {

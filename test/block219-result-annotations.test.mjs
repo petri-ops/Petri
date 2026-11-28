@@ -243,7 +243,7 @@ test('store delete is idempotent and get returns what was written', () => {
 // ---------------------------------------------------------------------------
 
 function loadRoutes() {
-  const routeModule = require('../core/petri-server/routes/result-studio/annotations');
+  const routeModule = require('../core/petri-server/routes/annotations');
   const entries = [];
   const app = {
     get: (routePath, handler) => entries.push({ method: 'GET', path: routePath, handler }),
@@ -277,11 +277,11 @@ test('route module registers the three annotation endpoints', () => {
   const routes = loadRoutes();
   const keys = routes.map((entry) => `${entry.method} ${entry.path}`).sort();
   assert.deepEqual(keys, [
-    'DELETE /api/result-studio/annotations/:annotationId',
-    'GET /api/result-studio/annotations',
+    'DELETE /api/annotations/:annotationId',
+    'GET /api/annotations',
     // BLOCK-307 — 拖拽移动的几何更新端点
-    'PATCH /api/result-studio/annotations/:annotationId/geometry',
-    'POST /api/result-studio/annotations',
+    'PATCH /api/annotations/:annotationId/geometry',
+    'POST /api/annotations',
   ]);
 });
 

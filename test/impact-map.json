@@ -157,7 +157,6 @@
         "core/shared-backend/execution-admission.js",
         "core/shared-backend/budget-constants.js",
         "core/shared-backend/llm-providers/io-transcript.js",
-        "core/petri-server/routes/result-studio/revisions.js",
         "core/shared-backend/result-studio-table-query.js",
         "core/shared-backend/result-plugin-validator.js",
         "core/petri-server/helpers/mesh-assets.js",
@@ -596,7 +595,6 @@
         "frontend/src/components/ui/controls/status.module.css",
         "frontend/src/components/ui/controls/StatusBadge.test.tsx",
         "frontend/src/components/work-surface/TraceSurface.tsx",
-        "frontend/src/components/work-surface/EvidenceSurface.tsx",
         "frontend/src/components/workspace-panels/ResultsLibrary.tsx",
         "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
         "frontend/src/components/copilot/ToolActivityList.tsx",
@@ -610,7 +608,6 @@
         "frontend/src/lib/trajectoryClient.timeout.test.ts",
         "frontend/src/components/ui/controls/StatusBadge.test.tsx",
         "frontend/src/components/work-surface/TraceSurface.test.tsx",
-        "frontend/src/components/work-surface/EvidenceSurface.test.tsx",
         "frontend/src/components/workspace-panels/WorkspaceSummaryCard.test.tsx",
         "frontend/src/components/copilot/ToolActivityList.test.tsx",
         "frontend/src/pages/window/CommandCenterJobsWall.test.tsx",
@@ -875,8 +872,7 @@
         "core/shared-backend/result-annotation-schema.js",
         "core/shared-backend/result-annotation-contracts.js",
         "core/shared-backend/result-annotation-store.js",
-        "core/petri-server/routes/result-studio/annotations.js",
-        "core/petri-server/routes/result-studio/index.js",
+        "core/petri-server/routes/annotations.js",
         "src/migrations/015_result_annotations.sql",
         "frontend/src/lib/annotations.ts",
         "frontend/src/lib/annotation-client.ts",
@@ -1147,7 +1143,7 @@
         "test/result-studio-lifecycle.test.mjs",
         "test/result-studio-migration.test.mjs",
         "test/result-studio-repository.test.mjs",
-        "test/result-studio-route-baseline.test.mjs"
+        "test/item90-result-studio-flag.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -1174,7 +1170,6 @@
       "note": "P4R source projection, controlled replay, background materialization and Code tests are owned by P4R; the explicit invariant gates remain listed so a route regression cannot be hidden by the default bundle.",
       "patterns": [
         "core/shared-backend/result-*.js",
-        "core/petri-server/routes/result-studio.js",
         "core/petri-server/agent-tools/result-*.js",
         "frontend/src/components/result-studio/**",
         "frontend/src/lib/result-studio-*.ts",
@@ -1191,7 +1186,7 @@
         "test/result-studio-contracts.test.mjs",
         "test/result-studio-repository.test.mjs",
         "test/result-studio-background.test.mjs",
-        "test/result-studio-route-baseline.test.mjs",
+        "test/item90-result-studio-flag.test.mjs",
         "test/result-changeset-service.test.mjs",
         "test/result-revision-source.test.mjs",
         "test/result-replay-service.test.mjs",
@@ -1273,7 +1268,6 @@
         "core/shared-backend/artifact-manifest.js",
         "core/shared-backend/artifact-profiles.js",
         "core/shared-backend/agent-workflow.js",
-        "core/shared-backend/artifact-profiles.js",
         "core/shared-backend/pack-artifact-profile-actors.js",
         "core/petri-server/helpers/tools-assets.js",
         "core/petri-server/helpers/pack-demo-assets.js",
@@ -1317,7 +1311,6 @@
         "core/petri-server/mcp/registry.js",
         "core/petri-server/routes/ai-legacy.js",
         "core/petri-server/routes/harness.js",
-        "core/petri-server/routes/result-studio.js",
         "core/petri-server/routes/tools-metadata.js",
         "frontend/src/lib/project-types.ts",
         "frontend/src/lib/project-store.ts",
@@ -1912,7 +1905,7 @@
       "tests": [
         "test/g0-rs-p6-ui110-observation.test.mjs",
         "test/g0-rs-p6-ui110-local-gateway.test.mjs",
-        "test/result-studio-route-baseline.test.mjs",
+        "test/item90-result-studio-flag.test.mjs",
         "test/result-studio-agent-binding.test.mjs",
         "test/result-studio-context.test.mjs",
         "test/agent-tool-result.test.mjs",
@@ -1932,7 +1925,7 @@
         "test/result-changeset-service.test.mjs",
         "test/result-studio-lifecycle.test.mjs",
         "test/result-studio-background.test.mjs",
-        "test/result-studio-route-baseline.test.mjs"
+        "test/item90-result-studio-flag.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -2086,7 +2079,7 @@
         "test/tool-resource-sampler.test.mjs",
         "test/tools-executor-job-context.test.mjs",
         "test/artifact-truth.test.mjs",
-        "test/result-studio-route-baseline.test.mjs",
+        "test/item90-result-studio-flag.test.mjs",
         "test/test-affected.test.mjs"
       ],
       "classifiesScripts": false
@@ -4305,7 +4298,6 @@
         "frontend/src/components/result-studio/LineageStrip.test.tsx",
         "frontend/src/components/result-studio/LineageGraph.test.tsx",
         "frontend/src/components/result-studio/CompactResultNavigator.test.tsx",
-        "frontend/src/components/result-studio/ResultStudioSurface.test.tsx",
         "frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx",
         "frontend/src/components/result-studio/RevisionCodeView.test.tsx",
         "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx",
@@ -4327,8 +4319,6 @@
         "frontend/src/components/result-studio/activeArtifactProjection.ts",
         "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
         "frontend/src/components/workspace-panels/ResultView/types.ts",
-        "frontend/src/pages/project-workspace/useResultStudioEditContext.ts",
-        "frontend/src/pages/project-workspace/useResultStudioEditContext.selectionBus.test.tsx",
         "test/block141-bundle-baseline.test.mjs",
         "test/block141-cancel-classification.test.mjs"
       ],
@@ -5444,8 +5434,6 @@
         "frontend/src/lib/workSurface/**",
         "frontend/src/components/work-surface/**",
         "frontend/src/hooks/useWorkSurfaceTabs.ts",
-        "frontend/src/components/result-studio/resultSurfaceHost.ts",
-        "frontend/src/components/result-studio/resultSurfaceHost.test.ts",
         "frontend/src/pages/project-workspace/rightPanelTabs.ts",
         "frontend/src/pages/project-workspace/useWorkspaceTitleBar.ts",
         "frontend/src/pages/project-workspace.tsx",
@@ -5460,7 +5448,6 @@
         "frontend/src/components/copilot/SimpleChat/PlanApprovalCard.tsx",
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/components/copilot/conversationChangesStore.ts",
-        "frontend/src/components/result-studio/ResultStudioSurface.test.tsx",
         "core/packages/shared-pack-assets/**",
         "core/petri-server/helpers/pack-contributions.js",
         "core/petri-server/routes/projection-data.js",
@@ -5483,8 +5470,6 @@
         "frontend/src/components/work-surface/PackSurfaceFrame.test.ts",
         "frontend/src/components/work-surface/GeneratedFilesSurface.test.tsx",
         "frontend/src/components/work-surface/PlanSurface.test.tsx",
-        "frontend/src/components/work-surface/EvidenceSurface.test.tsx",
-        "frontend/src/components/result-studio/resultSurfaceHost.test.ts",
         "frontend/src/components/workspace-panels/RightPanel.test.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
         "frontend/src/components/desktop/TitleBar.test.tsx",
@@ -5546,8 +5531,6 @@
         "frontend/src/components/work-surface/PackSurfaceFrame.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
-        "frontend/src/components/result-studio/resultSurfaceHost.ts",
-        "frontend/src/components/result-studio/resultSurfaceHost.test.ts",
         "core/petri-server/helpers/pack-contributions.js",
         "test/block218-*.test.mjs",
         "acceptance/block-218/**"
@@ -5555,7 +5538,6 @@
       "tests": [
         "frontend/src/lib/workSurface/packResultData.test.ts",
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
-        "frontend/src/components/result-studio/resultSurfaceHost.test.ts",
         "frontend/src/lib/workSurface/registry.test.ts",
         "test/block216-pack-contributions.test.mjs",
         "test/block218-pack-result-surface.test.mjs"
@@ -5692,7 +5674,6 @@
         "test/block234-methods-templates.test.mjs",
         "test/block220-pack-methods.test.mjs",
         "test/agent-workflow.test.mjs",
-        "test/agent-approval.test.mjs",
         "test/agent-workflow-phase6.test.mjs",
         "test/block138-f1-chain-pending-registration.test.mjs",
         "test/pl4a-tool-jobs-retention.test.mjs",
@@ -5974,7 +5955,6 @@
         "frontend/src/lib/trajectoryClient.ts",
         "frontend/src/components/work-surface/TraceSurface.tsx",
         "frontend/src/components/work-surface/TraceSurface.module.css",
-        "frontend/src/components/work-surface/EvidenceSurface.tsx",
         "frontend/src/components/copilot/TimelineBoundaries.tsx",
         "frontend/src/components/copilot/SimpleChat/CompactionNotice.tsx",
         "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
@@ -5996,7 +5976,6 @@
         "test/block248-trajectory.test.mjs",
         "test/live-window-policy.test.mjs",
         "frontend/src/components/work-surface/TraceSurface.test.tsx",
-        "frontend/src/components/work-surface/EvidenceSurface.test.tsx",
         "frontend/src/components/copilot/ToolActivityList.test.tsx",
         "frontend/src/components/copilot/TimelineBoundaries.test.tsx",
         "frontend/src/lib/workSurface/registry.test.ts"
@@ -6112,7 +6091,6 @@
         "frontend/src/components/workspace-panels/CenterPanel.tsx",
         "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
         "frontend/src/components/workspace-panels/ResultView/types.ts",
-        "frontend/src/pages/project-workspace/useResultStudioEditContext.ts",
         "acceptance/ui-544/**",
         "acceptance/ui-545/**",
         "acceptance/ui-546/**",
@@ -6122,7 +6100,6 @@
         "test/block216-pack-contributions.test.mjs",
         "frontend/src/lib/workSurface/packTabData.test.ts",
         "frontend/src/lib/workSurface/usePackTabData.test.ts",
-        "frontend/src/components/result-studio/resultSurfaceHost.tabs.test.ts",
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
         "frontend/src/components/annotations/AnnotatableImagePane.test.tsx",
         "frontend/src/components/annotations/AnnotationBar.test.tsx"
@@ -6172,7 +6149,7 @@
         "core/shared-backend/result-annotation-contracts.js",
         "core/shared-backend/result-annotation-store.js",
         "core/shared-backend/result-annotation-schema.js",
-        "core/petri-server/routes/result-studio/annotations.js",
+        "core/petri-server/routes/annotations.js",
         "core/petri-server/agent-tools/result-annotation-tools.js",
         "src/migrations/018_annotation_text_anchor.sql",
         "src/migrations/019_annotation_entry_owner.sql",
@@ -6499,7 +6476,6 @@
       "classifiesScripts": true,
       "note": "BLOCK-263 P4-REM 收官 — history tab 全链（/api/result-studio/history 有界端点 + packTabData 桥 + pack 0.2.3 声明/渲染器）+ 三块裁决（写面出籍 C-44/域中性 6 键保留/methods 达成）+ 实机腿。",
       "patterns": [
-        "core/petri-server/routes/result-studio/revisions.js",
         "frontend/src/lib/workSurface/packTabData.ts",
         "frontend/src/lib/workSurface/usePackTabData.ts",
         "frontend/src/lib/workSurface/packTabData.test.ts",
@@ -7540,15 +7516,11 @@
       "id": "block334-result-host-unification",
       "note": "BLOCK-334 结果宿主统一：P1 结果迁右栏宿主（ResultsSurface/useResultSurfaceHost、中央四态退役、openResultInRail/syncResultQuery）+ P2 渲染层统一（viewerRegistry 唯一分派、viewers 四类单 viewer、useArtifactTextSelection 优先 EditorApi）。四条 dev-verify flow 与 acceptance/block-334 证据同归本规则；改任一登记源文件即跑宿主/路由/标题/选区/文件预览 xlsx 路由契约测试（前端面经 frontendRelated 进 vitest）。",
       "patterns": [
-        "frontend/src/components/work-surface/ResultsSurface.tsx",
-        "frontend/src/components/work-surface/ResultsSurface.module.css",
-        "frontend/src/components/work-surface/useResultSurfaceHost.ts",
         "frontend/src/components/workspace-panels/RightPanel.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.tsx",
         "frontend/src/components/workspace-panels/ResultArtifactShell/useArtifactTextSelection.ts",
         "frontend/src/components/workspace-panels/ResultArtifactShell/ResultTechnicalDetails.tsx",
         "frontend/src/hooks/useWorkspaceRouting.ts",
-        "frontend/src/lib/result-title-bar.ts",
         "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
         ".agents/skills/petri-dev-infra/dev-verify/flows/block334-result-host-live.cjs",
         ".agents/skills/petri-dev-infra/dev-verify/flows/block334-p2-viewers-live.cjs",
@@ -7557,12 +7529,10 @@
         "acceptance/block-334/**"
       ],
       "tests": [
-        "frontend/src/components/work-surface/ResultsSurface.test.tsx",
         "frontend/src/components/workspace-panels/RightPanel.test.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
         "frontend/src/components/workspace-panels/ResultArtifactShell/useArtifactTextSelection.test.tsx",
         "frontend/src/hooks/useWorkspaceRouting.test.ts",
-        "frontend/src/lib/result-title-bar.test.ts",
         "frontend/src/pages/project-workspace/WorkspaceFilePreview.spreadsheet.test.tsx"
       ],
       "frontendRelated": true,
@@ -8409,7 +8379,6 @@
         "core/petri-server/agent-tools/security-boundaries.js",
         "core/petri-server/helpers/ddl-migrate.js",
         "core/petri-server/bootstrap.js",
-        "core/petri-server/agent-tools/tool-capability.js",
         "test/m6a-*",
         "docs/block-434-*",
         "docs/block-435-*",
@@ -10476,17 +10445,13 @@
       "patterns": [
         "core/petri-server/helpers/decision-config.js",
         "core/packages/shared-config/config-schema.js",
-        "core/petri-server/routes/result-studio/index.js",
-        "frontend/src/lib/resultStudioFlag.ts",
-        "frontend/src/components/work-surface/ResultsSurface.tsx",
-        "frontend/src/components/work-surface/EvidenceSurface.tsx",
-        "acceptance/item90-result-studio-phase1/**"
+        "acceptance/item90-result-studio-phase1/**",
+        "src/migrations/028_drop_result_studio_tables.sql",
+        "core/petri-server/routes/annotations.js"
       ],
       "tests": [
         "test/item90-result-studio-flag.test.mjs",
-        "frontend/src/components/work-surface/ResultsSurface.flag.test.tsx",
-        "frontend/src/components/work-surface/ResultsSurface.test.tsx",
-        "frontend/src/components/work-surface/EvidenceSurface.test.tsx"
+        "test/block219-result-annotations.test.mjs"
       ]
     },
     {

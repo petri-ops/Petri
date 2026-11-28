@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "kind": "lint-warnings-domain-baseline",
   "domains": {
-    "production": 1476,
-    "test": 416,
+    "production": 1463,
+    "test": 405,
     "scripts": 537
   },
-  "total": 2429,
-  "generatedAt": "2026-11-27T16:18:04.713Z",
+  "total": 2405,
+  "generatedAt": "2026-11-28T09:43:53.959Z",
   "note": "L0-6（L-88）warnings 分域只减棘轮基线；只许 --update 下调，任一域上涨即红"
 }

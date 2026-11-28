@@ -259,11 +259,6 @@
       "count": 2
     }
   },
-  "frontend/src/components/desktop/titlebar/TitleBarCenterZone.tsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
   "frontend/src/components/editor/CodeMirror/__tests__/CodeMirrorEditor.test.tsx": {
     "react-hooks/globals": {
       "count": 1
@@ -307,11 +302,6 @@
       "count": 3
     }
   },
-  "frontend/src/components/result-studio/ResultStudioSurface.tsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
   "frontend/src/components/result-studio/RevisionCodeView.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 1
@@ -327,11 +317,6 @@
       "count": 6
     },
     "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "frontend/src/components/result-studio/copilotAskDelivery.test.tsx": {
-    "@typescript-eslint/no-unsafe-return": {
       "count": 1
     }
   },
@@ -521,14 +506,6 @@
     }
   },
   "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 2
-    }
-  },
-  "frontend/src/pages/project-workspace/useResultStudioEditContext.ts": {
-    "react-hooks/preserve-manual-memoization": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 2
     }

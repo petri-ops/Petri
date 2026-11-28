@@ -257,7 +257,7 @@ function SessionFrameView({
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);
-                ctx.openRightPanel('results');
+                ctx.openRightPanel('jobs');
               }}
             />
             <FloatCardResizeHandle {...summaryResizeHandlers} />
@@ -291,7 +291,7 @@ function SessionFrameView({
               onOpenScheduled={ctx.openScheduledResults}
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);
-                ctx.openRightPanel('results');
+                ctx.openRightPanel('jobs');
               }}
             />
             <FloatCardResizeHandle {...summaryResizeHandlers} />

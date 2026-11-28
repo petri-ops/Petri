@@ -40,8 +40,8 @@ test('UI-629 拖宽把手钳制：左右把手调用点都传 clamp.max（sideba
   const ws = read('frontend/src/pages/project-workspace.tsx');
   assert.match(
     ws,
-    // resultsFocus 时右栏把手切 resultRight 档（UI-457 后右栏双档），钳制消费不变
-    /startColumnResize\((resultsFocus \? 'resultRight' : 'right'), \{ max: sidebarResizeMax\(window\.innerWidth, leftOpen \? leftWidth : 0\) \}\)/,
+    // item 90 阶段二 RS 退役后右栏固定走 'right' 档，钳制消费不变
+    /startColumnResize\('right', \{ max: sidebarResizeMax\(window\.innerWidth, leftOpen \? leftWidth : 0\) \}\)/,
     '右把手钳制（左栏开时按其现宽预留）',
   );
 });

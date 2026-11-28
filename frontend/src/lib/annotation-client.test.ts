@@ -49,7 +49,8 @@ describe('fetchAnnotations', () => {
     });
 
     const url = calls[0][0];
-    expect(url).toContain('/result-studio/annotations?');
+    expect(url).toContain('/annotations?');
+    expect(url).not.toContain('/result-studio/');
     expect(url).toContain('projectId=p1');
     expect(url).toContain('surface=result-artifact');
     expect(url).toContain('artifactId=a1');
@@ -172,7 +173,8 @@ describe('deleteAnnotation', () => {
     const calls = installFetch(() => jsonResponse({ error: 'annotation_not_found' }, 404));
 
     await expect(deleteAnnotation('ann_missing')).rejects.toMatchObject({ code: 'annotation_not_found' });
-    expect(calls[0][0]).toContain('/result-studio/annotations/ann_missing');
+    expect(calls[0][0]).toContain('/annotations/ann_missing');
+    expect(calls[0][0]).not.toContain('/result-studio/');
     expect(calls[0][1]?.method).toBe('DELETE');
   });
 

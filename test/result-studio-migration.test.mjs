@@ -163,18 +163,25 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
   assert.equal(version, LATEST_MIGRATION_VERSION);
 
   const names = tableNames(dbPath);
-  for (const table of RESULT_STUDIO_TABLES) {
-    assert.equal(names.includes(table), true, `missing table ${table}`);
+  const droppedRsTables = [
+    ...RESULT_STUDIO_TABLES,
+    'result_workflow_graphs',
+    'result_ref_transactions',
+    'results',
+    'result_tags',
+    'result_versions',
+  ];
+  for (const table of droppedRsTables) {
+    assert.equal(names.includes(table), false, `item 90 阶段二 028 应已 DROP RS 表 ${table}`);
   }
-  assert.equal(names.includes('result_workflow_graphs'), true);
-  assert.equal(names.includes('result_ref_transactions'), true);
+  assert.equal(names.includes('result_annotations'), true, '共享批注表 result_annotations 必须保留');
   assert.equal(names.includes('git_repository_consents'), true);
 
   const db = new Database(dbPath, { readonly: true });
   context.after(() => { try { db.close(); } catch { /* noop */ } });
-  assert.equal(inspectResultStudioSchema(db).complete, true);
+  assert.equal(inspectResultStudioSchema(db).complete, false);
   const applied = db.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map((r) => r.version);
-  // 期望集合同源推导自迁移目录，并点名校验四个 RS 专属 schema 版本确实就位
+  // 期望集合同源推导自迁移目录，并点名校验历史迁移版本与 028 清理迁移均已落库
   const expectedVersions = readdirSync(REAL_MIGRATIONS_DIR)
     .filter((f) => f.endsWith('.sql'))
     .map((f) => parseInt(f, 10))
@@ -186,6 +193,7 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
     RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION,
     RESULT_REF_TRANSACTION_MIGRATION_VERSION,
     4, // 004_git_repository_consent.sql（UI-462 后 generator 模块退役，版本以迁移文件名为准）
+    28, // 028_drop_result_studio_tables.sql（item 90 阶段二 RS 物理删除）
   ]) {
     assert.equal(applied.includes(named), true, `missing named migration ${named}`);
   }
@@ -208,9 +216,10 @@ test('RS2 runner upgrades an existing database without touching its tables', asy
   context.after(() => { try { db.close(); } catch { /* noop */ } });
   // 既有数据完好
   assert.equal(db.prepare('SELECT status FROM tool_jobs WHERE id = ?').get('job_1').status, 'completed');
-  // RS 表已就位
-  assert.equal(inspectResultStudioSchema(db).complete, true);
-  assert.equal(tableNames(dbPath).includes('result_ref_transactions'), true);
+  // 028 迁移后 RS 专属表已 DROP，共享批注表保留
+  assert.equal(inspectResultStudioSchema(db).complete, false);
+  assert.equal(tableNames(dbPath).includes('result_ref_transactions'), false);
+  assert.equal(tableNames(dbPath).includes('result_annotations'), true);
 });
 
 test('RS2 runner is idempotent across repeated startups', async (context) => {

@@ -5,7 +5,6 @@
 type CoreRightPanelMode =
   | 'overview'
   | 'home'
-  | 'results'
   | 'files'
   | 'generated'
   | 'browser'

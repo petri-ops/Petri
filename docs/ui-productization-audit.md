@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **item 90 阶段二 Result Studio 物理删除（2026-11-28）**：物理移除 Result Studio 专属页面/入口/Tab/TitleBar pill/flag（`ResultsSurface`、`EvidenceSurface`、`ResultStudioSurface`、`ResultAgentComposer`、`ResultEditPanel`、`useResultStudioEditContext`、`resultStudioFlag`）；保留 `ResultView`、`ResultArtifactShell`、`ResultsLibrary` 及批注组件（`/api/annotations`）。**状态**：`verified`（item 90 阶段二门禁：`quality:types`、`quality:ts-syntax`、`eslint --no-cache` 0 errors、`quality:lint:ledger` P1463/T405/S537 下降通过、`gate:arch-cycles` 0 环、`quality:knip:check` 425 冻结、`schema:verify` 31 表、前端 214 文件 1470 tests 绿、后端定向 244 tests 240 绿 4 live-skip 0 红）。
+
 > **item 88 总览 polish 四缺口同批登记（2026-11-28）**：①副标题裸 projectId → 项目名（/overview 顶层路由下 `currentProjectId` 恒 null，`resolveOverviewProjectRef` 只读派生：路由项目优先、否则激活会话所属项目，再映射项目名；裸 id 仅留 title 只读可见面）；②任务标签裸 ID 残片 → `readableTaskTitle`（显式标题 > 产物类型去括号规格 > 首条验收标准 > 「任务 N」兜底）；③目标节点去 🎯 前缀堆砌；④三分区布局（目标树/协作图弹性主区 · 教练条只读带 · 执行轨迹独立区，教练条与 wb 五态投影原样保留）。HK-01 7/7（HK-88p-1~5 + 既有 88w-5/6）；theme-token 新 CSS 零小字号/零裸色。观感零代签。**状态**：in_progress（代码级完成；CDP 实机与 owner 过目待做）。
 
 > **item 90 阶段一补刀 标题栏「结果 N」pill 隐藏同批登记（2026-11-27）**：owner 实测标题栏项目摘要旁「结果 N ▾」pill 在 tab 隐藏后仍可见——定位=TitleBarCenterZone resultPicker（数据源=conversationJobs 产物统计而非 RS 本体，但点击行为=selectResult 打开结果面，功能上是 RS 入口，flag off 后为死入口）→ flag off 一并隐藏（TitleBarCenterZone 加 useResultStudioEnabled 门控）。**数据源裁决项报 coordinator**：若 owner 希望「结果计数」独立于 RS 可见（纯产物统计视角），可保留 pill 但换数据源（直接读 tool_jobs 计数）——当前按「隐藏」落地。HK-01 2/2（flag off 无 pill/flag on 恢复，mock resultItems 两条有区分度）。**状态**：in_progress（代码级完成，观感零代签）。

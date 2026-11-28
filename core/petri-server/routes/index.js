@@ -75,7 +75,8 @@ module.exports = async function registerRoutes(app) {
     // item 87 第二波 — 教练循环记录面（只 bio 试点域白名单；分歧/讲解 append-only）。
     ['Do coaching', () => require('./do-coaching').registerDoCoachingRoutes(app)],
     ['Storage capabilities', () => require('./storage-capabilities').registerStorageCapabilitiesRoute(app)],
-    ['Result Studio', () => require('./result-studio')(app)],
+    // item 90 阶段二：Result Studio 物理删除后，共享批注路由独立挂载 /api/annotations（PDF/文件/速记批注零回归）
+    ['Annotations', () => require('./annotations').register(app)],
     // NEXT-04A — 3D/Blender 只读能力探测（构建/渲染/导出仍走 agent tools）
     ['Model 3D', () => require('./model3d')(app)],
     // BLOCK-342 W1 — SVG 编辑器读写面（与 agent 的 svg_inspect/svg_edit 同一套实现）
