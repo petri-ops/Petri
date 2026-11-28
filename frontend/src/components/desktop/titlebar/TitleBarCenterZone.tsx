@@ -5,6 +5,7 @@ import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import { BranchTabsWrapper } from '@/components/branch/BranchTabsWrapper';
 import styles from '../TitleBar.module.css';
 import { getFallbackTitle, isProjectionMobile, isStandalonePagePath, modeUsesSummaryCard, parseWorkspaceRoute } from './shared';
+import { useResultStudioEnabled } from '@/lib/resultStudioFlag';
 
 /**
  * BLOCK-62 P1a — TitleBar 中区片段（标题 + 分支 tabs + 结果选择器 + 摘要概览开关）。
@@ -25,6 +26,8 @@ export function TitleBarCenterZone(): React.ReactElement {
     activeResultId,
     onSelectResult,
   } = panels.titleBar;
+  // item 90 阶段一完善 — resultStudio flag off 时「结果 N」pill（RS 入口）一并隐藏
+  const resultStudioEnabled = useResultStudioEnabled();
 
   const [resultMenuOpen, setResultMenuOpen] = useState(false);
   const resultTriggerRef = useRef<HTMLButtonElement>(null);
@@ -129,7 +132,7 @@ export function TitleBarCenterZone(): React.ReactElement {
       </div>
       <BranchTabsWrapper />
       {/* UI-334 — 会话选择器已移除：左栏项目树下即完整会话列表（含分支） */}
-      {activeResult && (
+      {activeResult && resultStudioEnabled && (
         <div className={styles.resultPicker}>
           <button
             type="button"
