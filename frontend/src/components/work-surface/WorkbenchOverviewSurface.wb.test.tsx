@@ -93,4 +93,46 @@ describe('WorkbenchOverviewSurface wb 五态投影（item 88 第三波）', () =
     expect(document.querySelectorAll('.react-flow__node').length).toBeGreaterThan(0);
     expect(screen.getByTestId('wb-overview-goal-tree').textContent).not.toContain('wb 五态投影');
   });
+
+  it('HK-88p-1：任务标签可读——显式标题/产物类型优先，裸 id 与 🎯 不进图节点', async () => {
+    state.overview = {
+      ok: true,
+      projectId: 'p',
+      goals: [{
+        id: 'g1', description: '产品宣传素材包', budgetCny: null, status: 'active', acceptance: null,
+        tasks: [
+          { id: 'demo_wb_task_1', status: 'accepted', priority: 10, spec: { 产物类型: 'PNG 海报 ×3（1080×1920）' }, dependencies: [], createdAt: '' },
+          { id: 'demo_wb_task_2', status: 'running', priority: 20, spec: { 标题: '宣传短视频剪辑' }, dependencies: [], createdAt: '' },
+          { id: 'demo_wb_task_3', status: 'queued', priority: 30, spec: null, dependencies: [], createdAt: '' },
+        ],
+      }],
+    };
+    render(
+      <WorkbenchOverviewSurface tasks={[]} rootTaskId={null} conversationId={null} projectId="p" />,
+    );
+    await waitFor(() => {
+      expect(document.querySelectorAll('.react-flow__node').length).toBeGreaterThanOrEqual(4);
+    });
+    const graphText = screen.getByTestId('orchestration-graph').textContent || '';
+    expect(graphText).toContain('产品宣传素材包');
+    expect(graphText).toContain('PNG 海报 ×3');
+    expect(graphText).toContain('宣传短视频剪辑');
+    expect(graphText).toContain('任务 3');
+    expect(graphText).not.toContain('demo_wb_task_');
+    expect(graphText).not.toContain('🎯');
+  });
+
+  it('HK-88p-2：三分区结构在场，教练条与 wb 五态投影不被覆盖', async () => {
+    state.overview = WB_OVERVIEW;
+    render(
+      <WorkbenchOverviewSurface tasks={[]} rootTaskId={null} conversationId={null} projectId="p" />,
+    );
+    expect(screen.getByTestId('wb-section-graph')).toBeTruthy();
+    expect(screen.getByTestId('wb-section-trace')).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.getByTestId('wb-overview-goal-tree').textContent).toContain('wb 五态投影');
+    });
+    // 教练条 mock 未命中时诚实隐匿；本钉只要求分区不吞既有投影节点
+    expect(document.querySelectorAll('.react-flow__node').length).toBeGreaterThanOrEqual(6);
+  });
 });

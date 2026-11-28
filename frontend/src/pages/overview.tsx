@@ -12,8 +12,32 @@ import { Icon } from '@/components/icons/Icon';
 import { WorkbenchOverviewSurface } from '@/components/work-surface/WorkbenchOverviewSurface';
 import { useSubAgentTasksForConversation } from '@/components/copilot/conversationRunStore';
 import { useAppRail } from '@/components/desktop/AppRailContext';
+import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
+import type { Project } from '@/lib/project-types';
 import type { OrchestrationTask } from '@/components/workspace-panels/OrchestrationGraph';
 import styles from './global-page.module.css';
+
+/**
+ * item 88 polish ①——/overview 是顶层路由，AppRail 的 currentProjectId 只从
+ * `/project/:id` 派生，全局页恒 null。这里只读派生：优先路由项目，否则取激活会话
+ * 所属项目，再映射项目名。不改 AppRail 状态，右栏 tab 仍走它自己的 projectId。
+ */
+export function resolveOverviewProjectRef({
+  routeProjectId,
+  activeConvId,
+  conversations,
+  projects,
+}: {
+  routeProjectId: string | null | undefined;
+  activeConvId: string | null | undefined;
+  conversations: readonly ConversationSummary[] | null | undefined;
+  projects: readonly Project[] | null | undefined;
+}): { projectId: string | null; projectName: string | null } {
+  const activeConv = (conversations || []).find((conversation) => conversation?.id === activeConvId);
+  const projectId = routeProjectId || activeConv?.project_id || null;
+  const projectName = (projects || []).find((project) => project?.id === projectId)?.name ?? null;
+  return { projectId, projectName };
+}
 
 export default function OverviewPage(): React.ReactElement {
   const navigate = useNavigate();
@@ -23,8 +47,13 @@ export default function OverviewPage(): React.ReactElement {
     else void navigate('/');
   }, [navigate]);
 
-  const projectId = rail.currentProjectId ?? null;
   const conversationId = rail.activeConvId;
+  const { projectId, projectName } = resolveOverviewProjectRef({
+    routeProjectId: rail.currentProjectId,
+    activeConvId: conversationId,
+    conversations: rail.conversations,
+    projects: rail.allProjects,
+  });
   // 会话子代理快照仅在有激活会话时投影（独立入口无会话时只出 wb 目标树——诚实空态由 Surface 承担）
   const loopTasks: OrchestrationTask[] = useSubAgentTasksForConversation(conversationId).map((run) => ({
     taskId: run.taskId,
@@ -51,8 +80,11 @@ export default function OverviewPage(): React.ReactElement {
         </div>
         <div className={styles.titleWrap}>
           <span className={styles.title}>项目总览</span>
-          <span className={styles.subtitle}>
-            工作台指挥面 · 目标树 / 协作图 / 执行轨迹{projectId ? ` · 项目 ${projectId}` : '（未打开项目）'}
+          <span
+            className={styles.subtitle}
+            title={projectId ? `项目 ID：${projectId}` : undefined}
+          >
+            工作台指挥面 · {projectName ?? '未打开项目'}
           </span>
         </div>
       </header>

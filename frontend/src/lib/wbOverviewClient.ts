@@ -11,7 +11,16 @@ export interface WbOverviewTask {
   id: string;
   status: string;
   priority: number;
-  spec: { 产物类型?: string; 验收标准?: string[]; 计量?: Record<string, unknown>; 咨询选项?: unknown } | null;
+  /** 任务书：产物类型/验收标准恒在；标题类字段为后续 store 可选项（投影优先读它）。 */
+  spec: {
+    产物类型?: string;
+    验收标准?: string[];
+    计量?: Record<string, unknown>;
+    咨询选项?: unknown;
+    标题?: string;
+    label?: string;
+    title?: string;
+  } | null;
   dependencies: string[];
   createdAt: string;
 }

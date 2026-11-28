@@ -1,0 +1,74 @@
+/* WorkbenchOverviewSurface.module.css — item 88 polish ④ 总览分区布局。
+   布局单一真源：本文件只放容器几何；内容样式归各 surface 自身。
+   高度链路：root(min-height:0) → section(min-height:0) → wrap(min-height:0)，无固定高度。 */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-3);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  color: var(--petri-text);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding-top: var(--petri-space-2);
+  border-top: 1px solid var(--petri-divider);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  min-width: 0;
+  flex-shrink: 0;
+  padding-bottom: var(--petri-space-2);
+  color: var(--petri-text-secondary);
+}
+
+.sectionTitle {
+  margin: 0;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--petri-text);
+}
+
+.sectionMeta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--petri-text-tertiary);
+}
+
+.graphSection {
+  flex: 3 1 0;
+}
+
+.graphWrap {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.coachingStrip {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+}
+
+.traceSection {
+  flex: 2 1 0;
+  display: flex;
+  padding-top: var(--petri-space-2);
+}

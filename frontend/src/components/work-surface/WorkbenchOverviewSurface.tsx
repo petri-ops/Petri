@@ -5,8 +5,32 @@ import {
   type OrchestrationTask,
 } from '@/components/workspace-panels/OrchestrationGraph';
 import { TraceSurface } from './TraceSurface';
+import { Icon } from '@/components/icons/Icon';
 import { fetchWbOverview, type WbOverview } from '@/lib/wbOverviewClient';
 import { getApiPrefix } from '@/lib/env';
+import styles from './WorkbenchOverviewSurface.module.css';
+
+/**
+ * item 88 polish ②——任务标签可读性。
+ * 优先级：显式标题 > 产物类型（去括号规格）> 首条验收标准 > 数字兜底「任务 N」。
+ * 不再把裸 id 残片（demo_wb_task_1 / hk_xxx）铺在图节点上。
+ */
+type TaskWithSpec = {
+  id: string;
+  spec: { 标题?: string; label?: string; title?: string; 产物类型?: string; 验收标准?: string[] } | null;
+};
+
+function readableTaskTitle(task: TaskWithSpec): string {
+  const spec = task.spec;
+  const explicit = spec?.['标题'] ?? spec?.['label'] ?? spec?.['title'];
+  if (typeof explicit === 'string' && explicit.trim()) return explicit.trim();
+  const artifact = spec?.['产物类型'];
+  if (typeof artifact === 'string' && artifact.trim()) return artifact.split('（')[0].trim();
+  const criteria = spec?.['验收标准'];
+  if (Array.isArray(criteria) && typeof criteria[0] === 'string' && criteria[0].trim()) return criteria[0].trim();
+  const suffix = task.id.replace(/^(demo_wb_task_|hk_|task_)/, '');
+  return /^\d+$/.test(suffix) ? `任务 ${suffix}` : (suffix.replace(/[_-]+/g, ' ').trim() || '未命名任务');
+}
 
 // item 87 第二波 — 教练循环摘要（只读）：phase/决策数/分歧数，bio 试点域白名单在后端。
 export interface CoachingRunSummary {
@@ -100,15 +124,15 @@ export function WorkbenchOverviewSurface({
       out.push({
         taskId: goal.id,
         status: goal.status === 'active' ? 'running' : goal.status,
-        userContent: `🎯 ${goal.description}`,
+        // polish ③——目标节点不再逐条挂 🎯；目标/任务靠图结构分层，不靠 emoji 堆砌。
+        userContent: goal.description,
       });
       for (const task of goal.tasks) {
-        const specLabel = task.spec?.['产物类型'] ? `（${task.spec['产物类型']}）` : '';
         out.push({
           taskId: task.id,
           parentTaskId: goal.id,
           status: task.status,
-          userContent: `${task.id.replace(/^demo_wb_task_/, '').replace(/^hk_/, '')} ${specLabel}`.trim() || task.id,
+          userContent: readableTaskTitle(task),
         });
       }
     }
@@ -127,21 +151,35 @@ export function WorkbenchOverviewSurface({
   const projection = projectOrchestration(mergedTasks, effectiveRoot);
 
   return (
-    <div data-testid="workbench-overview">
-      <div data-testid="wb-overview-goal-tree">
-        {wbTasks.length > 0 ? (
-          <>目标树 · {projection.nodes.length} 节点 · wb 五态投影 {wbTasks.filter((task) => task.parentTaskId).length} 任务</>
-        ) : (
-          <>目标树 · {projection.nodes.length} 节点</>
-        )}
-      </div>
+    <div className={styles.root} data-testid="workbench-overview">
+      {/* polish ④——三分区：目标树/协作图（弹性主区）· 教练条（只读带）· 执行轨迹（独立区）。
+          教练条与 wb 五态投影的既有数据/testid 原样保留，仅改呈现层次。 */}
+      <section className={`${styles.section} ${styles.graphSection}`} data-testid="wb-section-graph">
+        <div className={styles.sectionHead}>
+          <Icon name="layers" size={14} />
+          <h2 className={styles.sectionTitle}>目标树 / 协作图</h2>
+          <span className={styles.sectionMeta} data-testid="wb-overview-goal-tree">
+            {wbTasks.length > 0
+              ? `${projection.nodes.length} 节点 · wb 五态投影 ${wbTasks.filter((task) => task.parentTaskId).length} 任务`
+              : `${projection.nodes.length} 节点`}
+          </span>
+        </div>
+        <div className={styles.graphWrap}>
+          <OrchestrationGraph tasks={mergedTasks} rootTaskId={effectiveRoot} />
+        </div>
+      </section>
       {coaching && coaching.runs.length > 0 && (
-        <div data-testid="coaching-strip" data-coaching-phase={coaching.runs[0]?.phase ?? ''}>
+        <div
+          className={styles.coachingStrip}
+          data-testid="coaching-strip"
+          data-coaching-phase={coaching.runs[0]?.phase ?? ''}
+        >
           教练 · 相位 {coaching.runs[0]?.phase} · 决策讲解 {coaching.runs.reduce((sum, run) => sum + (run.decision_count || 0), 0)} 条 · 复盘分歧 {coaching.divergences.reduce((sum, d) => sum + d.divergences.length, 0)} 点
         </div>
       )}
-      <OrchestrationGraph tasks={mergedTasks} rootTaskId={effectiveRoot} />
-      <TraceSurface conversationId={conversationId} />
+      <section className={`${styles.section} ${styles.traceSection}`} data-testid="wb-section-trace">
+        <TraceSurface conversationId={conversationId} />
+      </section>
     </div>
   );
 }
