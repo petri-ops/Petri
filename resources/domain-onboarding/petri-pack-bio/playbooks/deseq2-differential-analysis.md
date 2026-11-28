@@ -1,9 +1,10 @@
 # DESeq2 差异分析 playbook（教练化草稿 · item 87 第一阶段）
 
-> **状态：草案，待领域专家（owner）确认后定稿。** 升级自包内 DESeq2 golden path 实战内容
-> （demo 工具 `deseq2` + `test/fixtures/golden-path/deseq2-run.json`），按方案 §11「教练化」
-> 重写：每步带领域含义 / 验收标准 / 常见坑 / 依据（真理源清单 id，机器可核）。
-> 步骤顺序是领域惯例路径（golden path），不是唯一合法路径——教练复盘只做 diff，不做终判。
+> **状态：正式版 · owner 已审阅确认（item 87 确认令，2026-11-27）。** 升级自包内 DESeq2
+> golden path 实战内容（demo 工具 `deseq2` + `test/fixtures/golden-path/deseq2-run.json`），
+> 按方案 §11「教练化」重写：每步带领域含义 / 验收标准 / 常见坑 / 依据（真理源清单 id，
+> 机器可核）。步骤顺序是领域惯例路径（golden path），不是唯一合法路径——教练复盘只做
+> diff，不做终判。后续增删走 owner 确认流程。
 
 ## 适用任务
 

@@ -10513,7 +10513,10 @@
         "frontend/src/components/workspace-panels/OrchestrationGraph.tsx",
         "frontend/src/pages/overview.tsx",
         "acceptance/item88-wave3/**",
-        "acceptance/item88-workbench-demo-attempt2/**"
+        "acceptance/item88-workbench-demo-attempt2/**",
+        "acceptance/conv-0d113948-analysis/**",
+        "acceptance/item87-wave2-reconciliation/**",
+        "acceptance/item90-codebuddy-diagnosis/**"
       ],
       "tests": [
         "test/item88-wave3-wb-overview.test.mjs",

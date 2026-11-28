@@ -100,9 +100,9 @@ test('HK-87-14：bio 三件套资产自洽——playbook/品味样本的来源�
 
   const parsed = validateSourcesFile(fs.readFileSync(SOURCES_PATH, 'utf8'));
   assert.ok(parsed.ok, `真理源清单必须合法：${JSON.stringify(parsed)}`);
-  // 显式标「待领域专家（owner）确认」——草案期纪律，定稿前不得抹掉
-  assert.equal(parsed.meta.status, 'draft', 'owner 确认前 status 保持 draft');
-  assert.ok(/待.*确认|pending.*confirm/i.test(fs.readFileSync(SOURCES_PATH, 'utf8')), '清单文件需显式标注待 owner 确认');
+  // item 87 确认令（2026-11-27）——owner 已审阅确认，三件套翻 confirmed（回滚=owner 改判）
+  assert.equal(parsed.meta.status, 'confirmed', 'owner 确认后 status 应为 confirmed');
+  assert.ok(/owner 已审阅确认|已确认/.test(fs.readFileSync(SOURCES_PATH, 'utf8')), '清单文件需保留 owner 确认标记');
 
   const index = buildSourceIndex(parsed.sources);
   assert.ok(parsed.sources.length >= 4, '至少覆盖 NCBI/Ensembl/STAR/DESeq2 四类权威源');
@@ -124,5 +124,5 @@ test('HK-87-14：bio 三件套资产自洽——playbook/品味样本的来源�
     index
   );
   assert.ok(tasteCheck.ok, `品味样本来源必须全部可解析：${JSON.stringify(tasteCheck)}`);
-  assert.ok(/候选|待 owner 增删/.test(tasteText), '品味样本需标注候选供 owner 增删');
+  assert.ok(/confirmed/.test(tasteText), '品味样本已确认（owner 确认令 2026-11-27）');
 });
